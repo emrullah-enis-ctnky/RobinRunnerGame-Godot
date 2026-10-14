@@ -1,10 +1,10 @@
 # Progress & Kanban Roadmap: RobinRunner
 
 ## Project Status Overview
-- **Current Phase**: Phase 3: Camera System & Viewport (In Progress - Logic Complete, Awaiting Visual Check)
-- **Active Branch**: `feature/camera-system`
+- **Current Phase**: Phase 4: World & Modular Track Generation (Ready to Start)
+- **Active Branch**: `main` (Pending creation of `feature/world-generation`)
 - **Next Phase**: Phase 4: World & Modular Track Generation
-- **Overall Health**: Green (Baseline clean, guidelines and configurations locked)
+- **Overall Health**: Green (Baseline clean, Phase 1-3 merged into main)
 
 ---
 
@@ -75,60 +75,74 @@
 
 ---
 
-### [ ] Phase 6: Combat & Ability System (Arrow Shooting)
+### [ ] Phase 6: Animation System (Character & World Animations)
+- **Branch**: `feature/animation-system`
+- **Objective**: Integrate comprehensive character, mesh, and environment animations across gameplay entities.
+- [ ] Step 6.1: Set up player `AnimationPlayer` and state transitions (Idle, Run, Jump, Fall, Stumble).
+- [ ] Step 6.2: Implement procedural/blend animations for lateral lane changes (tilt, roll, lean).
+- [ ] Step 6.3: Implement combat action animations (Bow draw, aim hold, arrow release recoil).
+- [ ] Step 6.4: Implement environmental and foliage animations (wind sway, ambient motion for trees and vegetation).
+- [ ] Step 6.5: Implement interactive object animations (obstacle impact wobble/shatter, collectible spin and hover bobbing).
+- [ ] Step 6.6: Automated unit tests verifying animation state machines, blend parameters, and signal triggers.
+- [ ] Step 6.7: Animation fluidity, blending, and visual inspection (User Manual Test).
+
+---
+
+### [ ] Phase 7: Combat & Ability System (Arrow Shooting)
 - **Branch**: `feature/combat-abilities`
 - **Objective**: Implement ability gauge charging and active arrow shooting mechanics to destroy obstacles.
-- [ ] Step 6.1: Create Arrow projectile scene (`scenes/combat/arrow.tscn`) with forward ballistic trajectory.
-- [ ] Step 6.2: Implement Projectile Object Pool for rapid arrow reuse.
-- [ ] Step 6.3: Implement Ability Gauge system (meter charges through distance traveled and collected items).
-- [ ] Step 6.4: Implement Shoot Input action triggering arrow release when ability gauge is sufficient.
-- [ ] Step 6.5: Implement Arrow hit-detection destroying destructible targets and clearing obstacles.
-- [ ] Step 6.6: Automated unit tests for ability gauge charging, spending, and projectile lifecycle.
-- [ ] Step 6.7: Arrow shooting responsiveness and impact feel inspection (User Manual Test).
+- [ ] Step 7.1: Create Arrow projectile scene (`scenes/combat/arrow.tscn`) with forward ballistic trajectory.
+- [ ] Step 7.2: Implement Projectile Object Pool for rapid arrow reuse.
+- [ ] Step 7.3: Implement Ability Gauge system (meter charges through distance traveled and collected items).
+- [ ] Step 7.4: Implement Shoot Input action triggering arrow release when ability gauge is sufficient.
+- [ ] Step 7.5: Implement Arrow hit-detection destroying destructible targets and clearing obstacles.
+- [ ] Step 7.6: Automated unit tests for ability gauge charging, spending, and projectile lifecycle.
+- [ ] Step 7.7: Arrow shooting responsiveness and impact feel inspection (User Manual Test).
 
 ---
 
-### [ ] Phase 7: Pickups, Collectibles & Scoring
+### [ ] Phase 8: Pickups, Collectibles & Scoring
 - **Branch**: `feature/collectibles-scoring`
 - **Objective**: Create rewarding collectible loops, score calculation, and ability boosters.
-- [ ] Step 7.1: Implement `ScoreManager` calculating distance score and collectible multipliers.
-- [ ] Step 7.2: Create Collectible Coin/Essence scene with gentle idle bobbing and rotation.
-- [ ] Step 7.3: Implement Collectible Spawner populating lane patterns along track chunks.
-- [ ] Step 7.4: Implement Pickup collection triggers granting immediate score and ability gauge bonuses.
-- [ ] Step 7.5: Automated unit tests for score accumulation and pickup triggers.
+- [ ] Step 8.1: Implement `ScoreManager` calculating distance score and collectible multipliers.
+- [ ] Step 8.2: Create Collectible Coin/Essence scene with gentle idle bobbing and rotation.
+- [ ] Step 8.3: Implement Collectible Spawner populating lane patterns along track chunks.
+- [ ] Step 8.4: Implement Pickup collection triggers granting immediate score and ability gauge bonuses.
+- [ ] Step 8.5: Automated unit tests for score accumulation and pickup triggers.
+- [ ] Step 8.6: Collectible pickup cadence and readability inspection (User Manual Test).
 
 ---
 
-### [ ] Phase 8: User Interface & HUD
+### [ ] Phase 9: User Interface & HUD
 - **Branch**: `feature/ui-hud`
 - **Objective**: Deliver a clean, stylized user interface covering gameplay HUD, menus, and game-over loops.
-- [ ] Step 8.1: Build In-Game HUD (Real-time Score, Distance Counter, Ability Gauge Bar).
-- [ ] Step 8.2: Build Main Menu screen (Game Title, Play Button, Controls Guide).
-- [ ] Step 8.3: Build Pause Menu overlay (Resume, Restart, Quit/Menu).
-- [ ] Step 8.4: Build Game Over screen (Final Score, High Score display, Instant Retry button).
-- [ ] Step 8.5: Bind all UI events to `EventBus` and `GameManager` signals.
-- [ ] Step 8.6: UI responsiveness, readability, and visual inspection (User Manual Test).
+- [ ] Step 9.1: Build In-Game HUD (Real-time Score, Distance Counter, Ability Gauge Bar).
+- [ ] Step 9.2: Build Main Menu screen (Game Title, Play Button, Controls Guide).
+- [ ] Step 9.3: Build Pause Menu overlay (Resume, Restart, Quit/Menu).
+- [ ] Step 9.4: Build Game Over screen (Final Score, High Score display, Instant Retry button).
+- [ ] Step 9.5: Bind all UI events to `EventBus` and `GameManager` signals.
+- [ ] Step 9.6: UI responsiveness, readability, and visual inspection (User Manual Test).
 
 ---
 
-### [ ] Phase 9: Audio & Visual Polish
+### [ ] Phase 10: Audio & Visual Polish
 - **Branch**: `feature/audio-visual-polish`
 - **Objective**: Elevate game feel with sound effects, ambient music, and stylized particle systems.
-- [ ] Step 9.1: Implement `AudioManager` and integrate sound effects (Footsteps, Jump, Bow Fire, Target Shatter, Collect).
-- [ ] Step 9.2: Integrate adaptive background music loop with smooth pause ducking.
-- [ ] Step 9.3: Add stylized particle systems (Player run dust puffs, target splinter explosion, ability-ready shimmer).
-- [ ] Step 9.4: End-to-end game feel and audio balance inspection (User Manual Test).
+- [ ] Step 10.1: Implement `AudioManager` and integrate sound effects (Footsteps, Jump, Bow Fire, Target Shatter, Collect).
+- [ ] Step 10.2: Integrate adaptive background music loop with smooth pause ducking.
+- [ ] Step 10.3: Add stylized particle systems (Player run dust puffs, target splinter explosion, ability-ready shimmer).
+- [ ] Step 10.4: End-to-end game feel and audio balance inspection (User Manual Test).
 
 ---
 
-### [ ] Phase 10: Performance Optimization & Multi-Platform Export Preparation
+### [ ] Phase 11: Performance Optimization & Multi-Platform Export Preparation
 - **Branch**: `feature/optimization-export`
 - **Objective**: Optimize draw calls, configure export presets for Desktop and Web, and prepare mobile foundation.
-- [ ] Step 10.1: Configure Desktop export presets (Linux, Windows, macOS).
-- [ ] Step 10.2: Configure Web export preset and optimize asset compression for rapid HTML5 loading.
-- [ ] Step 10.3: Profile draw calls, frame pacing, and memory utilization to ensure solid 60 FPS.
-- [ ] Step 10.4: Implement touch/swipe input abstraction layer ready for future Android export.
-- [ ] Step 10.5: Final release validation and package verification.
+- [ ] Step 11.1: Configure Desktop export presets (Linux, Windows, macOS).
+- [ ] Step 11.2: Configure Web export preset and optimize asset compression for rapid HTML5 loading.
+- [ ] Step 11.3: Profile draw calls, frame pacing, and memory utilization to ensure solid 60 FPS.
+- [ ] Step 11.4: Implement touch/swipe input abstraction layer ready for future Android export.
+- [ ] Step 11.5: Final release validation and package verification.
 
 ---
 

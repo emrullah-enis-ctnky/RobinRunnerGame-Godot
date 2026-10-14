@@ -73,7 +73,7 @@ res://
 │   ├── systemPatterns.md   # Architectural patterns and component graphs
 │   ├── techContext.md      # Engine details, collision matrix, and constraints
 │   ├── activeContext.md    # Active phase focus and recent decisions
-│   ├── progress.md         # 10-Phase Kanban roadmap and step trackers
+│   ├── progress.md         # 11-Phase Kanban roadmap and step trackers
 │   └── projectRules.md     # Mandatory project guidelines and workflow rules
 ├── scenes/
 │   ├── combat/             # Projectiles (arrows) and combat props
@@ -143,15 +143,16 @@ The project is developed in phased, modular Kanban increments:
 
 - [x] **Phase 0**: Project Initialization, Standards Setup & Memory Bank
 - [x] **Phase 1**: Project Architecture & Core Infrastructure (`EventBus`, `GameConfig`, `GameManager`)
-- [ ] **Phase 2**: Player Controller & Movement Mechanics
-- [ ] **Phase 3**: Camera System & Viewport
+- [x] **Phase 2**: Player Controller & Movement Mechanics
+- [x] **Phase 3**: Camera System & Viewport
 - [ ] **Phase 4**: World & Modular Track Generation
 - [ ] **Phase 5**: Obstacles & Environmental Hazards
-- [ ] **Phase 6**: Combat & Ability System (Arrow Shooting)
-- [ ] **Phase 7**: Pickups, Collectibles & Scoring
-- [ ] **Phase 8**: User Interface & HUD
-- [ ] **Phase 9**: Audio & Visual Polish
-- [ ] **Phase 10**: Performance Optimization & Multi-Platform Export (Desktop, Web, Android)
+- [ ] **Phase 6**: Animation System (Character & World Animations)
+- [ ] **Phase 7**: Combat & Ability System (Arrow Shooting)
+- [ ] **Phase 8**: Pickups, Collectibles & Scoring
+- [ ] **Phase 9**: User Interface & HUD
+- [ ] **Phase 10**: Audio & Visual Polish
+- [ ] **Phase 11**: Performance Optimization & Multi-Platform Export (Desktop, Web, Android)
 
 Detailed breakdown and active progress tracking are maintained in [`memory-bank/progress.md`](memory-bank/progress.md).
 
