@@ -36,10 +36,12 @@
 - **Branch Structure**:
   - Direct pushing or committing everything to `main` is strictly prohibited.
   - Dedicated branches must be created for each Feature/Phase using clean, concise naming without redundant "phase" prefixes (e.g., `feature/core-architecture`, `feature/player-controller`).
-  - Merging into `main` is only performed upon explicit command and approval from the user.
-- **Commit Frequency & Timing**:
-  - Commit after completing an operation, step, or bug fix.
-  - Do not hoard, accumulate, or delay commits until the end.
+- **Phase Completion & Merging Protocol**:
+  - When a phase is completely finished, always explicitly ask the user whether the feature branch should be merged into `main`.
+  - Only merge into `main` after the user explicitly approves with "yes" ("evet"). Never auto-merge without this confirmation.
+- **Commit Timing & Unified Scope**:
+  - Commit only when an operation/step is completely finished. Do not fragment work into separate commits (e.g., do not commit implementation code first and then make a separate commit just for Memory Bank documentation). Complete the code, tests, and corresponding Memory Bank updates together and commit them in a single unified commit.
+  - Do not hoard or delay commits indefinitely until the very end.
 - **Commit Messages**:
   - Written in English.
   - Concise, descriptive, and clearly explain what was accomplished.
