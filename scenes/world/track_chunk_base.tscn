@@ -1,0 +1,109 @@
+[gd_scene format=3 uid="uid://c6trackchunkbase"]
+
+[ext_resource type="Script" path="res://scripts/world/track_chunk.gd" id="1_chunk"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_ground"]
+size = Vector3(6.6, 3, 30)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_track"]
+albedo_color = Color(0.54, 0.42, 0.28, 1)
+roughness = 0.85
+
+[sub_resource type="BoxMesh" id="BoxMesh_deck"]
+material = SubResource("StandardMaterial3D_track")
+size = Vector3(6.6, 0.2, 30)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_divider"]
+albedo_color = Color(0.72, 0.6, 0.45, 1)
+roughness = 0.7
+
+[sub_resource type="BoxMesh" id="BoxMesh_divider"]
+material = SubResource("StandardMaterial3D_divider")
+size = Vector3(0.08, 0.02, 30)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_curb"]
+albedo_color = Color(0.32, 0.22, 0.14, 1)
+roughness = 0.8
+
+[sub_resource type="BoxMesh" id="BoxMesh_curb"]
+material = SubResource("StandardMaterial3D_curb")
+size = Vector3(0.3, 0.35, 30)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_foundation"]
+albedo_color = Color(0.3, 0.31, 0.33, 1)
+roughness = 0.9
+
+[sub_resource type="BoxMesh" id="BoxMesh_foundation"]
+material = SubResource("StandardMaterial3D_foundation")
+size = Vector3(6.8, 2.6, 30)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_pillar"]
+albedo_color = Color(0.26, 0.27, 0.29, 1)
+roughness = 0.95
+
+[sub_resource type="BoxMesh" id="BoxMesh_pillar"]
+material = SubResource("StandardMaterial3D_pillar")
+size = Vector3(2.8, 12, 2.8)
+
+[node name="TrackChunkBase" type="Node3D"]
+script = ExtResource("1_chunk")
+
+[node name="StartAnchor" type="Marker3D" parent="."]
+
+[node name="EndAnchor" type="Marker3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -30)
+
+[node name="LaneMarkers" type="Node3D" parent="."]
+
+[node name="LaneLeft" type="Marker3D" parent="LaneMarkers"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 0, -15)
+
+[node name="LaneCenter" type="Marker3D" parent="LaneMarkers"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -15)
+
+[node name="LaneRight" type="Marker3D" parent="LaneMarkers"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 0, -15)
+
+[node name="GroundCollision" type="StaticBody3D" parent="."]
+collision_layer = 2
+collision_mask = 0
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="GroundCollision"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1.5, -15)
+shape = SubResource("BoxShape3D_ground")
+
+[node name="Visuals" type="Node3D" parent="."]
+
+[node name="TrackDeck" type="MeshInstance3D" parent="Visuals"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.1, -15)
+mesh = SubResource("BoxMesh_deck")
+
+[node name="FoundationBlock" type="MeshInstance3D" parent="Visuals"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1.5, -15)
+mesh = SubResource("BoxMesh_foundation")
+
+[node name="PillarFront" type="MeshInstance3D" parent="Visuals"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -7.5, -7.5)
+mesh = SubResource("BoxMesh_pillar")
+
+[node name="PillarBack" type="MeshInstance3D" parent="Visuals"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -7.5, -22.5)
+mesh = SubResource("BoxMesh_pillar")
+
+[node name="LaneDividerLeft" type="MeshInstance3D" parent="Visuals"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1, 0.01, -15)
+mesh = SubResource("BoxMesh_divider")
+
+[node name="LaneDividerRight" type="MeshInstance3D" parent="Visuals"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0.01, -15)
+mesh = SubResource("BoxMesh_divider")
+
+[node name="CurbLeft" type="MeshInstance3D" parent="Visuals"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.15, 0.12, -15)
+mesh = SubResource("BoxMesh_curb")
+
+[node name="CurbRight" type="MeshInstance3D" parent="Visuals"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.15, 0.12, -15)
+mesh = SubResource("BoxMesh_curb")
+
+[node name="LaneObjects" type="Node3D" parent="."]

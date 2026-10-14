@@ -1,0 +1,45 @@
+[gd_scene load_steps=7 format=3 uid="uid://coverheadarch"]
+
+[ext_resource type="PackedScene" path="res://assets/models/building-structure.glb" id="1_structure"]
+[ext_resource type="PackedScene" path="res://assets/models/building-roof.glb" id="2_roof"]
+[ext_resource type="PackedScene" path="res://assets/models/flag.glb" id="3_flag"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_beam"]
+albedo_color = Color(0.38, 0.22, 0.12, 1)
+roughness = 0.75
+
+[sub_resource type="BoxMesh" id="BoxMesh_beam"]
+material = SubResource("StandardMaterial3D_beam")
+size = Vector3(1.85, 0.32, 0.22)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_chain"]
+albedo_color = Color(0.2, 0.2, 0.22, 1)
+metallic = 0.6
+roughness = 0.4
+
+[sub_resource type="BoxMesh" id="BoxMesh_chain"]
+material = SubResource("StandardMaterial3D_chain")
+size = Vector3(0.04, 0.75, 0.04)
+
+[node name="OverheadArch" type="Node3D"]
+
+[node name="Structure" parent="." instance=ExtResource("1_structure")]
+transform = Transform3D(1.95, 0, 0, 0, 2.3, 0, 0, 0, 0.8, 0, 0, 0)
+
+[node name="Roof" parent="." instance=ExtResource("2_roof")]
+transform = Transform3D(1.5, 0, 0, 0, 0.8, 0, 0, 0, 0.8, 0, 2.3, 0)
+
+[node name="Flag" parent="." instance=ExtResource("3_flag")]
+transform = Transform3D(0.9, 0, 0, 0, 0.9, 0, 0, 0, 0.9, 0, 3.1, 0)
+
+[node name="HangingBeam" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.25, 0)
+mesh = SubResource("BoxMesh_beam")
+
+[node name="ChainLeft" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.65, 1.725, 0)
+mesh = SubResource("BoxMesh_chain")
+
+[node name="ChainRight" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.65, 1.725, 0)
+mesh = SubResource("BoxMesh_chain")
