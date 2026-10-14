@@ -17,7 +17,7 @@
   - Core endless runner mechanics.
   - Character abilities (e.g., firing arrows when ability gauge is full, plus upcoming special skills).
 - **Assets**:
-  - Primary assets: Pre-made Kenney assets located in the `addons/` directory.
+  - **Project Assets Location**: Kenney 3D assets are extracted as pure GLB models into `res://assets/models/`. All project scenes and systems must reference models directly from `assets/models/`, completely eliminating any dependency on the `addons/` directory for game assets.
   - **3D Asset Format**: Strictly GLB (`.glb` / glTF 2.0 Binary). All 3D models across the project must exclusively use the GLB format for optimal Godot 4 native integration, lightweight self-contained packaging, and web/desktop performance. FBX and OBJ formats must not be used.
   - Blender Usage: Blender MCP can be utilized if available assets are insufficient.
   - **Blender Rule**: **Always ask for user permission before using Blender.** No unnecessary or unapproved Blender usage.
@@ -102,5 +102,17 @@
   - When the tests pass, commit the test stage accordingly.
 - **Visual & Manual Testing Nuance**:
   - When a test requires visual verification or human assessment (such as UI appearance, aesthetic details, animations, or subjective gameplay feel), explicitly inform the user that it requires manual inspection and ask them to test it visually.
+
+---
+
+## 9. Tool Usage & MCP Policy
+
+- **Godot and Blender via MCP Exclusively**:
+  - Do not launch or execute Godot or Blender directly as local applications or via shell commands.
+  - Interact with Godot and Blender exclusively through their designated MCP tools (`godot-mcp-toolkit` and `blender` MCP).
+  - If a task or visual operation cannot be performed via MCP and requires direct user interaction within the editor, explicitly inform the user and request them to perform it.
+- **No Repetitive Language Checking**:
+  - Do not run repetitive terminal commands (such as grep) to inspect files for Turkish characters. Naturally write clean, simple English across all files from the start without redundant verification loops.
+
 
 

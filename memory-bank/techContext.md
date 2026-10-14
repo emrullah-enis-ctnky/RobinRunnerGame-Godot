@@ -16,16 +16,15 @@
 
 ## Integrated Tooling & MCP Servers
 - **godot-mcp-toolkit**:
-  - Used for inspecting node hierarchies, reading/writing scripts, modifying properties, checking scene trees, and runtime debugging.
+  - Exclusively utilized for all Godot engine operations (node trees, scene creation, property modification, script inspection, runtime checks). Direct shell execution or opening Godot as a local desktop app by the agent is prohibited.
 - **blender MCP**:
-  - Available for advanced 3D asset modifications or model repairs.
-  - **Rule of Engagement**: **Must never be used without explicit, prior user approval.** Always check whether existing Kenney assets in `addons/` suffice before proposing Blender usage.
+  - Exclusively utilized for Blender operations only when assets are insufficient and strictly upon explicit user approval. Direct local application launch is prohibited.
 - **Web Search**:
   - Leveraged proactively to look up official Godot 4.x and Blender documentation for syntax, API signatures, and version nuances.
 
 ## Technical Constraints
 1. **Performance Budget**: Target constant 60 FPS on desktop and web targets. Minimize dynamic allocations during active gameplay via object pooling.
-2. **Asset Constraints**: Leverage pre-made Kenney Mini-Forest assets exclusively in GLB format (`addons/kenney_mini-forest_1.0/Models/GLB format/`). Preserve modular grid alignment for seamless track chunk stitching.
+2. **Asset Constraints**: Kenney Mini-Forest GLB models are hosted in and referenced exclusively from `res://assets/models/`. Scenes and scripts must never reference `addons/` for 3D assets. Preserve modular grid alignment for seamless track chunk stitching.
 3. **Collision Matrix**: Strict collision layer assignment to avoid unnecessary broad-phase checks:
    - Layer 1: Player Body
    - Layer 2: Environment / Ground
