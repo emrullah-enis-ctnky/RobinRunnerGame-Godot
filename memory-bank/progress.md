@@ -1,9 +1,9 @@
 # Progress & Kanban Roadmap: RobinRunner
 
 ## Project Status Overview
-- **Current Phase**: Phase 1: Project Architecture & Core Infrastructure (Complete)
-- **Active Branch**: `feature/core-architecture`
-- **Next Phase**: Phase 2: Player Controller & Movement Mechanics
+- **Current Phase**: Phase 2: Player Controller & Movement Mechanics (In Progress - Logic Complete, Awaiting Visual Check)
+- **Active Branch**: `feature/player-controller`
+- **Next Phase**: Phase 3: Camera System & Viewport
 - **Overall Health**: Green (Baseline clean, guidelines and configurations locked)
 
 ---
@@ -32,11 +32,11 @@
 ### [ ] Phase 2: Player Controller & Movement Mechanics
 - **Branch**: `feature/player-controller`
 - **Objective**: Implement responsive 3-lane movement, jumping physics, and player state handling.
-- [ ] Step 2.1: Create Player scene (`scenes/player/player.tscn`) using Kenney archer mesh with collision shape.
-- [ ] Step 2.2: Implement Lane Switcher Controller with smooth lateral interpolation (Left, Center, Right).
-- [ ] Step 2.3: Implement Jump & Gravity Controller with snappy arc and ground detection.
-- [ ] Step 2.4: Implement forward speed controller and acceleration curves.
-- [ ] Step 2.5: Automated unit tests verifying lane bounds, jump height, and state consistency.
+- [x] Step 2.1: Create Player scene (`scenes/player/player.tscn`) using Kenney archer mesh with collision shape.
+- [x] Step 2.2: Implement Lane Switcher Controller with smooth lateral interpolation (Left, Center, Right).
+- [x] Step 2.3: Implement Jump & Gravity Controller with snappy arc and ground detection.
+- [x] Step 2.4: Implement forward speed controller and acceleration curves.
+- [x] Step 2.5: Automated unit tests verifying lane bounds, jump height, and state consistency.
 - [ ] Step 2.6: Visual and movement feel inspection (User Manual Test).
 
 ---

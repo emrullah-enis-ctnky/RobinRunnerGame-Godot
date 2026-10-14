@@ -1,0 +1,22 @@
+[gd_scene format=3 uid="uid://c7m8x4w6laq1r"]
+
+[ext_resource type="Script" path="res://scripts/player/player_controller.gd" id="1_controller"]
+[ext_resource type="PackedScene" uid="uid://dgpyyi83ott0" path="res://assets/models/character-archer.glb" id="2_archer_mesh"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_1"]
+radius = 0.4
+height = 1.4
+
+[node name="Player" type="CharacterBody3D"]
+collision_layer = 1
+collision_mask = 14
+script = ExtResource("1_controller")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.7, 0)
+shape = SubResource("CapsuleShape3D_1")
+
+[node name="Model" type="Node3D" parent="."]
+
+[node name="ArcherModel" parent="Model" instance=ExtResource("2_archer_mesh")]
+transform = Transform3D(-1, 0, 8.74228e-08, 0, 1, 0, -8.74228e-08, 0, -1, 0, 0, 0)
