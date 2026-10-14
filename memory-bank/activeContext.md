@@ -1,7 +1,7 @@
 # Active Context: RobinRunner
 
 ## Current Work Focus
-The project has completed its initial repository foundation (comprehensive `.gitignore`, `projectRules.md`, initial baseline commit). We are now completing the Memory Bank setup to establish a persistent architectural and roadmap baseline.
+Phase 1 (Core Architecture) has been completed, verified via automated tests, and committed on `feature/core-architecture`. Awaiting user order to merge into `main` and begin Phase 2 (`feature/player-controller`).
 
 ## Recent Changes
 - Created and formalized `projectRules.md` documenting:
@@ -12,22 +12,25 @@ The project has completed its initial repository foundation (comprehensive `.git
   - Autonomous testing workflow and manual visual inspection policy.
   - Web search usage for official documentation.
 - Configured a comprehensive `.gitignore` for Godot 4.x, Android, Blender autosaves, and OS artifacts.
-- Created baseline repository commit (`chore: initialize project configuration, rules, and base assets`).
-- Built core Memory Bank documents: `projectbrief.md`, `productContext.md`, `systemPatterns.md`, and `techContext.md`.
+- Implemented Phase 1 (`feature/core-architecture`):
+  - Organized project directory structure (`scenes/`, `scripts/`, `assets/`, `tests/`).
+  - Created `EventBus.gd` global signal hub and registered in `project.godot` autoloads.
+  - Created `GameConfig.gd` defining lane coordinates, speed variables, and collision masks.
+  - Created `GameManager.gd` state machine (`READY`, `PLAYING`, `PAUSED`, `GAME_OVER`), speed acceleration, and scoring.
+  - Implemented headless unit test suite (`tests/unit/test_runner.gd` & `test_core_architecture.tscn`) verifying all core architecture mechanics.
 
 ## Active Decisions & Architectural Considerations
 1. **Kenney Asset Utilization**:
-   - The Kenney Mini-Forest pack (`addons/kenney_mini-forest_1.0/`) contains ready-to-use archer models, weapons (bow, arrow), terrain patches (grass, dirt, platform, rocks), trees, fences, and target props.
-   - These assets provide complete baseline coverage for our runner without needing external asset creation.
-2. **Phase 1 Strategy**:
-   - Before building visual scenes, establish the directory structure, base manager scripts (`EventBus.gd`, `GameManager.gd`), and common constants to prevent architectural debt.
+   - The Kenney Mini-Forest pack (`addons/kenney_mini-forest_1.0/Models/GLB format/`) contains ready-to-use archer models, weapons (bow, arrow), terrain patches (grass, dirt, platform, rocks), trees, fences, and target props in GLB format.
+2. **Autoload Decoupling**:
+   - Systems communicate strictly via `EventBus` signals and `GameConfig` static constants, ensuring zero circular dependencies.
 3. **Branching Model**:
-   - Each phase will start by branching off `main` using concise naming without redundant "phase" prefixes (e.g., `git checkout -b feature/core-architecture`).
-   - Work will proceed step-by-step with clean, granular commits.
+   - Dedicated branch per feature (`feature/<feature-name>`). Merged to `main` only on explicit user approval.
 4. **Strict projectRules.md Adherence**:
    - Uncompromising compliance with all rules codified in `projectRules.md` is strictly enforced across all operations, commit scopes, tests, and language boundaries.
 
 ## Next Steps
-1. Commit updated branch conventions.
-2. Await user command to initiate Phase 1 (`feature/core-architecture`).
+1. Commit updated Memory Bank progress.
+2. Await user command to merge `feature/core-architecture` into `main`.
+3. Open `feature/player-controller` for Phase 2.
 

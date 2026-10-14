@@ -1,9 +1,9 @@
 # Progress & Kanban Roadmap: RobinRunner
 
 ## Project Status Overview
-- **Current Phase**: Phase 0: Project Setup & Memory Bank Initialization (Complete)
-- **Active Branch**: `main`
-- **Next Phase**: Phase 1: Project Architecture & Core Infrastructure
+- **Current Phase**: Phase 1: Project Architecture & Core Infrastructure (Complete)
+- **Active Branch**: `feature/core-architecture`
+- **Next Phase**: Phase 2: Player Controller & Movement Mechanics
 - **Overall Health**: Green (Baseline clean, guidelines and configurations locked)
 
 ---
@@ -18,14 +18,14 @@
 
 ---
 
-### [ ] Phase 1: Project Architecture & Core Infrastructure
+### [x] Phase 1: Project Architecture & Core Infrastructure
 - **Branch**: `feature/core-architecture`
 - **Objective**: Build foundational directory layouts, global singletons, state controllers, and testing scaffolds.
-- [ ] Step 1.1: Organize project directory structure (`scenes/`, `scripts/`, `assets/`, `tests/`).
-- [ ] Step 1.2: Implement `EventBus.gd` autoload singleton for global decoupled signals.
-- [ ] Step 1.3: Implement `GameConfig.gd` containing lane coordinates, base speeds, and gameplay constants.
-- [ ] Step 1.4: Implement `GameManager.gd` state machine (`Ready`, `Playing`, `Paused`, `GameOver`).
-- [ ] Step 1.5: Automated unit tests for EventBus signal dispatch and GameManager state transitions.
+- [x] Step 1.1: Organize project directory structure (`scenes/`, `scripts/`, `assets/`, `tests/`).
+- [x] Step 1.2: Implement `EventBus.gd` autoload singleton for global decoupled signals.
+- [x] Step 1.3: Implement `GameConfig.gd` containing lane coordinates, base speeds, and gameplay constants.
+- [x] Step 1.4: Implement `GameManager.gd` state machine (`Ready`, `Playing`, `Paused`, `GameOver`).
+- [x] Step 1.5: Automated unit tests for EventBus signal dispatch and GameManager state transitions.
 
 ---
 
