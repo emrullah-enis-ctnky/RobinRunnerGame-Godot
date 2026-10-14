@@ -6,7 +6,7 @@
   - Ensures robust compatibility with WebGL (HTML5 exports) and lower-end GPUs without Vulkan overhead.
 - **Physics Engine**: 3D Physics (Godot Physics / Jolt 3D)
 - **Primary Language**: GDScript (Strictly Typed)
-- **Asset Formats**: GLTF/GLB for 3D meshes, PNG for textures, OGG/WAV for audio.
+- **Asset Formats**: Strictly GLB (glTF 2.0 Binary) for all 3D models (FBX and OBJ are prohibited), PNG for textures, OGG/WAV for audio.
 
 ## Development Environment & Setup
 - **Operating System**: Linux
@@ -25,7 +25,7 @@
 
 ## Technical Constraints
 1. **Performance Budget**: Target constant 60 FPS on desktop and web targets. Minimize dynamic allocations during active gameplay via object pooling.
-2. **Asset Constraints**: Leverage pre-made Kenney Mini-Forest assets (`addons/kenney_mini-forest_1.0/`). Preserve modular grid alignment for seamless track chunk stitching.
+2. **Asset Constraints**: Leverage pre-made Kenney Mini-Forest assets exclusively in GLB format (`addons/kenney_mini-forest_1.0/Models/GLB format/`). Preserve modular grid alignment for seamless track chunk stitching.
 3. **Collision Matrix**: Strict collision layer assignment to avoid unnecessary broad-phase checks:
    - Layer 1: Player Body
    - Layer 2: Environment / Ground

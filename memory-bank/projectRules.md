@@ -18,6 +18,7 @@
   - Character abilities (e.g., firing arrows when ability gauge is full, plus upcoming special skills).
 - **Assets**:
   - Primary assets: Pre-made Kenney assets located in the `addons/` directory.
+  - **3D Asset Format**: Strictly GLB (`.glb` / glTF 2.0 Binary). All 3D models across the project must exclusively use the GLB format for optimal Godot 4 native integration, lightweight self-contained packaging, and web/desktop performance. FBX and OBJ formats must not be used.
   - Blender Usage: Blender MCP can be utilized if available assets are insufficient.
   - **Blender Rule**: **Always ask for user permission before using Blender.** No unnecessary or unapproved Blender usage.
 
