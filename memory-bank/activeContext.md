@@ -1,7 +1,7 @@
 # Active Context: RobinRunner
 
 ## Current Work Focus
-Phase 2 (Player Controller & Movement Mechanics) implementation is complete on `feature/player-controller`. Automated unit tests pass. Awaiting user visual inspection for Step 2.6.
+Phase 2 (Player Controller & Movement Mechanics) has been completed and verified visually by the user. Awaiting user command to merge `feature/player-controller` into `main`.
 
 ## Recent Changes
 - Created and formalized `projectRules.md` documenting:
@@ -29,7 +29,6 @@ Phase 2 (Player Controller & Movement Mechanics) implementation is complete on `
    - Uncompromising compliance with all rules codified in `projectRules.md` is strictly enforced across all operations, commit scopes, tests, and language boundaries.
 
 ## Next Steps
-1. Request user visual verification for Step 2.6 (player mesh, lane feel).
-2. Upon user satisfaction and approval, ask to merge `feature/player-controller` into `main`.
-3. Proceed to Phase 3 (`feature/camera-system`).
+1. Await user command to merge `feature/player-controller` into `main`.
+2. Open `feature/camera-system` for Phase 3 (dynamic runner follow camera).
 
