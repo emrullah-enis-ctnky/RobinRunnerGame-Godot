@@ -1,7 +1,7 @@
 # Active Context: RobinRunner
 
 ## Current Work Focus
-Phase 3 (Camera System & Viewport) implementation is complete on `feature/camera-system`. Automated unit tests pass. Awaiting user visual check for Step 3.4.
+Phase 3 (Camera System & Viewport) implementation and visual verification are complete on `feature/camera-system`. All automated unit tests pass. Awaiting user merge command to merge into `main` and advance to Phase 4.
 
 ## Recent Changes
 - Created and formalized `projectRules.md` documenting:
@@ -16,6 +16,7 @@ Phase 3 (Camera System & Viewport) implementation is complete on `feature/camera
   - Created `RunnerCamera` (`scripts/camera/camera_controller.gd`) supporting target tracking with decoupled axis damping, dynamic FOV scaling with player speed, and trauma-based screen shake.
   - Created `RunnerCamera` scene (`scenes/camera/runner_camera.tscn`) configured with 3rd-person runner angle.
   - Built and verified automated unit tests (`tests/unit/test_camera_controller.tscn`).
+  - Tested and visually verified camera tracking, parallax, and follow dynamics with user. Removed temporary stage cleanly.
 
 ## Active Decisions & Architectural Considerations
 1. **Camera Damping**:
@@ -29,7 +30,7 @@ Phase 3 (Camera System & Viewport) implementation is complete on `feature/camera
    - Uncompromising compliance with all rules codified in `projectRules.md` is strictly enforced across all operations, commit scopes, tests, and language boundaries.
 
 ## Next Steps
-1. Request user visual verification for Step 3.4 (camera framing, follow smoothness).
-2. Upon user satisfaction and approval, ask to merge `feature/camera-system` into `main`.
-3. Proceed to Phase 4 (`feature/world-generation`).
+1. Merge `feature/camera-system` into `main` upon user command.
+2. Create feature branch `feature/world-generation` for Phase 4.
+3. Implement modular track chunks, object pooling, and dynamic track spawner.
 

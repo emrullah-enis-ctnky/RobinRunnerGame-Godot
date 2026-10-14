@@ -41,13 +41,13 @@
 
 ---
 
-### [ ] Phase 3: Camera System & Viewport
+### [x] Phase 3: Camera System & Viewport
 - **Branch**: `feature/camera-system`
 - **Objective**: Build an engaging third-person runner camera with dynamic feedback.
 - [x] Step 3.1: Create Follow Camera controller tracking player position with smooth damping.
 - [x] Step 3.2: Implement lateral camera look-ahead aligned with active lane transitions.
 - [x] Step 3.3: Implement screen shake utility and speed-based dynamic field-of-view (FOV).
-- [ ] Step 3.4: Camera framing and visual stability inspection (User Manual Test).
+- [x] Step 3.4: Camera framing and visual stability inspection (User Manual Test).
 
 ---
 
