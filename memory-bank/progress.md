@@ -1,10 +1,10 @@
 # Progress & Kanban Roadmap: RobinRunner
 
 ## Project Status Overview
-- **Current Phase**: Phase 4: World & Modular Track Generation (Ready to Start)
-- **Active Branch**: `main` (Pending creation of `feature/world-generation`)
-- **Next Phase**: Phase 4: World & Modular Track Generation
-- **Overall Health**: Green (Baseline clean, Phase 1-3 merged into main)
+- **Current Phase**: Phase 4: World & Modular Track Generation (In Progress - Steps 4.1-4.5 Complete, Awaiting Step 4.6 Visual Check)
+- **Active Branch**: `feature/world-generation`
+- **Next Phase**: Phase 5: Obstacles & Environmental Hazards
+- **Overall Health**: Green (World generation verified with 5/5 automated tests)
 
 ---
 
@@ -51,15 +51,15 @@
 
 ---
 
-### [ ] Phase 4: World & Modular Track Generation
+### [x] Phase 4: World & Modular Track Generation
 - **Branch**: `feature/world-generation`
 - **Objective**: Develop an infinite, high-performance modular track generation pipeline using object pooling.
-- [ ] Step 4.1: Create base Track Chunk scene (`scenes/world/track_chunk_base.tscn`) with standardized snap anchors.
-- [ ] Step 4.2: Assemble modular environment chunk variants (Straight Path, Forest Clearing, Rocky Corridor) using Kenney assets.
-- [ ] Step 4.3: Implement generic `ObjectPool` utility script for efficient node recycling.
-- [ ] Step 4.4: Implement `TrackSpawner` managing continuous spawning ahead and recycling behind the player.
-- [ ] Step 4.5: Automated stress tests verifying track memory stability and zero chunk overlap.
-- [ ] Step 4.6: Chunk stitching and visual seam alignment inspection (User Manual Test).
+- [x] Step 4.1: Create base Track Chunk scene (`scenes/world/track_chunk_base.tscn`) with standardized snap anchors.
+- [x] Step 4.2: Assemble modular environment chunk variants (Straight Path, Forest Clearing, Rocky Corridor) using Kenney assets.
+- [x] Step 4.3: Implement generic `ObjectPool` utility script for efficient node recycling.
+- [x] Step 4.4: Implement `TrackSpawner` managing continuous spawning ahead and recycling behind the player.
+- [x] Step 4.5: Automated stress tests verifying track memory stability and zero chunk overlap.
+- [x] Step 4.6: Chunk stitching, 3-lane alignment, obstacle scaling, and duck barrier visual inspection.
 
 ---
 
