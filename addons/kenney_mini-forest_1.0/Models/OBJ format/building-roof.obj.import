@@ -1,0 +1,25 @@
+[remap]
+
+importer="wavefront_obj"
+importer_version=1
+type="Mesh"
+uid="uid://dp5mkn7khgf8u"
+path="res://.godot/imported/building-roof.obj-04be4c0c3365d3b6831a8ec01ea4abe0.mesh"
+
+[deps]
+
+files=["res://.godot/imported/building-roof.obj-04be4c0c3365d3b6831a8ec01ea4abe0.mesh"]
+
+source_file="res://addons/kenney_mini-forest_1.0/Models/OBJ format/building-roof.obj"
+dest_files=["res://.godot/imported/building-roof.obj-04be4c0c3365d3b6831a8ec01ea4abe0.mesh", "res://.godot/imported/building-roof.obj-04be4c0c3365d3b6831a8ec01ea4abe0.mesh"]
+
+[params]
+
+generate_tangents=true
+generate_lods=true
+generate_shadow_mesh=true
+generate_lightmap_uv2=false
+generate_lightmap_uv2_texel_size=0.2
+scale_mesh=Vector3(1, 1, 1)
+offset_mesh=Vector3(0, 0, 0)
+force_disable_mesh_compression=false

@@ -1,25 +1,76 @@
-# Godot 4.2+ specific ignores
-~*.dll
-
-# Godot 4+ specific ignores
+# ==============================================================================
+# Godot Engine 4.x
+# ==============================================================================
 .godot/
-.nomedia
-
-# Godot-specific ignores
-.import/
-export.cfg
-export_credentials.cfg
-*.tmp
-
-# Imported translations (automatically generated from CSV files)
 *.translation
 
-# Mono-specific ignores
+# Godot-specific configuration & credentials
+export.cfg
+export_credentials.cfg
+override.cfg
+*.tmp
+
+# Godot Mono / .NET (if applicable)
 .mono/
 data_*/
 mono_crash.*.json
 
-# Export outputs
+# ==============================================================================
+# Build & Export Outputs
+# ==============================================================================
+build/
+dist/
+export/
+exports/
+bin/
+
+# Packaged binaries and packages
+*.pck
+*.apk
+*.aab
 *.exe
-# Uncomment if your project does not version PCK files as runtime dependencies.
-# *.pck
+*.tpk
+
+# ==============================================================================
+# Android Source & Build Artifacts
+# ==============================================================================
+/android/
+*.keystore
+*.jks
+
+# ==============================================================================
+# Blender Backup & Autosave Files
+# ==============================================================================
+*.blend1
+*.blend2
+*.blend3
+*.blend@
+*.blend1@
+*.blend2@
+
+# ==============================================================================
+# Environment & Secrets
+# ==============================================================================
+.env
+.env.*
+*.key
+*.secret
+
+# ==============================================================================
+# Operating System & IDE Specific
+# ==============================================================================
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Editors
+*.swp
+*.swo
+*~
+.idea/
+.vscode/*
+!.vscode/tasks.json
+!.vscode/launch.json
+*.sublime-project
+*.sublime-workspace

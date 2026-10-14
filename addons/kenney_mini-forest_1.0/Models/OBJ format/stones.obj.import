@@ -1,0 +1,25 @@
+[remap]
+
+importer="wavefront_obj"
+importer_version=1
+type="Mesh"
+uid="uid://c5ii4kj3wjef1"
+path="res://.godot/imported/stones.obj-98c70f1f288ec3c0ad2d8a63a44c087f.mesh"
+
+[deps]
+
+files=["res://.godot/imported/stones.obj-98c70f1f288ec3c0ad2d8a63a44c087f.mesh"]
+
+source_file="res://addons/kenney_mini-forest_1.0/Models/OBJ format/stones.obj"
+dest_files=["res://.godot/imported/stones.obj-98c70f1f288ec3c0ad2d8a63a44c087f.mesh", "res://.godot/imported/stones.obj-98c70f1f288ec3c0ad2d8a63a44c087f.mesh"]
+
+[params]
+
+generate_tangents=true
+generate_lods=true
+generate_shadow_mesh=true
+generate_lightmap_uv2=false
+generate_lightmap_uv2_texel_size=0.2
+scale_mesh=Vector3(1, 1, 1)
+offset_mesh=Vector3(0, 0, 0)
+force_disable_mesh_compression=false
