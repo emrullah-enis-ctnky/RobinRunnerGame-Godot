@@ -1,0 +1,6 @@
+[gd_scene format=3 uid="uid://c8k72v5b6u1y7"]
+
+[ext_resource type="Script" path="res://tests/unit/test_runner.gd" id="1_test_runner"]
+
+[node name="TestCoreArchitecture" type="Node"]
+script = ExtResource("1_test_runner")
