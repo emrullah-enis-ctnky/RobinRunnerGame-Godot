@@ -35,7 +35,7 @@
 
 - **Branch Structure**:
   - Direct pushing or committing everything to `main` is strictly prohibited.
-  - Dedicated branches must be created for each Phase/Feature (e.g., `feature/phase-name`).
+  - Dedicated branches must be created for each Feature/Phase using clean, concise naming without redundant "phase" prefixes (e.g., `feature/core-architecture`, `feature/player-controller`).
   - Merging into `main` is only performed upon explicit command and approval from the user.
 - **Commit Frequency & Timing**:
   - Commit after completing an operation, step, or bug fix.

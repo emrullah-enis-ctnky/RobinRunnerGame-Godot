@@ -20,7 +20,7 @@ RobinRunner is a fast-paced, stylized 3D endless runner game developed with the 
 
 ## Constraints & Workflow Standards
 - **Language Policy**: 100% English across all repository files, code, documentation, comments, and commit messages. User communication in chat is conducted in Turkish.
-- **Git Strategy**: Dedicated branch per development phase (`feature/phase-name`). Commits after every completed step or bug fix. Merges to `main` only upon explicit user command.
+- **Git Strategy**: Dedicated branch per development feature using concise naming without redundant "phase" prefixes (e.g., `feature/core-architecture`). Commits after every completed step or bug fix. Merges to `main` only upon explicit user command.
 - **Kanban Execution**: Strict single-phase focus. Multiple steps within the same phase can be executed together, but phases must never be mixed.
 - **Testing Standard**: Autonomous automated verification for logic/syntax, explicit delegation to user for visual/manual testing.
 

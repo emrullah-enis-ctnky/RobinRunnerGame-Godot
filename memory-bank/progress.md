@@ -19,7 +19,7 @@
 ---
 
 ### [ ] Phase 1: Project Architecture & Core Infrastructure
-- **Branch**: `feature/phase-1-core-architecture`
+- **Branch**: `feature/core-architecture`
 - **Objective**: Build foundational directory layouts, global singletons, state controllers, and testing scaffolds.
 - [ ] Step 1.1: Organize project directory structure (`scenes/`, `scripts/`, `assets/`, `tests/`).
 - [ ] Step 1.2: Implement `EventBus.gd` autoload singleton for global decoupled signals.
@@ -30,7 +30,7 @@
 ---
 
 ### [ ] Phase 2: Player Controller & Movement Mechanics
-- **Branch**: `feature/phase-2-player-controller`
+- **Branch**: `feature/player-controller`
 - **Objective**: Implement responsive 3-lane movement, jumping physics, and player state handling.
 - [ ] Step 2.1: Create Player scene (`scenes/player/player.tscn`) using Kenney archer mesh with collision shape.
 - [ ] Step 2.2: Implement Lane Switcher Controller with smooth lateral interpolation (Left, Center, Right).
@@ -42,7 +42,7 @@
 ---
 
 ### [ ] Phase 3: Camera System & Viewport
-- **Branch**: `feature/phase-3-camera-system`
+- **Branch**: `feature/camera-system`
 - **Objective**: Build an engaging third-person runner camera with dynamic feedback.
 - [ ] Step 3.1: Create Follow Camera controller tracking player position with smooth damping.
 - [ ] Step 3.2: Implement lateral camera look-ahead aligned with active lane transitions.
@@ -52,7 +52,7 @@
 ---
 
 ### [ ] Phase 4: World & Modular Track Generation
-- **Branch**: `feature/phase-4-world-generation`
+- **Branch**: `feature/world-generation`
 - **Objective**: Develop an infinite, high-performance modular track generation pipeline using object pooling.
 - [ ] Step 4.1: Create base Track Chunk scene (`scenes/world/track_chunk_base.tscn`) with standardized snap anchors.
 - [ ] Step 4.2: Assemble modular environment chunk variants (Straight Path, Forest Clearing, Rocky Corridor) using Kenney assets.
@@ -64,7 +64,7 @@
 ---
 
 ### [ ] Phase 5: Obstacles & Environmental Hazards
-- **Branch**: `feature/phase-5-obstacles`
+- **Branch**: `feature/obstacles`
 - **Objective**: Add hazards, barriers, and destructible targets across running lanes.
 - [ ] Step 5.1: Create static obstacle scenes (Rocks, Fallen Logs, Fences).
 - [ ] Step 5.2: Create destructible target scenes (Wooden Archery Targets, Fragile Barriers).
@@ -76,7 +76,7 @@
 ---
 
 ### [ ] Phase 6: Combat & Ability System (Arrow Shooting)
-- **Branch**: `feature/phase-6-combat-abilities`
+- **Branch**: `feature/combat-abilities`
 - **Objective**: Implement ability gauge charging and active arrow shooting mechanics to destroy obstacles.
 - [ ] Step 6.1: Create Arrow projectile scene (`scenes/combat/arrow.tscn`) with forward ballistic trajectory.
 - [ ] Step 6.2: Implement Projectile Object Pool for rapid arrow reuse.
@@ -89,7 +89,7 @@
 ---
 
 ### [ ] Phase 7: Pickups, Collectibles & Scoring
-- **Branch**: `feature/phase-7-collectibles-scoring`
+- **Branch**: `feature/collectibles-scoring`
 - **Objective**: Create rewarding collectible loops, score calculation, and ability boosters.
 - [ ] Step 7.1: Implement `ScoreManager` calculating distance score and collectible multipliers.
 - [ ] Step 7.2: Create Collectible Coin/Essence scene with gentle idle bobbing and rotation.
@@ -100,7 +100,7 @@
 ---
 
 ### [ ] Phase 8: User Interface & HUD
-- **Branch**: `feature/phase-8-ui-hud`
+- **Branch**: `feature/ui-hud`
 - **Objective**: Deliver a clean, stylized user interface covering gameplay HUD, menus, and game-over loops.
 - [ ] Step 8.1: Build In-Game HUD (Real-time Score, Distance Counter, Ability Gauge Bar).
 - [ ] Step 8.2: Build Main Menu screen (Game Title, Play Button, Controls Guide).
@@ -112,7 +112,7 @@
 ---
 
 ### [ ] Phase 9: Audio & Visual Polish
-- **Branch**: `feature/phase-9-audio-visual-polish`
+- **Branch**: `feature/audio-visual-polish`
 - **Objective**: Elevate game feel with sound effects, ambient music, and stylized particle systems.
 - [ ] Step 9.1: Implement `AudioManager` and integrate sound effects (Footsteps, Jump, Bow Fire, Target Shatter, Collect).
 - [ ] Step 9.2: Integrate adaptive background music loop with smooth pause ducking.
@@ -122,7 +122,7 @@
 ---
 
 ### [ ] Phase 10: Performance Optimization & Multi-Platform Export Preparation
-- **Branch**: `feature/phase-10-optimization-export`
+- **Branch**: `feature/optimization-export`
 - **Objective**: Optimize draw calls, configure export presets for Desktop and Web, and prepare mobile foundation.
 - [ ] Step 10.1: Configure Desktop export presets (Linux, Windows, macOS).
 - [ ] Step 10.2: Configure Web export preset and optimize asset compression for rapid HTML5 loading.

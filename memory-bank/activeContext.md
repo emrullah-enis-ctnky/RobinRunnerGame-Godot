@@ -22,12 +22,12 @@ The project has completed its initial repository foundation (comprehensive `.git
 2. **Phase 1 Strategy**:
    - Before building visual scenes, establish the directory structure, base manager scripts (`EventBus.gd`, `GameManager.gd`), and common constants to prevent architectural debt.
 3. **Branching Model**:
-   - Each phase will start by branching off `main` (e.g., `git checkout -b feature/phase-1-core-architecture`).
+   - Each phase will start by branching off `main` using concise naming without redundant "phase" prefixes (e.g., `git checkout -b feature/core-architecture`).
    - Work will proceed step-by-step with clean, granular commits.
 4. **Strict projectRules.md Adherence**:
    - Uncompromising compliance with all rules codified in `projectRules.md` is strictly enforced across all operations, commit scopes, tests, and language boundaries.
 
 ## Next Steps
-1. Commit the complete Memory Bank setup to `main`.
-2. Await user command to initiate Phase 1 (`feature/phase-1-core-architecture`).
+1. Commit updated branch conventions.
+2. Await user command to initiate Phase 1 (`feature/core-architecture`).
 
