@@ -1,9 +1,9 @@
 # Progress & Kanban Roadmap: RobinRunner
 
 ## Project Status Overview
-- **Current Phase**: Phase 2: Player Controller & Movement Mechanics (Complete)
-- **Active Branch**: `feature/player-controller`
-- **Next Phase**: Phase 3: Camera System & Viewport
+- **Current Phase**: Phase 3: Camera System & Viewport (In Progress - Logic Complete, Awaiting Visual Check)
+- **Active Branch**: `feature/camera-system`
+- **Next Phase**: Phase 4: World & Modular Track Generation
 - **Overall Health**: Green (Baseline clean, guidelines and configurations locked)
 
 ---
@@ -44,9 +44,9 @@
 ### [ ] Phase 3: Camera System & Viewport
 - **Branch**: `feature/camera-system`
 - **Objective**: Build an engaging third-person runner camera with dynamic feedback.
-- [ ] Step 3.1: Create Follow Camera controller tracking player position with smooth damping.
-- [ ] Step 3.2: Implement lateral camera look-ahead aligned with active lane transitions.
-- [ ] Step 3.3: Implement screen shake utility and speed-based dynamic field-of-view (FOV).
+- [x] Step 3.1: Create Follow Camera controller tracking player position with smooth damping.
+- [x] Step 3.2: Implement lateral camera look-ahead aligned with active lane transitions.
+- [x] Step 3.3: Implement screen shake utility and speed-based dynamic field-of-view (FOV).
 - [ ] Step 3.4: Camera framing and visual stability inspection (User Manual Test).
 
 ---

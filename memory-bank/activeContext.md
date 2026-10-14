@@ -1,7 +1,7 @@
 # Active Context: RobinRunner
 
 ## Current Work Focus
-Phase 2 (Player Controller & Movement Mechanics) has been completed and verified visually by the user. Awaiting user command to merge `feature/player-controller` into `main`.
+Phase 3 (Camera System & Viewport) implementation is complete on `feature/camera-system`. Automated unit tests pass. Awaiting user visual check for Step 3.4.
 
 ## Recent Changes
 - Created and formalized `projectRules.md` documenting:
@@ -12,23 +12,24 @@ Phase 2 (Player Controller & Movement Mechanics) has been completed and verified
   - Autonomous testing workflow and manual visual inspection policy.
   - Web search usage for official documentation.
 - Configured a comprehensive `.gitignore` for Godot 4.x, Android, Blender autosaves, and OS artifacts.
-- Implemented Phase 2 (`feature/player-controller`):
-  - Added input mappings to `project.godot` (`move_left`, `move_right`, `jump`, `shoot`, `pause`).
-  - Created `PlayerController` (`scripts/player/player_controller.gd`) supporting 3-lane switching, smooth lateral lerping, jump physics, visual lean, and hazard collision triggers.
-  - Created `Player` scene (`scenes/player/player.tscn`) integrating Kenney archer GLB mesh and CapsuleShape3D.
-  - Built and verified automated unit tests (`tests/unit/test_player_controller.tscn`).
+- Implemented Phase 3 (`feature/camera-system`):
+  - Created `RunnerCamera` (`scripts/camera/camera_controller.gd`) supporting target tracking with decoupled axis damping, dynamic FOV scaling with player speed, and trauma-based screen shake.
+  - Created `RunnerCamera` scene (`scenes/camera/runner_camera.tscn`) configured with 3rd-person runner angle.
+  - Built and verified automated unit tests (`tests/unit/test_camera_controller.tscn`).
 
 ## Active Decisions & Architectural Considerations
-1. **Kenney Asset Utilization**:
-   - The Kenney Mini-Forest pack (`assets/models/`) contains ready-to-use archer models, weapons (bow, arrow), terrain patches (grass, dirt, platform, rocks), trees, fences, and target props in GLB format.
-2. **Autoload Decoupling**:
-   - Systems communicate strictly via `EventBus` signals and `GameConfig` static constants, ensuring zero circular dependencies.
+1. **Camera Damping**:
+   - Forward Z-axis tracks directly with offset to maintain tight framing during high-speed runs.
+   - Lateral X-axis and vertical Y-axis smoothly damp transitions and jumps.
+2. **Screen Shake Model**:
+   - Uses quadratic trauma falloff with pseudo-random multi-frequency sine oscillation, automatically listening to `EventBus.player_hit_hazard`.
 3. **Branching Model**:
    - Dedicated branch per feature (`feature/<feature-name>`). Merged to `main` only on explicit user approval.
 4. **Strict projectRules.md Adherence**:
    - Uncompromising compliance with all rules codified in `projectRules.md` is strictly enforced across all operations, commit scopes, tests, and language boundaries.
 
 ## Next Steps
-1. Await user command to merge `feature/player-controller` into `main`.
-2. Open `feature/camera-system` for Phase 3 (dynamic runner follow camera).
+1. Request user visual verification for Step 3.4 (camera framing, follow smoothness).
+2. Upon user satisfaction and approval, ask to merge `feature/camera-system` into `main`.
+3. Proceed to Phase 4 (`feature/world-generation`).
 

@@ -1,0 +1,9 @@
+[gd_scene load_steps=2 format=3 uid="uid://dp7m2x9k4q1w8"]
+
+[ext_resource type="Script" path="res://scripts/camera/camera_controller.gd" id="1_controller"]
+
+[node name="RunnerCamera" type="Camera3D"]
+transform = Transform3D(1, 0, 0, 0, 0.965926, 0.258819, 0, -0.258819, 0.965926, 0, 2.8, 4.5)
+current = true
+fov = 68.0
+script = ExtResource("1_controller")

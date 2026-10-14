@@ -1,0 +1,6 @@
+[gd_scene format=3 uid="uid://c3m5x7qaq1k8w"]
+
+[ext_resource type="Script" path="res://tests/unit/test_camera_runner.gd" id="1_test_runner"]
+
+[node name="TestCameraController" type="Node"]
+script = ExtResource("1_test_runner")
