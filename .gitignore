@@ -60,6 +60,12 @@ bin/
 # AI Assistant Tooling
 # ==============================================================================
 .commandcode/
+.commandcode*/
+*.commandcode*
+.commandcode_cache/
+.commandcode-cache/
+commandcode.cache
+commandcode-cache/
 
 # ==============================================================================
 # Operating System & IDE Specific
