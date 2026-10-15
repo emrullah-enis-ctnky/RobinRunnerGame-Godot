@@ -45,8 +45,9 @@ func _test_camera_instantiation() -> bool:
 		camera.queue_free()
 		return false
 
-	if camera.fov != 68.0:
-		printerr("FAIL: Default camera FOV should be 68.0, got: ", camera.fov)
+	# The scene-driven framing value must match the controller's configured base FOV
+	if camera.fov != camera.base_fov:
+		printerr("FAIL: Initial camera FOV should match base_fov, got: ", camera.fov)
 		camera.queue_free()
 		return false
 

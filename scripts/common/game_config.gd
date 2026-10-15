@@ -34,13 +34,18 @@ const CHUNK_LENGTH: float = 30.0
 const INITIAL_CHUNKS_COUNT: int = 6
 const CHUNK_DESPAWN_DISTANCE_BEHIND: float = 40.0
 
-# Collision Layer Masks
-const LAYER_PLAYER: int = 1
-const LAYER_ENVIRONMENT: int = 2
-const LAYER_OBSTACLE: int = 3
-const LAYER_TARGET: int = 4
-const LAYER_PROJECTILE: int = 5
-const LAYER_PICKUP: int = 6
+# Collision Layer Bitmasks (layer 1 -> 1 << 0)
+const LAYER_PLAYER: int = 1 << 0
+const LAYER_ENVIRONMENT: int = 1 << 1
+const LAYER_OBSTACLE: int = 1 << 2
+const LAYER_TARGET: int = 1 << 3
+const LAYER_PROJECTILE: int = 1 << 4
+const LAYER_PICKUP: int = 1 << 5
+
+# Hazard Resolution
+const MAX_STUMBLES_PER_RUN: int = 1
+const STUMBLE_DURATION: float = 0.6
+const STUMBLE_SPEED_FACTOR: float = 0.45
 
 
 ## Returns the 3D X coordinate for a specific lane index.

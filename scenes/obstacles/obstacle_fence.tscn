@@ -1,0 +1,20 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/obstacles/obstacle.gd" id="1_obstacle"]
+[ext_resource type="PackedScene" path="res://assets/models/fence.glb" id="2_mesh"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_block"]
+size = Vector3(1.8, 0.68, 0.4)
+
+[node name="ObstacleFence" type="StaticBody3D" groups=["obstacle"]]
+collision_layer = 4
+collision_mask = 0
+script = ExtResource("1_obstacle")
+hazard_type = "fence"
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.34, 0)
+shape = SubResource("BoxShape3D_block")
+
+[node name="Mesh" parent="." instance=ExtResource("2_mesh")]
+transform = Transform3D(1.7, 0, 0, 0, 1.7, 0, 0, 0, 1.7, 0, 0, 0)

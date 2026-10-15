@@ -1,24 +1,13 @@
-[gd_scene load_steps=8 format=3 uid="uid://c8chunkstraight"]
+[gd_scene format=3 uid="uid://c8chunkstraight"]
 
 [ext_resource type="PackedScene" uid="uid://c6trackchunkbase" path="res://scenes/world/track_chunk_base.tscn" id="1_base"]
-[ext_resource type="PackedScene" path="res://assets/models/stones.glb" id="2_stones"]
-[ext_resource type="PackedScene" uid="uid://coverheadarch" path="res://scenes/world/props/overhead_arch.tscn" id="3_arch"]
-[ext_resource type="PackedScene" path="res://assets/models/patch-dirt.glb" id="4_dirt"]
-[ext_resource type="PackedScene" path="res://assets/models/tree.glb" id="5_tree"]
-[ext_resource type="PackedScene" path="res://assets/models/tree-high.glb" id="6_treehigh"]
-[ext_resource type="PackedScene" path="res://assets/models/rocks-low.glb" id="7_rockslow"]
+[ext_resource type="PackedScene" path="res://scenes/obstacles/obstacle_fence.tscn" id="2_fence"]
+[ext_resource type="PackedScene" path="res://scenes/obstacles/obstacle_stones.tscn" id="3_stones"]
 
 [node name="TrackChunkStraight" instance=ExtResource("1_base")]
 
-[node name="StonesLeftLane" parent="LaneObjects" index="0" instance=ExtResource("2_stones")]
-transform = Transform3D(2, 0, 0, 0, 1.7, 0, 0, 0, 2, -2, 0, -8)
+[node name="FenceLeftLane" parent="LaneObjects" index="0" instance=ExtResource("2_fence")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 0, -10)
 
-[node name="TreeCenterLane" parent="LaneObjects" index="1" instance=ExtResource("5_tree")]
-transform = Transform3D(1.6, 0, 0, 0, 1.6, 0, 0, 0, 1.6, 0, 0, -14)
-
-[node name="OverheadArchRight" parent="LaneObjects" index="2" instance=ExtResource("3_arch")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 0, -20)
-
-[node name="RocksLowLeftLane" parent="LaneObjects" index="3" instance=ExtResource("7_rockslow")]
-transform = Transform3D(1.8, 0, 0, 0, 1.6, 0, 0, 0, 1.8, -2, 0, -26)
-
+[node name="StonesRightLane" parent="LaneObjects" index="1" instance=ExtResource("3_stones")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 0, -22)
