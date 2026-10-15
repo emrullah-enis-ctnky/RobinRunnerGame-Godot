@@ -166,7 +166,7 @@ The project is developed in phased, modular Kanban increments:
 - [x] **Phase 2**: Player Controller & Movement Mechanics
 - [x] **Phase 3**: Camera System & Viewport
 - [x] **Phase 4**: World & Modular Track Generation
-- [ ] **Phase 5**: Obstacles & Environmental Hazards *(Steps 5.1-5.5 complete; Step 5.6 visual check pending)*
+- [x] **Phase 5**: Obstacles & Environmental Hazards
 - [ ] **Phase 6**: Animation System (Character & World Animations)
 - [ ] **Phase 7**: Combat & Ability System (Arrow Shooting)
 - [ ] **Phase 8**: Pickups, Collectibles & Scoring

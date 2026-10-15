@@ -1,8 +1,8 @@
 # Progress & Kanban Roadmap: RobinRunner
 
 ## Project Status Overview
-- **Current Phase**: Phase 5: Obstacles & Environmental Hazards (In Progress - Steps 5.1-5.5 Complete, Awaiting Step 5.6 Visual Check)
-- **Active Branch**: `feature/obstacles`
+- **Current Phase**: Phase 5: Obstacles & Environmental Hazards (Complete - Step 5.6 visually verified by user)
+- **Active Branch**: `main`
 - **Next Phase**: Phase 6: Animation System
 - **Overall Health**: Green (Hazards verified with 9/9 automated obstacle tests; player and world suites also green)
 
@@ -64,15 +64,15 @@
 
 ---
 
-### [ ] Phase 5: Obstacles & Environmental Hazards
-- **Branch**: `feature/obstacles`
+### [x] Phase 5: Obstacles & Environmental Hazards
+- **Branch**: `feature/obstacles` (merged into `main`)
 - **Objective**: Add hazards, barriers, and destructible targets across running lanes.
 - [x] Step 5.1: Create static obstacle scenes (Rocks, Fallen Logs, Fences).
 - [x] Step 5.2: Create destructible target scenes (Wooden Archery Targets, Fragile Barriers).
 - [x] Step 5.3: Integrate obstacle placement patterns into Track Chunks with guaranteed clearable routes.
 - [x] Step 5.4: Implement collision resolution (Player hazard collision triggering stumble or game over). Refined into a graded hit rule: `obstacle_tree`, `obstacle_tree_tall` and `barrier_fragile` are lethal (first contact ends the run, bypassing stagger immunity), while `obstacle_log`, `obstacle_rocks`, `obstacle_stones` and `obstacle_fence` stagger once then kill. The `overhead_barrier` applies a backward head-bump posture so the arch reads as a head hit the runner ducks under.
 - [x] Step 5.5: Automated tests verifying obstacle collision layers and route passability.
-- [ ] Step 5.6: Obstacle silhouette clarity and fairness inspection (User Manual Test).
+- [x] Step 5.6: Obstacle silhouette clarity and fairness inspection (User Manual Test).
 
 ---
 
@@ -157,4 +157,4 @@
 
 ### Open Notes
 - `tests/unit/test_core_architecture.tscn` was re-run after the graded hit rule change and is green (GameConfig, EventBus, GameManager suites all pass). The obstacle suite reports 9/9, and the player and world generation suites are also green.
-- Step 5.6 is intentionally left to the user: obstacle silhouettes, collider fairness and duck-barrier clearance need a human visual pass before the phase can be closed.
+- Step 5.6 completed: the user performed the human visual pass and confirmed obstacle silhouettes, collider fairness, and duck-barrier clearance, so Phase 5 is now closed.
