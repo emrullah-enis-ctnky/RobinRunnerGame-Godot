@@ -134,9 +134,9 @@ func _test_jumping_mechanics() -> bool:
 	return true
 
 
-## Tests hazard impact resolution, controls disabling, and player reset.
+## Tests hazard staggering, the fatal follow-up hit, and player reset.
 func _test_hazard_collision_and_reset() -> bool:
-	print("[TEST] Hazard Collision & Reset...")
+	print("[TEST] Hazard Stumble, Death & Reset...")
 	var player: CharacterBody3D = PlayerScene.instantiate() as CharacterBody3D
 	add_child(player)
 
@@ -150,15 +150,38 @@ func _test_hazard_collision_and_reset() -> bool:
 		bus.player_hit_hazard.connect(func(_hazard: String) -> void: signals_received["hit"] = true)
 		bus.player_died.connect(func() -> void: signals_received["died"] = true)
 
+	# The first contact must only stagger the player, never end the run
 	player.take_hit("test_rock")
-
-	if player.can_control:
-		printerr("FAIL: can_control should be false after taking a hit")
+	if not signals_received["hit"]:
+		printerr("FAIL: First hit must emit player_hit_hazard")
+		player.queue_free()
+		return false
+	if signals_received["died"] or not player.is_stumbling:
+		printerr("FAIL: First hit must stagger the player instead of killing it")
+		player.queue_free()
+		return false
+	if not player.can_control:
+		printerr("FAIL: Player must keep running while staggering")
 		player.queue_free()
 		return false
 
-	if not signals_received["hit"] or not signals_received["died"]:
-		printerr("FAIL: EventBus hazard or death signals were not received")
+	# A second contact inside the stagger window must be ignored
+	player.take_hit("test_rock")
+	if signals_received["died"]:
+		printerr("FAIL: Contact inside the stagger window must be ignored")
+		player.queue_free()
+		return false
+
+	# Once the stagger expires the next contact becomes fatal
+	player._update_stumble(player.stumble_duration)
+	if player.is_stumbling:
+		printerr("FAIL: Stagger window should expire after its duration")
+		player.queue_free()
+		return false
+
+	player.take_hit("test_rock")
+	if not signals_received["died"] or player.can_control:
+		printerr("FAIL: Follow-up hit must end the run and disable control")
 		player.queue_free()
 		return false
 
@@ -168,7 +191,11 @@ func _test_hazard_collision_and_reset() -> bool:
 		printerr("FAIL: Player reset failed to restore control, lane, or position")
 		player.queue_free()
 		return false
+	if player.stumbles_remaining != GameConfig.MAX_STUMBLES_PER_RUN:
+		printerr("FAIL: Player reset failed to restore the stumble allowance")
+		player.queue_free()
+		return false
 
 	player.queue_free()
-	print("  -> Hazard Collision & Reset passed.")
+	print("  -> Hazard Stumble, Death & Reset passed.")
 	return true

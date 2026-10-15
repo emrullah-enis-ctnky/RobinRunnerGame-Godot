@@ -1,20 +1,32 @@
-[gd_scene load_steps=4 format=3 uid="uid://c7m8x4w6laq1r"]
+[gd_scene load_steps=5 format=3 uid="uid://c7m8x4w6laq1r"]
 
 [ext_resource type="Script" path="res://scripts/player/player_controller.gd" id="1_controller"]
 [ext_resource type="PackedScene" uid="uid://dgpyyi83ott0" path="res://assets/models/character-archer.glb" id="2_archer_mesh"]
 
-[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_1"]
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_body"]
+radius = 0.48
+height = 1.55
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_hazard"]
 radius = 0.48
 height = 1.55
 
 [node name="Player" type="CharacterBody3D"]
 collision_layer = 1
-collision_mask = 14
+collision_mask = 2
 script = ExtResource("1_controller")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.775, 0)
-shape = SubResource("CapsuleShape3D_1")
+shape = SubResource("CapsuleShape3D_body")
+
+[node name="HazardDetector" type="Area3D" parent="."]
+collision_layer = 0
+collision_mask = 12
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="HazardDetector"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.775, 0)
+shape = SubResource("CapsuleShape3D_hazard")
 
 [node name="Model" type="Node3D" parent="."]
 

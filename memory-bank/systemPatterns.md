@@ -37,10 +37,20 @@ RobinRunner follows a modular, decoupled node-based architecture in Godot 4. Com
   - `RunningState`: Standard forward velocity with lane-switching capabilities.
   - `JumpingState`: Vertical velocity handling, gravity application, and air control.
   - `ShootingState`: Aiming/firing animation and arrow release while maintaining forward momentum.
+  - `StaggeredState`: Post-collision stumble window with reduced forward speed and temporary hazard immunity.
   - `DeadState`: Ragdoll or death animation, stopping input, triggering game over sequence.
 - **Event Bus Pattern**: Centralized `EventBus` autoload for decoupled cross-system communication.
 - **Object Pool Pattern**: `ObjectPool` utility managing reuse of Track Chunks, Projectiles, and Collectibles.
 - **Observer Pattern**: UI widgets observe gameplay metrics (score, gauge, health) via signals.
+
+## Hazard & Obstacle Patterns
+- **Obstacle Contract**: Every hazard is a `StaticBody3D` scene in `scenes/obstacles/` driven by `scripts/obstacles/obstacle.gd`. It declares `collision_mask = 0`, joins the `obstacle` group, and exposes `get_hazard_type()` so the player can report a readable hazard label without holding a hard reference to the scene.
+- **Destructible Contract**: `scripts/obstacles/destructible.gd` extends the obstacle contract with `score_reward`, `destroy()` (clears the collision layer deferred, hides the mesh, emits `EventBus.target_destroyed`) and `restore()` (re-armed on `EventBus.game_restarted` so recycled chunks present live targets again).
+- **Duck Barrier Variant**: The overhead arch keeps its decorative root and adds a `HazardBody` child on the obstacle layer inside the `overhead_barrier` group. Its collider covers only the hanging beam, so the lane stays passable by ducking.
+- **Player-Side Hazard Detection**: Hazards never physically block the runner. The player body collides with the environment layer only, while a `HazardDetector` `Area3D` (`collision_mask = LAYER_OBSTACLE | LAYER_TARGET`) reports `body_entered` and forwards it to `PlayerController.take_hit()`. This centralises detection and stops a staggered player from being trapped inside geometry.
+- **Stance Swapping**: Ducking swaps the detector between two pre-built `CapsuleShape3D` resources and re-centres it, because Jolt Physics only supports uniform shape scaling.
+- **Forgiving Hit Rule**: `take_hit()` staggers on the first contact and only ends the run once `MAX_STUMBLES_PER_RUN` is exhausted, which keeps dense hazard rows fair at high speed.
+- **Fairness Invariant**: Every chunk must leave at least one clear lane per depth row of ground hazards. `tests/unit/test_obstacles.gd` asserts this invariant for all chunk variants.
 
 ## Directory Structure Pattern
 ```

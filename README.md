@@ -12,6 +12,8 @@
 ## Key Features
 
 - **Responsive 3-Lane Movement**: Snappy and fluid lateral lane transitions (Left, Center, Right) and responsive jump arcs.
+- **Layered Environmental Hazards**: Rock piles, fallen logs, fences and solid trees block the lanes, while hanging arches demand a duck or a lane switch. Every hazard carries an explicit collider sized from the asset's real bounding box.
+- **Forgiving Hit Rule**: The first hazard contact only staggers the archer (reduced speed plus a short immunity window); the next contact ends the run.
 - **Combat & Ability Mechanics**: Charge an ability gauge during runs; fire arrows to destroy wooden targets and clear barricades in your path.
 - **Infinite World Generation**: High-performance modular track chunk spawning with an object pooling system to ensure zero stutter.
 - **Lightweight & Cross-Platform**: Powered by Godot 4's **GL Compatibility** renderer for instant load times, consistent frame rates, and seamless compatibility across Desktop (Linux, Windows, macOS) and Web (HTML5/WebAssembly), with future Android deployment in mind.
@@ -103,6 +105,7 @@ res://
 | **Move Left** | `A` | `Left Arrow` |
 | **Move Right** | `D` | `Right Arrow` |
 | **Jump** | `Space` / `W` | `Up Arrow` |
+| **Duck / Slide** | `S` | `Down Arrow` |
 | **Shoot Arrow** | `F` | `Left Mouse Click` |
 | **Pause / Resume** | `Escape` | `P` |
 
@@ -129,10 +132,14 @@ res://
 
 ### Running Automated Tests
 
-RobinRunner includes automated test suites that can be executed headlessly:
+RobinRunner includes automated test suites that can be executed headlessly. Each suite prints its own pass/fail summary and exits with code `0` on success and `1` on failure:
 
 ```bash
 godot --headless res://tests/unit/test_core_architecture.tscn
+godot --headless res://tests/unit/test_player_controller.tscn
+godot --headless res://tests/unit/test_camera_controller.tscn
+godot --headless res://tests/unit/test_world_generation.tscn
+godot --headless res://tests/unit/test_obstacles.tscn
 ```
 
 ---
@@ -145,8 +152,8 @@ The project is developed in phased, modular Kanban increments:
 - [x] **Phase 1**: Project Architecture & Core Infrastructure (`EventBus`, `GameConfig`, `GameManager`)
 - [x] **Phase 2**: Player Controller & Movement Mechanics
 - [x] **Phase 3**: Camera System & Viewport
-- [ ] **Phase 4**: World & Modular Track Generation
-- [ ] **Phase 5**: Obstacles & Environmental Hazards
+- [x] **Phase 4**: World & Modular Track Generation
+- [ ] **Phase 5**: Obstacles & Environmental Hazards *(Steps 5.1-5.5 complete; Step 5.6 visual check pending)*
 - [ ] **Phase 6**: Animation System (Character & World Animations)
 - [ ] **Phase 7**: Combat & Ability System (Arrow Shooting)
 - [ ] **Phase 8**: Pickups, Collectibles & Scoring
