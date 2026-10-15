@@ -116,5 +116,23 @@
 - **No Repetitive Language Checking**:
   - Do not run repetitive terminal commands (such as grep) to inspect files for Turkish characters. Naturally write clean, simple English across all files from the start without redundant verification loops.
 
+---
+
+## 10. Token Economy & Context Budget Management
+
+- **Minimal Onboarding Reading Protocol**:
+  - When the user asks to "read the readme", "read the project", or get project orientation, the agent must **ONLY** read:
+    1. `README.md`
+    2. `memory-bank/projectRules.md`
+    3. `memory-bank/progress.md`
+  - Do **NOT** read other Memory Bank files (`projectbrief.md`, `productContext.md`, `systemPatterns.md`, `techContext.md`, `activeContext.md`) or arbitrary project files unless explicitly requested by the user or strictly required for the specific task.
+- **Strict On-Demand File Reading**:
+  - Read files **only when strictly necessary** for the current task. Speculative, bulk, or exploratory file reading into context is strictly prohibited.
+- **Directory Tree Exploration via Terminal**:
+  - When the agent needs to understand the project tree or locate files, use token-optimized terminal commands (`rtk ls`, `rtk find`) rather than reading file contents.
+- **Meticulous Step-by-Step Logging**:
+  - Every completed step, bug fix, or modification must be recorded with thorough, detailed notes in `memory-bank/progress.md` and clear commit messages every single time.
+  - Incomplete or vague tracking is strictly prohibited; thorough logging prevents confusion, preserves context, and guarantees seamless continuity across agent sessions.
+
 
 

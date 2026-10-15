@@ -9,6 +9,19 @@
 
 ---
 
+## AI Agent & Developer Orientation (Token Economy Protocol)
+
+> [!IMPORTANT]
+> **Minimal Context Loading Protocol**:
+> When an AI agent or contributor is instructed to read the project, read this README, or onboard:
+> 1. Read **ONLY** this `README.md`, [`memory-bank/projectRules.md`](memory-bank/projectRules.md), and [`memory-bank/progress.md`](memory-bank/progress.md).
+> 2. Do **NOT** read other Memory Bank files (`projectbrief.md`, `productContext.md`, `systemPatterns.md`, `techContext.md`, `activeContext.md`) or project source files unless explicitly requested or strictly required for a task.
+> 3. Read specific source code or scene files **only when strictly necessary** for active implementation.
+> 4. Use lightweight terminal commands (e.g. `rtk ls`, `rtk find`) to explore the directory structure instead of reading file contents.
+> 5. **Meticulous Logging**: Always document completed work and decisions thoroughly in `memory-bank/progress.md` and commit messages to prevent context loss and confusion.
+
+---
+
 ## Key Features
 
 - **Responsive 3-Lane Movement**: Snappy and fluid lateral lane transitions (Left, Center, Right) and responsive jump arcs.
