@@ -4,7 +4,7 @@
 - **Current Phase**: Phase 5: Obstacles & Environmental Hazards (In Progress - Steps 5.1-5.5 Complete, Awaiting Step 5.6 Visual Check)
 - **Active Branch**: `feature/obstacles`
 - **Next Phase**: Phase 6: Animation System
-- **Overall Health**: Green (Hazards verified with 5/5 automated obstacle tests)
+- **Overall Health**: Green (Hazards verified with 9/9 automated obstacle tests; player and world suites also green)
 
 ---
 
@@ -70,7 +70,7 @@
 - [x] Step 5.1: Create static obstacle scenes (Rocks, Fallen Logs, Fences).
 - [x] Step 5.2: Create destructible target scenes (Wooden Archery Targets, Fragile Barriers).
 - [x] Step 5.3: Integrate obstacle placement patterns into Track Chunks with guaranteed clearable routes.
-- [x] Step 5.4: Implement collision resolution (Player hazard collision triggering stumble or game over).
+- [x] Step 5.4: Implement collision resolution (Player hazard collision triggering stumble or game over). Refined into a graded hit rule: `obstacle_tree`, `obstacle_tree_tall` and `barrier_fragile` are lethal (first contact ends the run, bypassing stagger immunity), while `obstacle_log`, `obstacle_rocks`, `obstacle_stones` and `obstacle_fence` stagger once then kill. The `overhead_barrier` applies a backward head-bump posture so the arch reads as a head hit the runner ducks under.
 - [x] Step 5.5: Automated tests verifying obstacle collision layers and route passability.
 - [ ] Step 5.6: Obstacle silhouette clarity and fairness inspection (User Manual Test).
 
@@ -152,8 +152,9 @@
 ### Resolved During Phase 5
 - **Stale camera FOV assertion**: `tests/unit/test_camera_runner.gd` still expected the pre-Phase 4 default camera FOV of `68.0`, while `scenes/camera/runner_camera.tscn` was calibrated to `64.0` during the Phase 4 framing pass. The camera suite therefore reported `FAIL: Default camera FOV should be 68.0, got: 64.0` and exited with code `1`. The assertion was updated to compare the instantiated camera against its own configured `base_fov`, so future framing calibration can no longer break it.
 - **Jolt rejects non-uniform shape scaling**: the previous `duck()` implementation scaled the player capsule to `(1.0, 0.45, 1.0)`. Jolt Physics silently substituted a uniform `0.816667` scale and logged `Failed to correctly scale shape ... is not supported by Jolt Physics for this shape/body`, which shrank the capsule on every axis instead of flattening it. Ducking now swaps between two pre-built `CapsuleShape3D` resources, so the duck silhouette is exact and the engine warning is gone.
+- **Log collider one lane off the visible trunk**: `obstacle_log`'s instanced mesh was translated `+0.842` on X, so the visible fallen trunk sat in the right lane while its `CollisionShape3D` stayed centred in the middle lane. Runners visibly passed through the trunk in the right lane and died on an invisible collider in the centre lane, which read as inconsistent "sometimes it kills, sometimes it does not". The mesh offset was flipped to `-0.842` and a `Hazard Visual & Collider Alignment` suite now guards the mesh/collider centre alignment for every hazard.
 - **Global class registration lag**: the newly added `scripts/obstacles/destructible.gd` failed to parse with `Could not find base class "Obstacle"` until a filesystem rescan re-registered the new `class_name`. A rescan is required after adding a script that extends a brand new global class.
 
 ### Open Notes
-- `tests/unit/test_core_architecture.tscn` was not re-run after the Phase 5 changes; its last confirmed state is green.
+- `tests/unit/test_core_architecture.tscn` was re-run after the graded hit rule change and is green (GameConfig, EventBus, GameManager suites all pass). The obstacle suite reports 9/9, and the player and world generation suites are also green.
 - Step 5.6 is intentionally left to the user: obstacle silhouettes, collider fairness and duck-barrier clearance need a human visual pass before the phase can be closed.
