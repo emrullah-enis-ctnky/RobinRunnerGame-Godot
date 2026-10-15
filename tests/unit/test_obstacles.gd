@@ -54,6 +54,10 @@ func _run_all_tests() -> void:
 	await _test_destructible_targets()
 	_test_overhead_duck_barrier()
 	_test_player_hazard_detector()
+	_test_hazard_lethality_profiles()
+	_test_hazard_visual_collider_alignment()
+	_test_lethal_hit_resolution()
+	_test_arch_head_bump_feedback()
 	_test_chunk_route_passability()
 
 
@@ -202,6 +206,114 @@ func _test_player_hazard_detector() -> void:
 	_end_test("Player Hazard Detector & Duck Profile")
 
 
+## Verifies trees and the ladder barrier declare a lethal profile while logs and low hazards stay forgiving.
+func _test_hazard_lethality_profiles() -> void:
+	_start_test("Hazard Lethality Profiles")
+
+	var lethal_paths: Array = [
+		"res://scenes/obstacles/obstacle_tree.tscn",
+		"res://scenes/obstacles/obstacle_tree_tall.tscn",
+		"res://scenes/obstacles/barrier_fragile.tscn"
+	]
+	var forgiving_paths: Array = [
+		"res://scenes/obstacles/obstacle_stones.tscn",
+		"res://scenes/obstacles/obstacle_rocks.tscn",
+		"res://scenes/obstacles/obstacle_fence.tscn",
+		"res://scenes/obstacles/obstacle_log.tscn"
+	]
+
+	for path in lethal_paths:
+		var obstacle: StaticBody3D = load(path).instantiate() as StaticBody3D
+		add_child(obstacle)
+		_assert(obstacle.is_lethal_hazard(),
+			"%s must end the run on a single contact." % path)
+		obstacle.queue_free()
+
+	for path in forgiving_paths:
+		var obstacle: StaticBody3D = load(path).instantiate() as StaticBody3D
+		add_child(obstacle)
+		_assert(not obstacle.is_lethal_hazard(),
+			"%s must stay forgiving and stagger on the first contact." % path)
+		obstacle.queue_free()
+
+	_end_test("Hazard Lethality Profiles")
+
+
+## Verifies each hazard's visible mesh is centred on its collider, so a player can never
+## run through the visible geometry (a misaligned log once left its collider in another lane).
+func _test_hazard_visual_collider_alignment() -> void:
+	_start_test("Hazard Visual & Collider Alignment")
+
+	var all_paths: Array = OBSTACLE_SCENES + DESTRUCTIBLE_SCENES
+	for path in all_paths:
+		var obstacle: StaticBody3D = load(path).instantiate() as StaticBody3D
+		add_child(obstacle)
+
+		var shape_node: CollisionShape3D = _first_collision_shape(obstacle)
+		var mesh_instance: MeshInstance3D = _first_mesh_instance(obstacle)
+		if shape_node != null and mesh_instance != null:
+			var mesh_center: Vector3 = (mesh_instance.global_transform * mesh_instance.get_aabb()).get_center()
+			var shape_center: Vector3 = shape_node.global_position
+			_assert(absf(mesh_center.x - shape_center.x) <= 0.3,
+				"%s visual must align with its collider on X (mesh %.2f, collider %.2f)." % [path, mesh_center.x, shape_center.x])
+			_assert(absf(mesh_center.z - shape_center.z) <= 0.3,
+				"%s visual must align with its collider on Z (mesh %.2f, collider %.2f)." % [path, mesh_center.z, shape_center.z])
+
+		obstacle.queue_free()
+
+	_end_test("Hazard Visual & Collider Alignment")
+
+
+## Verifies lethal hazards end the run instantly and bypass the stagger immunity.
+func _test_lethal_hit_resolution() -> void:
+	_start_test("Lethal Hit Resolution & Immunity Bypass")
+
+	var player: CharacterBody3D = PLAYER_SCENE.instantiate() as CharacterBody3D
+	add_child(player)
+
+	player.take_hit("tree", true)
+	_assert(not player.can_control, "A lethal hit must end the run immediately.")
+	_assert(not player.is_stumbling, "A lethal hit must not leave the player staggering.")
+
+	# A lethal hit inside the stagger window must still be fatal
+	player.reset_player()
+	player.take_hit("rocks", false)
+	_assert(player.is_stumbling, "A forgiving hazard must stagger the player first.")
+	player.take_hit("tree", true)
+	_assert(not player.can_control, "A lethal hit must bypass the stagger immunity window.")
+
+	# A forgiving hazard must not kill on its first contact
+	player.reset_player()
+	player.take_hit("rocks", false)
+	_assert(player.can_control and player.is_stumbling,
+		"A forgiving hazard must stagger without ending the run.")
+
+	player.queue_free()
+	_end_test("Lethal Hit Resolution & Immunity Bypass")
+
+
+## Verifies an arch hit reads as a head bump while ground hazards tip the runner forward.
+func _test_arch_head_bump_feedback() -> void:
+	_start_test("Overhead Arch Head-Bump Feedback")
+
+	var player: CharacterBody3D = PLAYER_SCENE.instantiate() as CharacterBody3D
+	add_child(player)
+
+	player.take_hit("rocks", false)
+	var ground_tilt: float = player.visual_model.rotation.x
+	_assert(ground_tilt < 0.0,
+		"A ground hazard must tip the runner forward (got %.2f)." % ground_tilt)
+
+	player.reset_player()
+	player.take_hit("overhead_barrier", false)
+	var arch_tilt: float = player.visual_model.rotation.x
+	_assert(arch_tilt > 0.0,
+		"An arch hit must recoil the runner backward as a head bump (got %.2f)." % arch_tilt)
+
+	player.queue_free()
+	_end_test("Overhead Arch Head-Bump Feedback")
+
+
 ## Verifies every chunk row of hazards always leaves at least one clear lane.
 func _test_chunk_route_passability() -> void:
 	_start_test("Chunk Hazard Rows & Route Passability")
@@ -252,6 +364,13 @@ func _first_collision_shape(body: Node) -> CollisionShape3D:
 	for child in body.get_children():
 		if child is CollisionShape3D:
 			return child
+	return null
+
+
+## Returns the first mesh instance found beneath a hazard's visual tree.
+func _first_mesh_instance(body: Node) -> MeshInstance3D:
+	for node in body.find_children("*", "MeshInstance3D", true, false):
+		return node as MeshInstance3D
 	return null
 
 

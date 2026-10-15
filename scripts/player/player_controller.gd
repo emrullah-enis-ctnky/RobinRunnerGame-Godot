@@ -4,6 +4,11 @@ extends CharacterBody3D
 
 const GameConfig = preload("res://scripts/common/game_config.gd")
 
+# Hazard labels and the posture each type imprints on a non-fatal contact
+const HAZARD_OVERHEAD_BARRIER: String = "overhead_barrier"
+const STUMBLE_TILT_FORWARD: float = -0.35
+const HEAD_BUMP_TILT_BACK: float = 0.3
+
 @export var lane_switch_speed: float = GameConfig.LANE_SWITCH_SPEED
 @export var jump_velocity: float = GameConfig.JUMP_VELOCITY
 @export var gravity: float = GameConfig.GRAVITY
@@ -214,34 +219,54 @@ func _check_landing() -> void:
 ## Resolves contact with obstacles and destructible targets around the player.
 func _on_hazard_body_entered(body: Node3D) -> void:
 	var hazard_name: String = str(body.name)
+	var lethal: bool = false
 	if body.has_method("get_hazard_type"):
 		hazard_name = body.get_hazard_type()
-	take_hit(hazard_name)
+	if body.has_method("is_lethal_hazard"):
+		lethal = body.is_lethal_hazard()
+	take_hit(hazard_name, lethal)
 
 
-## Resolves a hazard impact: the first hit staggers the player, the next one is fatal.
-func take_hit(hazard_name: String) -> void:
-	if not can_control or is_stumbling:
+## Resolves a hazard impact: lethal hazards are always fatal, the rest stagger once.
+func take_hit(hazard_name: String, lethal: bool = false) -> void:
+	if not can_control:
 		return
 
-	if has_node("/root/EventBus"):
-		var bus: Node = get_node("/root/EventBus")
-		bus.player_hit_hazard.emit(hazard_name)
+	# Lethal hazards (trees, logs) ignore the stumbling immunity and end the run at once
+	if lethal:
+		_emit_hazard_hit(hazard_name)
+		_die()
+		return
+
+	# A contact absorbed by the stagger window leaves the player unharmed
+	if is_stumbling:
+		return
+
+	_emit_hazard_hit(hazard_name)
 
 	if stumbles_remaining > 0:
 		stumbles_remaining -= 1
-		_start_stumble()
+		_start_stumble(hazard_name)
 		return
 
 	_die()
 
 
+## Broadcasts the hazard label so feedback systems (camera, HUD) can react.
+func _emit_hazard_hit(hazard_name: String) -> void:
+	if has_node("/root/EventBus"):
+		var bus: Node = get_node("/root/EventBus")
+		bus.player_hit_hazard.emit(hazard_name)
+
+
 ## Starts the stagger window in which the player stays hazard-immune.
-func _start_stumble() -> void:
+## Overhead arches read as a head bump while ground hazards tip the runner forward.
+func _start_stumble(hazard_name: String = "") -> void:
 	is_stumbling = true
 	stumble_timer = stumble_duration
 	if visual_model:
-		visual_model.rotation.x = -0.35
+		var overhead: bool = hazard_name == HAZARD_OVERHEAD_BARRIER
+		visual_model.rotation.x = HEAD_BUMP_TILT_BACK if overhead else STUMBLE_TILT_FORWARD
 
 
 ## Counts down the stagger window and restores posture when it expires.
