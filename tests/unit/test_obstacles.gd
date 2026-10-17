@@ -292,7 +292,8 @@ func _test_lethal_hit_resolution() -> void:
 	_end_test("Lethal Hit Resolution & Immunity Bypass")
 
 
-## Verifies an arch hit reads as a head bump while ground hazards tip the runner forward.
+## Verifies a ground stagger reads as a forward tip (or the baked hit clip) while an
+## arch hit always recoils the runner backward as a head bump.
 func _test_arch_head_bump_feedback() -> void:
 	_start_test("Overhead Arch Head-Bump Feedback")
 
@@ -300,9 +301,12 @@ func _test_arch_head_bump_feedback() -> void:
 	add_child(player)
 
 	player.take_hit("rocks", false)
-	var ground_tilt: float = player.visual_model.rotation.x
-	_assert(ground_tilt < 0.0,
-		"A ground hazard must tip the runner forward (got %.2f)." % ground_tilt)
+	if player.stumble_animates:
+		_assert(is_zero_approx(player.visual_model.rotation.x),
+			"The hit clip must drive a ground stagger instead of a manual tilt (got %.2f)." % player.visual_model.rotation.x)
+	else:
+		_assert(player.visual_model.rotation.x < 0.0,
+			"A ground hazard must tip the runner forward when no hit clip exists (got %.2f)." % player.visual_model.rotation.x)
 
 	player.reset_player()
 	player.take_hit("overhead_barrier", false)

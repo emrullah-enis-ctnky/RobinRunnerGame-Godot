@@ -1,7 +1,7 @@
 [gd_scene load_steps=5 format=3 uid="uid://c7m8x4w6laq1r"]
 
 [ext_resource type="Script" path="res://scripts/player/player_controller.gd" id="1_controller"]
-[ext_resource type="PackedScene" uid="uid://dgpyyi83ott0" path="res://assets/models/character-archer.glb" id="2_archer_mesh"]
+[ext_resource type="PackedScene" path="res://assets/models/character-archer-hit-test.glb" id="2_archer_mesh"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_body"]
 radius = 0.48

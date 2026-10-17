@@ -7,7 +7,7 @@ const GameConfig = preload("res://scripts/common/game_config.gd")
 # Hazard labels and the posture each type imprints on a non-fatal contact
 const HAZARD_OVERHEAD_BARRIER: String = "overhead_barrier"
 const STUMBLE_TILT_FORWARD: float = -0.35
-const HEAD_BUMP_TILT_BACK: float = 0.3
+const HEAD_BUMP_TILT_BACK: float = 0.6
 
 # Animation clip names baked into the archer model
 const ANIM_IDLE: String = "idle"
@@ -15,7 +15,10 @@ const ANIM_RUN: String = "sprint"
 const ANIM_JUMP: String = "jump"
 const ANIM_FALL: String = "fall"
 const ANIM_CROUCH: String = "crouch"
+const ANIM_DUCK: String = "duck"
 const ANIM_DEATH: String = "die"
+const ANIM_STUMBLE: String = "trip"
+const ANIM_STUMBLE_LEGACY: String = "hit"
 const ANIM_BLEND_TIME: float = 0.15
 
 @export var lane_switch_speed: float = GameConfig.LANE_SWITCH_SPEED
@@ -50,6 +53,7 @@ var _standing_hitbox_center_y: float = 0.775
 @onready var animation_player: AnimationPlayer = get_node_or_null("Model/ArcherModel/AnimationPlayer")
 
 var current_animation: String = ""
+var stumble_animates: bool = false
 
 
 ## Initializes the player state and connects to global lifecycle signals.
@@ -279,8 +283,11 @@ func _emit_hazard_hit(hazard_name: String) -> void:
 func _start_stumble(hazard_name: String = "") -> void:
 	is_stumbling = true
 	stumble_timer = stumble_duration
-	if visual_model:
-		var overhead: bool = hazard_name == HAZARD_OVERHEAD_BARRIER
+	var overhead: bool = hazard_name == HAZARD_OVERHEAD_BARRIER
+	# Use the baked hit clip for ground hazards; the arch keeps a backward head bump.
+	stumble_animates = not overhead and animation_player != null and (
+		animation_player.has_animation(ANIM_STUMBLE) or animation_player.has_animation(ANIM_STUMBLE_LEGACY))
+	if visual_model and not stumble_animates:
 		visual_model.rotation.x = HEAD_BUMP_TILT_BACK if overhead else STUMBLE_TILT_FORWARD
 
 
@@ -324,6 +331,7 @@ func reset_player() -> void:
 	is_ducking = false
 	duck_timer = 0.0
 	is_stumbling = false
+	stumble_animates = false
 	stumble_timer = 0.0
 	stumbles_remaining = GameConfig.MAX_STUMBLES_PER_RUN
 	can_control = true
@@ -340,7 +348,6 @@ func _setup_animations() -> void:
 		return
 	_set_animation_loop(ANIM_IDLE)
 	_set_animation_loop(ANIM_RUN)
-	_set_animation_loop(ANIM_CROUCH)
 
 
 ## Enables linear looping on a single clip when the model provides it.
@@ -362,8 +369,10 @@ func _update_animation() -> void:
 func _resolve_animation() -> String:
 	if not can_control:
 		return ANIM_DEATH
+	if is_stumbling and stumble_animates:
+		return _available_animation(ANIM_STUMBLE, ANIM_STUMBLE_LEGACY)
 	if is_ducking:
-		return ANIM_CROUCH
+		return _available_animation(ANIM_DUCK, ANIM_CROUCH)
 	if not is_on_floor():
 		return ANIM_JUMP if velocity.y > 0.0 else ANIM_FALL
 	if _is_game_playing():
@@ -377,6 +386,13 @@ func _is_game_playing() -> bool:
 		var gm: Node = get_node("/root/GameManager")
 		return gm.current_state == gm.GameState.PLAYING
 	return true
+
+
+## Returns the preferred clip when the model provides it, otherwise the fallback.
+func _available_animation(primary: String, fallback: String) -> String:
+	if animation_player != null and animation_player.has_animation(primary):
+		return primary
+	return fallback
 
 
 ## Blends to a clip unless it is already the active one.
