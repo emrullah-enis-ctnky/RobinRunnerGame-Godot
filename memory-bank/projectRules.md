@@ -128,8 +128,10 @@
   - Do **NOT** read other Memory Bank files (`projectbrief.md`, `productContext.md`, `systemPatterns.md`, `techContext.md`, `activeContext.md`) or arbitrary project files unless explicitly requested by the user or strictly required for the specific task.
 - **Strict On-Demand File Reading**:
   - Read files **only when strictly necessary** for the current task. Speculative, bulk, or exploratory file reading into context is strictly prohibited.
-- **Directory Tree Exploration via Terminal**:
-  - When the agent needs to understand the project tree or locate files, use token-optimized terminal commands (`rtk ls`, `rtk find`) rather than reading file contents.
+- **All Terminal Commands via `rtk` Proxy**:
+  - Every shell command executed by the agent must be routed through the `rtk` CLI proxy whenever possible (e.g. `rtk ls`, `rtk find`, `rtk git`, `rtk grep`, `rtk diff`, `rtk test`, `rtk read`).
+  - `rtk` filters and summarizes system output before it enters the context window, keeping token usage low and the context clean.
+  - Only fall back to raw shell commands when `rtk` has no suitable subcommand for the task.
 - **Context-Mode First for Large Data**:
   - Prefer `context-mode` MCP tools over raw reads whenever data is large, noisy, or external, to keep the context window clean.
   - Use `ctx_search` to query indexed content instead of reading whole files into context.
