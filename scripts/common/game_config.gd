@@ -43,9 +43,9 @@ const LAYER_PROJECTILE: int = 1 << 4
 const LAYER_PICKUP: int = 1 << 5
 
 # Hazard Resolution
-const MAX_STUMBLES_PER_RUN: int = 1
 const STUMBLE_DURATION: float = 0.6
 const STUMBLE_SPEED_FACTOR: float = 0.45
+const DAMAGE_WINDOW_DURATION: float = 5.0
 
 
 ## Returns the 3D X coordinate for a specific lane index.

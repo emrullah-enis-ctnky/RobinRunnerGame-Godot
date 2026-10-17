@@ -13,6 +13,7 @@ signal player_lane_changed(new_lane_index: int, target_x: float)
 signal player_jumped
 signal player_landed
 signal player_hit_hazard(hazard_type: String)
+signal player_damaged(window_duration: float)
 signal player_died
 
 # Combat & Ability Signals

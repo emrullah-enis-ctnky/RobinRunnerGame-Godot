@@ -70,9 +70,10 @@
 - [x] Step 5.1: Create static obstacle scenes (Rocks, Fallen Logs, Fences).
 - [x] Step 5.2: Create destructible target scenes (Wooden Archery Targets, Fragile Barriers).
 - [x] Step 5.3: Integrate obstacle placement patterns into Track Chunks with guaranteed clearable routes.
-- [x] Step 5.4: Implement collision resolution (Player hazard collision triggering stumble or game over). Refined into a graded hit rule: `obstacle_tree`, `obstacle_tree_tall` and `barrier_fragile` are lethal (first contact ends the run, bypassing stagger immunity), while `obstacle_log`, `obstacle_rocks`, `obstacle_stones` and `obstacle_fence` stagger once then kill. The `overhead_barrier` applies a backward head-bump posture so the arch reads as a head hit the runner ducks under.
+- [x] Step 5.4: Implement collision resolution (Player hazard collision triggering stumble or game over). Refined into a graded hit rule: `obstacle_tree`, `obstacle_tree_tall` and `barrier_fragile` are lethal (first contact ends the run, bypassing stagger immunity), while `obstacle_log`, `obstacle_rocks`, `obstacle_stones` and `obstacle_fence` stagger once then kill. The `overhead_barrier` applies a backward head-bump posture so the arch reads as a head hit the runner ducks under. (Superseded by Step 5.7, which replaced the "stagger once then kill" allowance with the timed damage window.)
 - [x] Step 5.5: Automated tests verifying obstacle collision layers and route passability.
 - [x] Step 5.6: Obstacle silhouette clarity and fairness inspection (User Manual Test).
+- [x] Step 5.7: Hazard damage window & full-screen red feedback. Replaced the old per-run stumble allowance with a timed vulnerability model. The first forgiving contact (log, rocks, stones, fence, arch) still staggers the archer for 0.6s, but now also opens a 5s damage window (`GameConfig.DAMAGE_WINDOW_DURATION`) announced through the new `EventBus.player_damaged(window_duration)` signal. A second forgiving contact inside that window is fatal, while surviving the window heals the archer and lets a later contact open a fresh window, so a run is no longer limited to one free stumble. The window is drawn by the project's first UI element, `scenes/ui/damage_overlay.tscn` (`DamageOverlay`, a `CanvasLayer` holding a full-rect `ColorRect` tint), which pulses a full-screen red overlay via a `_process`-driven sine and fades out as the window closes; no health bar is shown. Lethal trees and fragile barriers remain instantly fatal. Both gameplay suites were updated to the new rule.
 
 ---
 
@@ -157,6 +158,7 @@
 - **Global class registration lag**: the newly added `scripts/obstacles/destructible.gd` failed to parse with `Could not find base class "Obstacle"` until a filesystem rescan re-registered the new `class_name`. A rescan is required after adding a script that extends a brand new global class.
 
 ### Open Notes
+- The old per-run stumble allowance (`GameConfig.MAX_STUMBLES_PER_RUN` and `PlayerController.stumbles_remaining`) was removed in Step 5.7; the damage window now governs fatal follow-up contacts.
 - `tests/unit/test_core_architecture.tscn` was re-run after the graded hit rule change and is green (GameConfig, EventBus, GameManager suites all pass). The obstacle suite reports 9/9, and the player and world generation suites are also green.
 - Step 5.6 completed: the user performed the human visual pass and confirmed obstacle silhouettes, collider fairness, and duck-barrier clearance, so Phase 5 is now closed.
 - Custom animation model swap: the authored `duck` and `trip` clips are now merged into `assets/models/character-archer.glb` (35 clips) and the temporary review copy was removed; `player.tscn` points back at the original model path.

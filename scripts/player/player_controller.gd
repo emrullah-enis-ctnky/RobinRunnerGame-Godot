@@ -28,6 +28,7 @@ const ANIM_BLEND_TIME: float = 0.15
 @export var duck_duration: float = 0.65
 @export var stumble_duration: float = GameConfig.STUMBLE_DURATION
 @export var stumble_speed_factor: float = GameConfig.STUMBLE_SPEED_FACTOR
+@export var vulnerability_duration: float = GameConfig.DAMAGE_WINDOW_DURATION
 @export var duck_hitbox_radius: float = 0.3
 @export var duck_hitbox_height: float = 0.7
 
@@ -38,7 +39,8 @@ var is_ducking: bool = false
 var duck_timer: float = 0.0
 var is_stumbling: bool = false
 var stumble_timer: float = 0.0
-var stumbles_remaining: int = GameConfig.MAX_STUMBLES_PER_RUN
+var is_vulnerable: bool = false
+var vulnerability_timer: float = 0.0
 var can_control: bool = true
 
 # Stand-in shapes swapped on the detector; Jolt rejects non-uniform shape scaling
@@ -102,6 +104,7 @@ func _physics_process(delta: float) -> void:
 		return
 
 	_update_stumble(delta)
+	_update_vulnerability(delta)
 
 	# Input is locked while staggering, but forward momentum keeps the run alive
 	if not is_stumbling:
@@ -246,29 +249,28 @@ func _on_hazard_body_entered(body: Node3D) -> void:
 	take_hit(hazard_name, lethal)
 
 
-## Resolves a hazard impact: lethal hazards are always fatal, the rest stagger once.
+## Resolves a hazard impact: lethal hazards are always fatal, while a forgiving contact
+## staggers the runner and opens the damage window in which a second contact is fatal.
 func take_hit(hazard_name: String, lethal: bool = false) -> void:
 	if not can_control:
 		return
 
-	# Lethal hazards (trees, logs) ignore the stumbling immunity and end the run at once
+	# Lethal hazards (trees, fragile barriers) end the run at once
 	if lethal:
 		_emit_hazard_hit(hazard_name)
 		_die()
 		return
 
-	# A contact absorbed by the stagger window leaves the player unharmed
-	if is_stumbling:
+	# A second forgiving contact inside the damage window is fatal
+	if is_vulnerable:
+		_emit_hazard_hit(hazard_name)
+		_die()
 		return
 
+	# The first forgiving contact staggers the runner and opens the damage window
 	_emit_hazard_hit(hazard_name)
-
-	if stumbles_remaining > 0:
-		stumbles_remaining -= 1
-		_start_stumble(hazard_name)
-		return
-
-	_die()
+	_start_stumble(hazard_name)
+	_start_vulnerability()
 
 
 ## Broadcasts the hazard label so feedback systems (camera, HUD) can react.
@@ -278,7 +280,7 @@ func _emit_hazard_hit(hazard_name: String) -> void:
 		bus.player_hit_hazard.emit(hazard_name)
 
 
-## Starts the stagger window in which the player stays hazard-immune.
+## Starts the short stumble in which the runner is slowed and tips out of posture.
 ## Overhead arches read as a head bump while ground hazards tip the runner forward.
 func _start_stumble(hazard_name: String = "") -> void:
 	is_stumbling = true
@@ -291,7 +293,7 @@ func _start_stumble(hazard_name: String = "") -> void:
 		visual_model.rotation.x = HEAD_BUMP_TILT_BACK if overhead else STUMBLE_TILT_FORWARD
 
 
-## Counts down the stagger window and restores posture when it expires.
+## Counts down the stumble window and restores posture when it expires.
 func _update_stumble(delta: float) -> void:
 	if not is_stumbling:
 		return
@@ -303,10 +305,30 @@ func _update_stumble(delta: float) -> void:
 			visual_model.rotation.x = 0.0
 
 
-## Ends the run once the player has no stumbles left.
+## Opens the damage window during which the next forgiving contact is fatal.
+func _start_vulnerability() -> void:
+	is_vulnerable = true
+	vulnerability_timer = vulnerability_duration
+	if has_node("/root/EventBus"):
+		var bus: Node = get_node("/root/EventBus")
+		bus.player_damaged.emit(vulnerability_duration)
+
+
+## Counts down the damage window and heals the runner once it expires.
+func _update_vulnerability(delta: float) -> void:
+	if not is_vulnerable:
+		return
+
+	vulnerability_timer -= delta
+	if vulnerability_timer <= 0.0:
+		is_vulnerable = false
+
+
+## Ends the run on a fatal hazard or a second contact inside the damage window.
 func _die() -> void:
 	can_control = false
 	is_stumbling = false
+	is_vulnerable = false
 	velocity = Vector3.ZERO
 	if visual_model:
 		visual_model.rotation = Vector3.ZERO
@@ -333,7 +355,8 @@ func reset_player() -> void:
 	is_stumbling = false
 	stumble_animates = false
 	stumble_timer = 0.0
-	stumbles_remaining = GameConfig.MAX_STUMBLES_PER_RUN
+	is_vulnerable = false
+	vulnerability_timer = 0.0
 	can_control = true
 	if visual_model:
 		visual_model.scale = Vector3.ONE

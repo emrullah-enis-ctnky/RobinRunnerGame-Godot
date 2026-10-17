@@ -264,9 +264,10 @@ func _test_hazard_visual_collider_alignment() -> void:
 	_end_test("Hazard Visual & Collider Alignment")
 
 
-## Verifies lethal hazards end the run instantly and bypass the stagger immunity.
+## Verifies lethal hazards end the run instantly and that a second forgiving contact
+## inside the damage window is fatal.
 func _test_lethal_hit_resolution() -> void:
-	_start_test("Lethal Hit Resolution & Immunity Bypass")
+	_start_test("Lethal Hit Resolution & Damage Window")
 
 	var player: CharacterBody3D = PLAYER_SCENE.instantiate() as CharacterBody3D
 	add_child(player)
@@ -275,21 +276,25 @@ func _test_lethal_hit_resolution() -> void:
 	_assert(not player.can_control, "A lethal hit must end the run immediately.")
 	_assert(not player.is_stumbling, "A lethal hit must not leave the player staggering.")
 
-	# A lethal hit inside the stagger window must still be fatal
+	# A lethal hit inside the damage window must still be fatal
 	player.reset_player()
 	player.take_hit("rocks", false)
 	_assert(player.is_stumbling, "A forgiving hazard must stagger the player first.")
 	player.take_hit("tree", true)
-	_assert(not player.can_control, "A lethal hit must bypass the stagger immunity window.")
+	_assert(not player.can_control, "A lethal hit must remain fatal inside the damage window.")
 
 	# A forgiving hazard must not kill on its first contact
 	player.reset_player()
 	player.take_hit("rocks", false)
-	_assert(player.can_control and player.is_stumbling,
-		"A forgiving hazard must stagger without ending the run.")
+	_assert(player.can_control and player.is_stumbling and player.is_vulnerable,
+		"A forgiving hazard must stagger and open the damage window without ending the run.")
+
+	# A second forgiving contact inside the window must end the run
+	player.take_hit("rocks", false)
+	_assert(not player.can_control, "A second forgiving contact inside the damage window must be fatal.")
 
 	player.queue_free()
-	_end_test("Lethal Hit Resolution & Immunity Bypass")
+	_end_test("Lethal Hit Resolution & Damage Window")
 
 
 ## Verifies a ground stagger reads as a forward tip (or the baked hit clip) while an
