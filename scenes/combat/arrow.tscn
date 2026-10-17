@@ -1,0 +1,9 @@
+[gd_scene format=3 uid="uid://carrowcombat"]
+
+[ext_resource type="Script" path="res://scripts/combat/arrow.gd" id="1_arrow"]
+[ext_resource type="PackedScene" path="res://assets/models/weapon-arrow.glb" id="2_mesh"]
+
+[node name="Arrow" type="Node3D"]
+script = ExtResource("1_arrow")
+
+[node name="Mesh" parent="." instance=ExtResource("2_mesh")]

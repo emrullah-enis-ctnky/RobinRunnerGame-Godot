@@ -1,10 +1,10 @@
 # Progress & Kanban Roadmap: RobinRunner
 
 ## Project Status Overview
-- **Current Phase**: Phase 6: Animation System (Steps 6.1, 6.2 and 6.4 implemented and merged into `main`; Steps 6.3, 6.5-6.7 still open)
-- **Active Branch**: `main` (`feature/animation-system` merged)
-- **Next Phase**: Phase 6 remaining steps (6.3, 6.5-6.7); lane-change turn clips deferred by the user
-- **Overall Health**: Green (All five automated suites pass: core, player, camera, world 5/5, obstacles 9/9)
+- **Current Phase**: Phase 7: Combat & Ability System (Steps 7.1-7.6 implemented, Step 7.7 manual test pending; Step 6.3 pulled in per user decision)
+- **Active Branch**: `feature/combat-abilities`
+- **Next Phase**: Phase 7 Step 7.7 manual test and merge into `main` on user approval; Phase 6 leftovers (6.5-6.7) and Phase 8 remain open
+- **Overall Health**: Green (All six automated suites pass: core, player, camera, world 5/5, obstacles 9/9, combat 6/6)
 
 ---
 
@@ -83,7 +83,7 @@
 - **Objective**: Integrate comprehensive character, mesh, and environment animations across gameplay entities.
 - [x] Step 6.1: Set up player `AnimationPlayer` and state transitions. `PlayerController` drives the archer's `AnimationPlayer` at `Model/ArcherModel/AnimationPlayer` through a state-driven mapping: `idle` in READY, `sprint` while running (playback speed scaled to forward speed), `jump`/`fall` in the air, `duck` (fallback `crouch`) while ducking, `trip` (fallback `hit`) on a ground stagger, and `die` on death. Clips crossfade over 0.15s and idle/sprint loop. Two custom clips were authored in Blender on the rig: `duck`, a deep crouch that halves the head height, and `trip`, a foot-catch that throws the runner into a hop over the obstacle before recovering. The arch head bump reads as a deeper 0.6 rad backward recoil. Visually approved by the user.
 - [x] Step 6.2: Lateral lane-change tilt/roll/lean is covered by the existing procedural visual banking in `PlayerController._apply_lane_movement`.
-- [ ] Step 6.3: Implement combat action animations (Bow draw, aim hold, arrow release recoil).
+- [x] Step 6.3: Combat action animations (bow draw, aim hold, arrow release recoil). Pulled into Phase 7 at the user's request and implemented there: `PlayerController` drives the archer's baked `holding-both` (aim) and `holding-both-shoot` (release) clips through a short draw/release window (`GameConfig.SHOOT_DRAW_TIME`, `SHOOT_RELEASE_TIME`), with `holding-right` / `holding-right-shoot` fallbacks. The bow mesh attachment was intentionally deferred pending the Step 7.7 visual pass.
 - [x] Step 6.4: Implement environmental and foliage animations (wind sway). Added `shaders/foliage_wind.gdshader`, a shared world-space wind field that bends the upper part of each plant toward one common direction with a world-position phase offset, plus `scripts/world/wind_foliage.gd` (`WindFoliage`), which reuses each mesh's original albedo texture and measured height before applying the material. Wrapped onto the tree and tall-tree obstacles and the arch flag. User review asked for stronger amplitude and smoother randomized motion; that pass raised the sway ratio to 0.18 and layered incommensurate sines with per-plant phase/speed jitter, a slow gust envelope, and gentle direction wander. The user re-verified the result.
 - [ ] Step 6.5: Implement interactive object animations (obstacle impact wobble/shatter, collectible spin and hover bobbing).
 - [ ] Step 6.6: Automated unit tests verifying animation state machines, blend parameters, and signal triggers.
@@ -92,16 +92,18 @@
 
 ---
 
-### [ ] Phase 7: Combat & Ability System (Arrow Shooting)
-- **Branch**: `feature/combat-abilities`
-- **Objective**: Implement ability gauge charging and active arrow shooting mechanics to destroy obstacles.
-- [ ] Step 7.1: Create Arrow projectile scene (`scenes/combat/arrow.tscn`) with forward ballistic trajectory.
-- [ ] Step 7.2: Implement Projectile Object Pool for rapid arrow reuse.
-- [ ] Step 7.3: Implement Ability Gauge system (meter charges through distance traveled and collected items).
-- [ ] Step 7.4: Implement Shoot Input action triggering arrow release when ability gauge is sufficient.
-- [ ] Step 7.5: Implement Arrow hit-detection destroying destructible targets and clearing obstacles.
-- [ ] Step 7.6: Automated unit tests for ability gauge charging, spending, and projectile lifecycle.
-- [ ] Step 7.7: Arrow shooting responsiveness and impact feel inspection (User Manual Test).
+### [ ] Phase 7: Combat & Ability System (Arrows, Quiver & Arrow Types)
+- **Branch**: `feature/combat-abilities` (active)
+- **Objective**: Deliver active archery combat — a quiver of collectible arrows, a pooled straight-line projectile, automatic arrow-type selection, shootable hazards, and the bow draw/aim/release animation.
+- **Design decisions (confirmed with the user)**: ammo is a **quiver** of collected arrows (the distance-charged ability gauge was dropped); two arrow types (`normal`, `flame`) chosen **automatically** at fire time; the flame arrow is **procedural** (`weapon-arrow.glb` + emissive head + `GPUParticles3D`, no Blender); arrow pickups live in Phase 7; arrows fly in a **straight line** (no gravity); Step 6.3 was pulled into this phase.
+- [x] Step 7.1: Arrow projectile scene (`scenes/combat/arrow.tscn` + `scripts/combat/arrow.gd`). A straight-line `Arrow` (`Node3D`) advances each physics frame and resolves hits with a ray query (mask `LAYER_OBSTACLE | LAYER_TARGET`) instead of a moving `Area3D`, so a 40 m/s projectile cannot tunnel. `activate()`/`deactivate()` make it `ObjectPool`-compatible; the flame variant toggles a shared emissive head and fire emitter built by `scripts/combat/flame_visual.gd` (`FlameVisual`).
+- [x] Step 7.2: Projectile pool. `scripts/combat/arrow_pool.gd` (`ArrowPool`) wraps the Phase 4 `ObjectPool` (prewarm 8, max 32) and, listening to `EventBus.arrow_fired`, spawns an arrow per shot and recycles it on `finished`. Attached to `world.tscn` as an `ArrowPool` node (a sibling of `TrackSpawner`, never under it because chunks recycle).
+- [x] Step 7.3: Quiver/ammo system replacing the ability gauge. `scripts/managers/ability_manager.gd` (`AbilityManager` autoload) tracks per-type counts (`START_AMMO_NORMAL` 3, `START_AMMO_FLAME` 1), tops up on `EventBus.collectible_picked("arrow_*")`, resets on `game_restarted`, and broadcasts `arrow_ammo_updated` / `arrow_type_changed`. `GameConfig` lost the gauge constants and gained arrow-type ids, start ammo, scan range, muzzle height, shoot timings, and pickup motion constants; `EventBus` dropped the gauge signals and extended `arrow_fired` with an `arrow_type` argument.
+- [x] Step 7.4: Shoot input and automatic type selection. `PlayerController` reads the `shoot` action (F / left mouse), ray-scans the lane ahead, and asks `AbilityManager.try_fire(origin, direction, preferred)` for the best type (a burnable tree selects flame, anything else normal; no usable ammo blocks the shot and the animation). A successful shot starts the Step 6.3 draw/release animation.
+- [x] Step 7.5: Arrow hit-detection. Any node exposing `receive_arrow(type)` / `required_arrow_types()` is shootable. `Destructible` gained `destroyed_by` (archery target and ladder barrier: `["normal"]`), and the new `scripts/obstacles/burnable_tree.gd` (`BurnableTree extends Obstacle`, `destroyed_by = ["flame"]`) makes `obstacle_tree` / `obstacle_tree_tall` burnable while staying lethal and on `LAYER_OBSTACLE`. `GameManager` now banks `target_destroyed` rewards into the score.
+- [x] Step 7.6: Automated tests. `tests/unit/test_combat.gd` + `.tscn` (mirroring the obstacle suite: quiver spend/collect/block, arrow flight and expiry, pool spawn/recycle, typed hit resolution with a tree-lethality regression guard, pickup collection, and smart type selection) — 6/6 passing; added to the README run list.
+- [x] Step 7.6b: Collectible arrow pickups. `scripts/combat/arrow_pickup.gd` (`ArrowPickup`) plus `scenes/combat/arrow_pickup_normal.tscn` and `arrow_pickup_flame.tscn` (flame glows and emits fire). Pickups sit on `LAYER_PICKUP`, bob/spin, grant ammo on player contact, and reset when their chunk re-activates (`track_chunk_base.tscn` gained a `Pickups` node; `TrackChunk.activate()` restores its pickup descendants) so ammo stays renewable on the looping track. Authored into the straight, rocky, and forest chunks (one resting on the rocky stones).
+- [ ] Step 7.7: Arrow shooting responsiveness, flame/impact feel, and animation inspection (User Manual Test).
 
 ---
 
@@ -159,6 +161,12 @@
 - **Global class registration lag**: the newly added `scripts/obstacles/destructible.gd` failed to parse with `Could not find base class "Obstacle"` until a filesystem rescan re-registered the new `class_name`. A rescan is required after adding a script that extends a brand new global class.
 
 ### Open Notes
+- Phase 7 is in progress on `feature/combat-abilities`. Steps 7.1-7.6 are implemented and all six automated suites are green; Step 7.7 (manual shooting/flame/animation feel pass) is pending a user test before the branch is merged into `main`.
+- The ability gauge was replaced by the collectible-arrow quiver per the user's decision: `GameConfig.MAX_ABILITY_GAUGE`, `ABILITY_CHARGE_PER_METER`, `ABILITY_CHARGE_PER_COIN`, and the `ability_gauge_updated` / `ability_ready` signals were removed, and `arrow_fired` now carries an `arrow_type`.
+- Arrow pickups reset each time their chunk re-activates so ammo stays renewable through the looping track; destructible targets still only restore on `game_restarted` (unchanged existing behaviour).
+- First-pass visual guesses to confirm in Step 7.7: `Arrow.MESH_LOCAL_ROTATION` and `ArrowPickup.MESH_LOCAL_ROTATION` (the Kenney `weapon-arrow` model's native axis is assumed +Y) and the flame head offset. The bow mesh on the archer's hand was deferred pending the same pass.
+- Adding the new global classes `Arrow`, `ArrowPool`, `ArrowPickup`, `BurnableTree`, and `FlameVisual` may require a filesystem rescan before the editor resolves them (same "global class registration lag" note as earlier phases).
+- No HUD yet (Phase 9): quiver counts are broadcast via `arrow_ammo_updated` / `arrow_type_changed` but nothing renders them on screen.
 - `feature/animation-system` was merged into `main` with Phase 6 partially complete (Steps 6.1, 6.2 and 6.4). The same merge carried Step 5.7 (the hazard damage window and its death fade-to-black overlay) into `main`; the remaining animation steps (6.3, 6.5-6.7) continue on a follow-up branch.
 - The old per-run stumble allowance (`GameConfig.MAX_STUMBLES_PER_RUN` and `PlayerController.stumbles_remaining`) was removed in Step 5.7; the damage window now governs fatal follow-up contacts.
 - `tests/unit/test_core_architecture.tscn` was re-run after the graded hit rule change and is green (GameConfig, EventBus, GameManager suites all pass). The obstacle suite reports 9/9, and the player and world generation suites are also green.

@@ -3,6 +3,7 @@ extends Obstacle
 ## Shootable hazard that blocks a lane until a projectile destroys it.
 
 @export var score_reward: int = 50
+@export var destroyed_by: PackedStringArray = ["normal"]
 
 var is_destroyed: bool = false
 
@@ -33,3 +34,16 @@ func restore() -> void:
 	is_destroyed = false
 	set_deferred("collision_layer", GameConfig.LAYER_TARGET)
 	show()
+
+
+## Returns the arrow types that can destroy this target.
+func required_arrow_types() -> PackedStringArray:
+	return destroyed_by
+
+
+## Applies an incoming arrow; returns true when it destroyed the target.
+func receive_arrow(arrow_type: String) -> bool:
+	if arrow_type in destroyed_by:
+		destroy()
+		return true
+	return false

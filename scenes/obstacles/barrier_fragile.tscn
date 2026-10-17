@@ -13,6 +13,7 @@ script = ExtResource("1_destructible")
 hazard_type = "fragile_barrier"
 is_lethal = true
 score_reward = 50
+destroyed_by = PackedStringArray("normal")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8, 0)

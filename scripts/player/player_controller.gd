@@ -19,6 +19,10 @@ const ANIM_DUCK: String = "duck"
 const ANIM_DEATH: String = "die"
 const ANIM_STUMBLE: String = "trip"
 const ANIM_STUMBLE_LEGACY: String = "hit"
+const ANIM_AIM: String = "holding-both"
+const ANIM_AIM_LEGACY: String = "holding-right"
+const ANIM_SHOOT: String = "holding-both-shoot"
+const ANIM_SHOOT_LEGACY: String = "holding-right-shoot"
 const ANIM_BLEND_TIME: float = 0.15
 
 @export var lane_switch_speed: float = GameConfig.LANE_SWITCH_SPEED
@@ -31,6 +35,9 @@ const ANIM_BLEND_TIME: float = 0.15
 @export var vulnerability_duration: float = GameConfig.DAMAGE_WINDOW_DURATION
 @export var duck_hitbox_radius: float = 0.3
 @export var duck_hitbox_height: float = 0.7
+@export var shoot_draw_time: float = GameConfig.SHOOT_DRAW_TIME
+@export var shoot_release_time: float = GameConfig.SHOOT_RELEASE_TIME
+@export var arrow_scan_range: float = GameConfig.ARROW_SCAN_RANGE
 
 var current_lane: int = GameConfig.LANE_CENTER
 var target_x: float = 0.0
@@ -41,6 +48,9 @@ var is_stumbling: bool = false
 var stumble_timer: float = 0.0
 var is_vulnerable: bool = false
 var vulnerability_timer: float = 0.0
+var is_shooting: bool = false
+var shoot_timer: float = 0.0
+var shoot_released: bool = false
 var can_control: bool = true
 
 # Stand-in shapes swapped on the detector; Jolt rejects non-uniform shape scaling
@@ -105,6 +115,7 @@ func _physics_process(delta: float) -> void:
 
 	_update_stumble(delta)
 	_update_vulnerability(delta)
+	_update_shoot(delta)
 
 	# Input is locked while staggering, but forward momentum keeps the run alive
 	if not is_stumbling:
@@ -144,6 +155,9 @@ func _handle_input() -> void:
 		else:
 			# Fast fall downward if in mid-air
 			velocity.y = minf(velocity.y, -gravity * 0.9)
+
+	if Input.is_action_just_pressed("shoot") and not is_shooting:
+		try_shoot()
 
 
 ## Shifts the target lane by direction offset (-1 for left, +1 for right).
@@ -185,6 +199,67 @@ func duck() -> bool:
 	_apply_stance(true)
 
 	return true
+
+
+## Fires the best arrow for the hazard ahead, if the quiver allows it.
+func try_shoot() -> bool:
+	if not has_node("/root/AbilityManager"):
+		return false
+
+	var origin: Vector3 = global_position + Vector3(0.0, GameConfig.ARROW_MUZZLE_HEIGHT, 0.0)
+	var forward: Vector3 = (-global_transform.basis.z).normalized()
+	var preferred: String = _preferred_arrow_type(origin, forward)
+	var fired: bool = get_node("/root/AbilityManager").try_fire(origin, forward, preferred)
+	if fired:
+		_start_shoot_animation()
+	return fired
+
+
+## Scans the lane ahead and returns a usable arrow type for the first shootable found.
+func _preferred_arrow_type(origin: Vector3, forward: Vector3) -> String:
+	var hit: Dictionary = _scan_ahead(origin, forward)
+	if not hit.is_empty():
+		var body: Object = hit.get("collider")
+		if body != null and body.has_method("required_arrow_types"):
+			for arrow_type in body.required_arrow_types():
+				if _quiver_has(arrow_type):
+					return arrow_type
+	return GameConfig.ARROW_TYPE_NORMAL
+
+
+## Casts a ray through the current lane to find the first shootable surface.
+func _scan_ahead(origin: Vector3, forward: Vector3) -> Dictionary:
+	var space: PhysicsDirectSpaceState3D = get_world_3d().direct_space_state
+	var query := PhysicsRayQueryParameters3D.create(origin, origin + forward * arrow_scan_range)
+	query.collision_mask = GameConfig.LAYER_OBSTACLE | GameConfig.LAYER_TARGET
+	query.collide_with_areas = false
+	return space.intersect_ray(query)
+
+
+## Returns true when the quiver still holds an arrow of the given type.
+func _quiver_has(arrow_type: String) -> bool:
+	if not has_node("/root/AbilityManager"):
+		return false
+	return get_node("/root/AbilityManager").has_ammo(arrow_type)
+
+
+## Starts the short draw-and-release shooting window.
+func _start_shoot_animation() -> void:
+	is_shooting = true
+	shoot_released = false
+	shoot_timer = shoot_draw_time + shoot_release_time
+
+
+## Advances the shooting window and flips the draw pose into the release pose.
+func _update_shoot(delta: float) -> void:
+	if not is_shooting:
+		return
+
+	shoot_timer -= delta
+	if not shoot_released and shoot_timer <= shoot_release_time:
+		shoot_released = true
+	if shoot_timer <= 0.0:
+		is_shooting = false
 
 
 ## Updates duck/slide duration and restores standing posture.
@@ -357,6 +432,9 @@ func reset_player() -> void:
 	stumble_timer = 0.0
 	is_vulnerable = false
 	vulnerability_timer = 0.0
+	is_shooting = false
+	shoot_timer = 0.0
+	shoot_released = false
 	can_control = true
 	if visual_model:
 		visual_model.scale = Vector3.ONE
@@ -394,6 +472,10 @@ func _resolve_animation() -> String:
 		return ANIM_DEATH
 	if is_stumbling and stumble_animates:
 		return _available_animation(ANIM_STUMBLE, ANIM_STUMBLE_LEGACY)
+	if is_shooting:
+		if shoot_released:
+			return _available_animation(ANIM_SHOOT, ANIM_SHOOT_LEGACY)
+		return _available_animation(ANIM_AIM, ANIM_AIM_LEGACY)
 	if is_ducking:
 		return _available_animation(ANIM_DUCK, ANIM_CROUCH)
 	if not is_on_floor():

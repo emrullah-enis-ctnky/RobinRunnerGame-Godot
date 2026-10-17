@@ -8,6 +8,7 @@ extends Node3D
 @onready var start_anchor: Marker3D = $StartAnchor
 @onready var end_anchor: Marker3D = $EndAnchor
 @onready var lane_markers: Node3D = $LaneMarkers
+@onready var pickups: Node3D = get_node_or_null("Pickups")
 
 # State tracking for object pooling
 var is_active: bool = false
@@ -38,6 +39,7 @@ func activate(spawn_position: Vector3) -> void:
 	show()
 	set_process(true)
 	set_physics_process(true)
+	_restore_pickups()
 
 
 ## Called when the chunk passes behind the player and is returned to the pool.
@@ -47,6 +49,21 @@ func deactivate() -> void:
 	set_process(false)
 	set_physics_process(false)
 	global_position = Vector3(0.0, -500.0, 0.0)
+
+
+## Resets collected pickups so a recycled chunk can present them again.
+func _restore_pickups() -> void:
+	if pickups == null:
+		return
+	_restore_descendants(pickups)
+
+
+## Recursively calls restore() on any descendant that supports it.
+func _restore_descendants(node: Node) -> void:
+	for child in node.get_children():
+		if child.has_method("restore"):
+			child.restore()
+		_restore_descendants(child)
 
 
 ## Verifies or dynamically creates anchor markers if not explicitly set in editor.
