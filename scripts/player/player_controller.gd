@@ -4,7 +4,7 @@ extends CharacterBody3D
 
 const GameConfig = preload("res://scripts/common/game_config.gd")
 const BOW_SCENE: PackedScene = preload("res://assets/models/weapon-bow.glb")
-const BOW_BONE: String = "arm-left"
+const BOW_BONE: String = "hand-left"
 
 # Hazard labels and the posture each type imprints on a non-fatal contact
 const HAZARD_OVERHEAD_BARRIER: String = "overhead_barrier"
@@ -40,8 +40,8 @@ const ANIM_BLEND_TIME: float = 0.15
 @export var shoot_draw_time: float = GameConfig.SHOOT_DRAW_TIME
 @export var shoot_release_time: float = GameConfig.SHOOT_RELEASE_TIME
 @export var arrow_scan_range: float = GameConfig.ARROW_SCAN_RANGE
-@export var bow_offset: Vector3 = Vector3(0.6, 0.0, 0.15)
-@export var bow_rotation_degrees: Vector3 = Vector3(0.0, 0.0, 31.0)
+@export var bow_offset: Vector3 = Vector3(0.006, 0.012, 0.006)
+@export var bow_rotation_degrees: Vector3 = Vector3(90.0, 0.0, 0.0)
 @export var bow_scale: float = 1.0
 
 var current_lane: int = GameConfig.LANE_CENTER
@@ -105,13 +105,14 @@ func _prepare_hitboxes() -> void:
 	_ducking_hitbox.height = duck_hitbox_height
 
 
-## Attaches the bow model to the archer's right-hand bone so it is held at all times.
+## Attaches the bow model to the archer's left-hand bone so it is held at all times.
 func _attach_bow() -> void:
 	var skeleton: Skeleton3D = _find_skeleton(visual_model)
 	if skeleton == null or skeleton.find_bone(BOW_BONE) < 0:
 		return
 
 	var attach := BoneAttachment3D.new()
+	attach.name = "HandAnchor"
 	attach.bone_name = BOW_BONE
 	skeleton.add_child(attach)
 
