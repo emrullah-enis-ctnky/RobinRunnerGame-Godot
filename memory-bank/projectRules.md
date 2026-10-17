@@ -45,6 +45,8 @@
 - **Commit Messages**:
   - Written in English.
   - Concise, descriptive, and clearly explain what was accomplished.
+- **Push Command Shortcut**:
+  - When the user says "push" (or asks to push), run `git push --all` directly without extra confirmation.
 
 ---
 
