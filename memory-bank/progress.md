@@ -3,7 +3,7 @@
 ## Project Status Overview
 - **Current Phase**: Phase 6: Animation System (in progress - Steps 6.1, 6.2 and 6.4 implemented)
 - **Active Branch**: `feature/animation-system`
-- **Next Phase**: Phase 6 refinement (stronger, smoother randomized wind sway), then Phase 7
+- **Next Phase**: Phase 6 Step 6.1 addendum - author a hit/stumble clip in Blender (lane-change turn clips deferred by the user), then Phase 7
 - **Overall Health**: Green (All five automated suites pass: core, player, camera, world 5/5, obstacles 9/9)
 
 ---
@@ -83,7 +83,7 @@
 - [x] Step 6.1: Set up player `AnimationPlayer` and state transitions. `PlayerController` now drives the archer's built-in 32-clip player at `Model/ArcherModel/AnimationPlayer` through a state-driven mapping: `idle` in READY, `sprint` while running (playback speed scaled to forward speed), `jump`/`fall` in the air, `crouch` while ducking, and `die` on death. Clips crossfade over 0.15s and the loop flags of idle/sprint/crouch are forced on. The model ships no dedicated stumble clip, so a non-fatal hit keeps the existing procedural forward tilt. Visually approved by the user.
 - [x] Step 6.2: Lateral lane-change tilt/roll/lean is covered by the existing procedural visual banking in `PlayerController._apply_lane_movement`.
 - [ ] Step 6.3: Implement combat action animations (Bow draw, aim hold, arrow release recoil).
-- [x] Step 6.4: Implement environmental and foliage animations (wind sway). Added `shaders/foliage_wind.gdshader`, a shared world-space wind field that bends the upper part of each plant toward one common direction with a world-position phase offset, plus `scripts/world/wind_foliage.gd` (`WindFoliage`), which reuses each mesh's original albedo texture and measured height before applying the material. Wrapped onto the tree and tall-tree obstacles and the arch flag. User review asked for stronger amplitude and smoother randomized motion; refinement is in progress.
+- [x] Step 6.4: Implement environmental and foliage animations (wind sway). Added `shaders/foliage_wind.gdshader`, a shared world-space wind field that bends the upper part of each plant toward one common direction with a world-position phase offset, plus `scripts/world/wind_foliage.gd` (`WindFoliage`), which reuses each mesh's original albedo texture and measured height before applying the material. Wrapped onto the tree and tall-tree obstacles and the arch flag. User review asked for stronger amplitude and smoother randomized motion; that pass raised the sway ratio to 0.18 and layered incommensurate sines with per-plant phase/speed jitter, a slow gust envelope, and gentle direction wander. The user re-verified the result.
 - [ ] Step 6.5: Implement interactive object animations (obstacle impact wobble/shatter, collectible spin and hover bobbing).
 - [ ] Step 6.6: Automated unit tests verifying animation state machines, blend parameters, and signal triggers.
 - [ ] Step 6.7: Animation fluidity, blending, and visual inspection (User Manual Test).

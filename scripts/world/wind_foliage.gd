@@ -5,7 +5,7 @@ extends Node3D
 const WIND_SHADER: Shader = preload("res://shaders/foliage_wind.gdshader")
 
 ## Peak horizontal travel as a fraction of the plant's world height.
-@export_range(0.0, 0.5, 0.01) var sway_ratio: float = 0.1
+@export_range(0.0, 0.5, 0.01) var sway_ratio: float = 0.18
 
 
 ## Applies the wind shader to the meshes nested under this node.
