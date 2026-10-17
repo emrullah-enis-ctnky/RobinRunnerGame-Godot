@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://jvvk5tmjpq34"
-path.s3tc="res://.godot/imported/character-archer-hit-test_colormap.png-5ff710b87d57ff08df853614381221c7.s3tc.ctex"
+uid="uid://bd7gjrkdfsqqe"
+path.s3tc="res://.godot/imported/character-archer_colormap.png-15c579c721e22d4713ff14dd44ebcd53.s3tc.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc"],
 "vram_texture": true
@@ -14,8 +14,8 @@ generator_parameters={
 
 [deps]
 
-source_file="res://assets/models/character-archer-hit-test_colormap.png"
-dest_files=["res://.godot/imported/character-archer-hit-test_colormap.png-5ff710b87d57ff08df853614381221c7.s3tc.ctex"]
+source_file="res://assets/models/character-archer_colormap.png"
+dest_files=["res://.godot/imported/character-archer_colormap.png-15c579c721e22d4713ff14dd44ebcd53.s3tc.ctex"]
 
 [params]
 

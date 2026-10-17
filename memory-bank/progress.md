@@ -159,4 +159,4 @@
 ### Open Notes
 - `tests/unit/test_core_architecture.tscn` was re-run after the graded hit rule change and is green (GameConfig, EventBus, GameManager suites all pass). The obstacle suite reports 9/9, and the player and world generation suites are also green.
 - Step 5.6 completed: the user performed the human visual pass and confirmed obstacle silhouettes, collider fairness, and duck-barrier clearance, so Phase 5 is now closed.
-- Custom animation model swap: the authored `duck` and `trip` clips currently live in the review copy `assets/models/character-archer-hit-test.glb`, which is what `player.tscn` points at. Once confirmed, that copy replaces `character-archer.glb`, `player.tscn` returns to the original path, and the review copy is removed.
+- Custom animation model swap: the authored `duck` and `trip` clips are now merged into `assets/models/character-archer.glb` (35 clips) and the temporary review copy was removed; `player.tscn` points back at the original model path.
