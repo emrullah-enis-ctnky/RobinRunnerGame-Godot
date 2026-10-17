@@ -78,8 +78,8 @@
 ---
 
 ### [ ] Phase 6: Animation System (Character & World Animations)
-- **Branch**: `feature/animation-system`
-- **Status**: Steps 6.1, 6.2 and 6.4 implemented and merged into `main`; Steps 6.3, 6.5-6.7 remain open
+- **Branch**: `feature/animation-system` (merged into `main`, no longer active)
+- **Status**: Steps 6.1, 6.2, 6.4 and 6.8 implemented and merged into `main`; Steps 6.3, 6.5-6.7 remain open
 - **Objective**: Integrate comprehensive character, mesh, and environment animations across gameplay entities.
 - [x] Step 6.1: Set up player `AnimationPlayer` and state transitions. `PlayerController` drives the archer's `AnimationPlayer` at `Model/ArcherModel/AnimationPlayer` through a state-driven mapping: `idle` in READY, `sprint` while running (playback speed scaled to forward speed), `jump`/`fall` in the air, `duck` (fallback `crouch`) while ducking, `trip` (fallback `hit`) on a ground stagger, and `die` on death. Clips crossfade over 0.15s and idle/sprint loop. Two custom clips were authored in Blender on the rig: `duck`, a deep crouch that halves the head height, and `trip`, a foot-catch that throws the runner into a hop over the obstacle before recovering. The arch head bump reads as a deeper 0.6 rad backward recoil. Visually approved by the user.
 - [x] Step 6.2: Lateral lane-change tilt/roll/lean is covered by the existing procedural visual banking in `PlayerController._apply_lane_movement`.
@@ -88,6 +88,7 @@
 - [ ] Step 6.5: Implement interactive object animations (obstacle impact wobble/shatter, collectible spin and hover bobbing).
 - [ ] Step 6.6: Automated unit tests verifying animation state machines, blend parameters, and signal triggers.
 - [ ] Step 6.7: Animation fluidity, blending, and visual inspection (User Manual Test).
+- [x] Step 6.8: Player damage & death feedback animation. `DamageOverlay` (`scripts/ui/damage_overlay.gd` + `scenes/ui/damage_overlay.tscn`) pulses a full-screen red tint across the damage window and, on death, leaves the pulse and runs a one-shot fade that deepens the impact red all the way to solid black over `death_fade_time` (1.2s); it resets on `game_restarted`. The gameplay rule behind it lives in Step 5.7. Visual result confirmed.
 
 ---
 
