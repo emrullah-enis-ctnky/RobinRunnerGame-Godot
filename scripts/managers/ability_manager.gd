@@ -43,6 +43,11 @@ func total_ammo() -> int:
 	return total
 
 
+## Returns true when the quiver holds at least one arrow of any type.
+func can_fire() -> bool:
+	return total_ammo() > 0
+
+
 ## Resolves the arrow type (preferring the requested one) and fires it when ammo allows.
 ## Returns false when no usable arrow remains.
 func try_fire(origin: Vector3, direction: Vector3, preferred_type: String) -> bool:

@@ -6,7 +6,6 @@ const GameConfig = preload("res://scripts/common/game_config.gd")
 
 # The mesh's native axis is baked into a rotation so the arrow points along its flight path.
 const MESH_LOCAL_ROTATION: Vector3 = Vector3(-90.0, 0.0, 0.0)
-const FLAME_OFFSET: Vector3 = Vector3(0.0, 0.0, -0.6)
 
 signal finished(arrow)
 
@@ -23,21 +22,23 @@ var _flame_fx: GPUParticles3D
 
 ## Builds the flame visuals once so every pooled arrow reuses them.
 func _ready() -> void:
-	_orient_mesh()
+	_prepare_mesh()
 	_build_flame_visuals()
 	deactivate()
 
 
-## Aligns the instanced arrow mesh with the travel direction.
-func _orient_mesh() -> void:
+## Normalizes the arrow mesh size and aligns it with the travel direction.
+func _prepare_mesh() -> void:
 	var mesh: Node3D = get_node_or_null("Mesh")
 	if mesh:
+		MeshFit.fit_longest_axis(mesh, GameConfig.ARROW_MODEL_LENGTH)
 		mesh.rotation_degrees = MESH_LOCAL_ROTATION
 
 
 ## Creates the glowing head and the particle emitter shown only for flame arrows.
 func _build_flame_visuals() -> void:
-	var visuals: Dictionary = FlameVisual.build(self, FLAME_OFFSET)
+	var tip: Vector3 = Vector3(0.0, 0.0, -GameConfig.ARROW_MODEL_LENGTH * 0.5)
+	var visuals: Dictionary = FlameVisual.build(self, tip)
 	_flame_head = visuals["head"]
 	_flame_fx = visuals["fx"]
 

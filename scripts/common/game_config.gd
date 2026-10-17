@@ -33,6 +33,9 @@ const ARROW_SCAN_RANGE: float = 45.0
 const ARROW_MUZZLE_HEIGHT: float = 1.0
 const SHOOT_DRAW_TIME: float = 0.12
 const SHOOT_RELEASE_TIME: float = 0.28
+const ARROW_MODEL_LENGTH: float = 0.9
+const BOW_MODEL_LENGTH: float = 0.55
+const PICKUP_COLLECT_TIME: float = 0.35
 
 # Pickup Idle Motion
 const PICKUP_BOB_HEIGHT: float = 0.12

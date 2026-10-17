@@ -232,7 +232,10 @@ func _test_arrow_pickup() -> void:
 		waited += 1
 	_assert(picked["type"] == "arrow_normal", "Collecting must report the arrow type.")
 	_assert(picked["value"] == 1, "Collecting must report the arrow amount.")
-	_assert(not pickup.visible, "A collected pickup must hide.")
+
+	# The collect effect flies and shrinks the arrow before it hides.
+	await get_tree().create_timer(GameConfig.PICKUP_COLLECT_TIME + 0.2).timeout
+	_assert(not pickup.visible, "A collected pickup must hide after its collect effect.")
 
 	pickup.restore()
 	_assert(pickup.visible, "restore() must show the pickup again.")

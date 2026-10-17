@@ -1,4 +1,4 @@
-[gd_scene load_steps=9 format=3 uid="uid://bworldmain"]
+[gd_scene load_steps=10 format=3 uid="uid://bworldmain"]
 
 [ext_resource type="Script" path="res://scenes/world/world.gd" id="1_world"]
 [ext_resource type="PackedScene" uid="uid://c7m8x4w6laq1r" path="res://scenes/player/player.tscn" id="2_player"]
@@ -6,6 +6,7 @@
 [ext_resource type="Script" path="res://scripts/world/track_spawner.gd" id="4_spawner"]
 [ext_resource type="PackedScene" uid="uid://c8n4v2x6bq7zp" path="res://scenes/ui/damage_overlay.tscn" id="5_overlay"]
 [ext_resource type="Script" path="res://scripts/combat/arrow_pool.gd" id="6_arrowpool"]
+[ext_resource type="PackedScene" path="res://scenes/ui/arrow_counter_hud.tscn" id="7_hud"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_world"]
 sky_top_color = Color(0.25, 0.52, 0.88, 1)
@@ -55,3 +56,5 @@ script = ExtResource("4_spawner")
 script = ExtResource("6_arrowpool")
 
 [node name="DamageOverlay" parent="." instance=ExtResource("5_overlay")]
+
+[node name="ArrowCounterHUD" parent="." instance=ExtResource("7_hud")]
