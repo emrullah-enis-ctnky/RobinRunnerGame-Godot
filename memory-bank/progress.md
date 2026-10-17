@@ -1,10 +1,10 @@
 # Progress & Kanban Roadmap: RobinRunner
 
 ## Project Status Overview
-- **Current Phase**: Phase 5: Obstacles & Environmental Hazards (Complete - Step 5.6 visually verified by user)
-- **Active Branch**: `main`
-- **Next Phase**: Phase 6: Animation System
-- **Overall Health**: Green (Hazards verified with 9/9 automated obstacle tests; player and world suites also green)
+- **Current Phase**: Phase 6: Animation System (in progress - Steps 6.1, 6.2 and 6.4 implemented)
+- **Active Branch**: `feature/animation-system`
+- **Next Phase**: Phase 6 refinement (stronger, smoother randomized wind sway), then Phase 7
+- **Overall Health**: Green (All five automated suites pass: core, player, camera, world 5/5, obstacles 9/9)
 
 ---
 
@@ -78,11 +78,12 @@
 
 ### [ ] Phase 6: Animation System (Character & World Animations)
 - **Branch**: `feature/animation-system`
+- **Status**: In progress (Steps 6.1, 6.2 and 6.4 implemented)
 - **Objective**: Integrate comprehensive character, mesh, and environment animations across gameplay entities.
-- [ ] Step 6.1: Set up player `AnimationPlayer` and state transitions (Idle, Run, Jump, Fall, Stumble).
-- [ ] Step 6.2: Implement procedural/blend animations for lateral lane changes (tilt, roll, lean).
+- [x] Step 6.1: Set up player `AnimationPlayer` and state transitions. `PlayerController` now drives the archer's built-in 32-clip player at `Model/ArcherModel/AnimationPlayer` through a state-driven mapping: `idle` in READY, `sprint` while running (playback speed scaled to forward speed), `jump`/`fall` in the air, `crouch` while ducking, and `die` on death. Clips crossfade over 0.15s and the loop flags of idle/sprint/crouch are forced on. The model ships no dedicated stumble clip, so a non-fatal hit keeps the existing procedural forward tilt. Visually approved by the user.
+- [x] Step 6.2: Lateral lane-change tilt/roll/lean is covered by the existing procedural visual banking in `PlayerController._apply_lane_movement`.
 - [ ] Step 6.3: Implement combat action animations (Bow draw, aim hold, arrow release recoil).
-- [ ] Step 6.4: Implement environmental and foliage animations (wind sway, ambient motion for trees and vegetation).
+- [x] Step 6.4: Implement environmental and foliage animations (wind sway). Added `shaders/foliage_wind.gdshader`, a shared world-space wind field that bends the upper part of each plant toward one common direction with a world-position phase offset, plus `scripts/world/wind_foliage.gd` (`WindFoliage`), which reuses each mesh's original albedo texture and measured height before applying the material. Wrapped onto the tree and tall-tree obstacles and the arch flag. User review asked for stronger amplitude and smoother randomized motion; refinement is in progress.
 - [ ] Step 6.5: Implement interactive object animations (obstacle impact wobble/shatter, collectible spin and hover bobbing).
 - [ ] Step 6.6: Automated unit tests verifying animation state machines, blend parameters, and signal triggers.
 - [ ] Step 6.7: Animation fluidity, blending, and visual inspection (User Manual Test).

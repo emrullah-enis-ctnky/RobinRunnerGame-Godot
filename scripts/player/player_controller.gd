@@ -9,6 +9,15 @@ const HAZARD_OVERHEAD_BARRIER: String = "overhead_barrier"
 const STUMBLE_TILT_FORWARD: float = -0.35
 const HEAD_BUMP_TILT_BACK: float = 0.3
 
+# Animation clip names baked into the archer model
+const ANIM_IDLE: String = "idle"
+const ANIM_RUN: String = "sprint"
+const ANIM_JUMP: String = "jump"
+const ANIM_FALL: String = "fall"
+const ANIM_CROUCH: String = "crouch"
+const ANIM_DEATH: String = "die"
+const ANIM_BLEND_TIME: float = 0.15
+
 @export var lane_switch_speed: float = GameConfig.LANE_SWITCH_SPEED
 @export var jump_velocity: float = GameConfig.JUMP_VELOCITY
 @export var gravity: float = GameConfig.GRAVITY
@@ -38,11 +47,15 @@ var _standing_hitbox_center_y: float = 0.775
 @onready var collision_shape: CollisionShape3D = get_node_or_null("CollisionShape3D")
 @onready var hazard_detector: Area3D = get_node_or_null("HazardDetector")
 @onready var hazard_shape: CollisionShape3D = get_node_or_null("HazardDetector/CollisionShape3D")
+@onready var animation_player: AnimationPlayer = get_node_or_null("Model/ArcherModel/AnimationPlayer")
+
+var current_animation: String = ""
 
 
 ## Initializes the player state and connects to global lifecycle signals.
 func _ready() -> void:
 	_prepare_hitboxes()
+	_setup_animations()
 	reset_player()
 	if has_node("/root/EventBus"):
 		var bus: Node = get_node("/root/EventBus")
@@ -81,6 +94,7 @@ func _physics_process(delta: float) -> void:
 		if not is_on_floor():
 			velocity.y -= gravity * delta
 			move_and_slide()
+		_update_animation()
 		return
 
 	_update_stumble(delta)
@@ -104,6 +118,7 @@ func _physics_process(delta: float) -> void:
 
 	move_and_slide()
 	_check_landing()
+	_update_animation()
 
 
 ## Captures discrete player inputs for lane switching, jumping, and ducking/sliding.
@@ -288,6 +303,7 @@ func _die() -> void:
 	velocity = Vector3.ZERO
 	if visual_model:
 		visual_model.rotation = Vector3.ZERO
+	_play_animation(ANIM_DEATH, true)
 
 	if has_node("/root/EventBus"):
 		var bus: Node = get_node("/root/EventBus")
@@ -315,3 +331,68 @@ func reset_player() -> void:
 		visual_model.scale = Vector3.ONE
 		visual_model.rotation = Vector3.ZERO
 	_apply_stance(false)
+	_play_animation(ANIM_IDLE, true)
+
+
+## Enables linear looping on the clips that must cycle continuously.
+func _setup_animations() -> void:
+	if animation_player == null:
+		return
+	_set_animation_loop(ANIM_IDLE)
+	_set_animation_loop(ANIM_RUN)
+	_set_animation_loop(ANIM_CROUCH)
+
+
+## Enables linear looping on a single clip when the model provides it.
+func _set_animation_loop(anim_name: String) -> void:
+	if animation_player.has_animation(anim_name):
+		animation_player.get_animation(anim_name).loop_mode = Animation.LOOP_LINEAR
+
+
+## Picks the clip matching the current gameplay state and blends to it.
+func _update_animation() -> void:
+	if animation_player == null:
+		return
+	var anim_name: String = _resolve_animation()
+	_play_animation(anim_name)
+	_apply_animation_speed(anim_name)
+
+
+## Maps movement, stance, and life state to an animation clip name.
+func _resolve_animation() -> String:
+	if not can_control:
+		return ANIM_DEATH
+	if is_ducking:
+		return ANIM_CROUCH
+	if not is_on_floor():
+		return ANIM_JUMP if velocity.y > 0.0 else ANIM_FALL
+	if _is_game_playing():
+		return ANIM_RUN
+	return ANIM_IDLE
+
+
+## Returns true while the game manager reports the active run state.
+func _is_game_playing() -> bool:
+	if has_node("/root/GameManager"):
+		var gm: Node = get_node("/root/GameManager")
+		return gm.current_state == gm.GameState.PLAYING
+	return true
+
+
+## Blends to a clip unless it is already the active one.
+func _play_animation(anim_name: String, force: bool = false) -> void:
+	if animation_player == null or not animation_player.has_animation(anim_name):
+		return
+	if not force and anim_name == current_animation:
+		return
+	current_animation = anim_name
+	animation_player.play(anim_name, ANIM_BLEND_TIME)
+
+
+## Scales run playback so the stride keeps pace with forward speed.
+func _apply_animation_speed(anim_name: String) -> void:
+	var target_scale: float = 1.0
+	if anim_name == ANIM_RUN and has_node("/root/GameManager"):
+		var gm: Node = get_node("/root/GameManager")
+		target_scale = clampf(gm.current_speed / GameConfig.INITIAL_FORWARD_SPEED, 1.0, 1.6)
+	animation_player.speed_scale = target_scale
