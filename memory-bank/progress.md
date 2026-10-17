@@ -1,8 +1,8 @@
 # Progress & Kanban Roadmap: RobinRunner
 
 ## Project Status Overview
-- **Current Phase**: Phase 6: Animation System (in progress - Steps 6.1, 6.2 and 6.4 implemented)
-- **Active Branch**: `feature/animation-system`
+- **Current Phase**: Phase 6: Animation System (Steps 6.1, 6.2 and 6.4 implemented and merged into `main`; Steps 6.3, 6.5-6.7 still open)
+- **Active Branch**: `main` (`feature/animation-system` merged)
 - **Next Phase**: Phase 6 remaining steps (6.3, 6.5-6.7); lane-change turn clips deferred by the user
 - **Overall Health**: Green (All five automated suites pass: core, player, camera, world 5/5, obstacles 9/9)
 
@@ -79,7 +79,7 @@
 
 ### [ ] Phase 6: Animation System (Character & World Animations)
 - **Branch**: `feature/animation-system`
-- **Status**: In progress (Steps 6.1, 6.2 and 6.4 implemented)
+- **Status**: Steps 6.1, 6.2 and 6.4 implemented and merged into `main`; Steps 6.3, 6.5-6.7 remain open
 - **Objective**: Integrate comprehensive character, mesh, and environment animations across gameplay entities.
 - [x] Step 6.1: Set up player `AnimationPlayer` and state transitions. `PlayerController` drives the archer's `AnimationPlayer` at `Model/ArcherModel/AnimationPlayer` through a state-driven mapping: `idle` in READY, `sprint` while running (playback speed scaled to forward speed), `jump`/`fall` in the air, `duck` (fallback `crouch`) while ducking, `trip` (fallback `hit`) on a ground stagger, and `die` on death. Clips crossfade over 0.15s and idle/sprint loop. Two custom clips were authored in Blender on the rig: `duck`, a deep crouch that halves the head height, and `trip`, a foot-catch that throws the runner into a hop over the obstacle before recovering. The arch head bump reads as a deeper 0.6 rad backward recoil. Visually approved by the user.
 - [x] Step 6.2: Lateral lane-change tilt/roll/lean is covered by the existing procedural visual banking in `PlayerController._apply_lane_movement`.
@@ -158,6 +158,7 @@
 - **Global class registration lag**: the newly added `scripts/obstacles/destructible.gd` failed to parse with `Could not find base class "Obstacle"` until a filesystem rescan re-registered the new `class_name`. A rescan is required after adding a script that extends a brand new global class.
 
 ### Open Notes
+- `feature/animation-system` was merged into `main` with Phase 6 partially complete (Steps 6.1, 6.2 and 6.4). The same merge carried Step 5.7 (the hazard damage window and its death fade-to-black overlay) into `main`; the remaining animation steps (6.3, 6.5-6.7) continue on a follow-up branch.
 - The old per-run stumble allowance (`GameConfig.MAX_STUMBLES_PER_RUN` and `PlayerController.stumbles_remaining`) was removed in Step 5.7; the damage window now governs fatal follow-up contacts.
 - `tests/unit/test_core_architecture.tscn` was re-run after the graded hit rule change and is green (GameConfig, EventBus, GameManager suites all pass). The obstacle suite reports 9/9, and the player and world generation suites are also green.
 - Step 5.6 completed: the user performed the human visual pass and confirmed obstacle silhouettes, collider fairness, and duck-barrier clearance, so Phase 5 is now closed.
