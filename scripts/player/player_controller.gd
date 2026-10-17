@@ -41,8 +41,8 @@ const ANIM_BLEND_TIME: float = 0.15
 @export var shoot_release_time: float = GameConfig.SHOOT_RELEASE_TIME
 @export var arrow_scan_range: float = GameConfig.ARROW_SCAN_RANGE
 @export var bow_offset: Vector3 = Vector3(0.006, 0.012, 0.006)
-@export var bow_rotation_degrees: Vector3 = Vector3(90.0, 0.0, 0.0)
-@export var bow_scale: float = 1.0
+@export var bow_rotation_degrees: Vector3 = Vector3(-90.0, 0.0, 0.0)
+@export var bow_scale: float = 0.7
 
 var current_lane: int = GameConfig.LANE_CENTER
 var target_x: float = 0.0
