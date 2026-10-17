@@ -130,6 +130,12 @@
   - Read files **only when strictly necessary** for the current task. Speculative, bulk, or exploratory file reading into context is strictly prohibited.
 - **Directory Tree Exploration via Terminal**:
   - When the agent needs to understand the project tree or locate files, use token-optimized terminal commands (`rtk ls`, `rtk find`) rather than reading file contents.
+- **Context-Mode First for Large Data**:
+  - Prefer `context-mode` MCP tools over raw reads whenever data is large, noisy, or external, to keep the context window clean.
+  - Use `ctx_search` to query indexed content instead of reading whole files into context.
+  - Use `ctx_execute_file` to inspect, filter, or summarize large files (logs, generated output, test dumps) without pulling their full contents into context.
+  - Use `ctx_fetch_and_index` (and `ctx_index`) for web pages, documentation, and other external sources so only distilled results enter context.
+  - Reserve plain `read_file`, `web_fetch`, and shell `grep`/`cat` for small, targeted lookups where the full content is genuinely needed.
 - **Meticulous Step-by-Step Logging**:
   - Every completed step, bug fix, or modification must be recorded with thorough, detailed notes in `memory-bank/progress.md` and clear commit messages every single time.
   - Incomplete or vague tracking is strictly prohibited; thorough logging prevents confusion, preserves context, and guarantees seamless continuity across agent sessions.
