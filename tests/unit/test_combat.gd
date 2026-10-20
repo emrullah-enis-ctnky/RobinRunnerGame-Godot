@@ -10,6 +10,7 @@ const ARROW_POOL_SCRIPT: GDScript = preload("res://scripts/combat/arrow_pool.gd"
 const TARGET_SCENE: PackedScene = preload("res://scenes/obstacles/target_archery.tscn")
 const TREE_SCENE: PackedScene = preload("res://scenes/obstacles/obstacle_tree.tscn")
 const BARRIER_SCENE: PackedScene = preload("res://scenes/obstacles/barrier_fragile.tscn")
+const ROCKY_CHUNK_SCENE: PackedScene = preload("res://scenes/world/chunks/track_chunk_rocky.tscn")
 const PICKUP_SCENE: PackedScene = preload("res://scenes/combat/arrow_pickup_normal.tscn")
 const FLAME_PICKUP_SCENE: PackedScene = preload("res://scenes/combat/arrow_pickup_flame.tscn")
 
@@ -42,6 +43,7 @@ func _run_all_tests() -> void:
 	await _test_arrow_pool()
 	await _test_arrow_hit_resolution()
 	await _test_ladder_topple()
+	await _test_ladder_resets_on_chunk_reuse()
 	await _test_arrow_pickup()
 	await _test_smart_arrow_selection()
 
@@ -259,6 +261,40 @@ func _test_ladder_topple() -> void:
 	arrow.queue_free()
 	barrier.queue_free()
 	_end_test("Ladder Topple & Stuck Arrow")
+
+
+## Verifies a recycled chunk presents its ladder upright instead of keeping it toppled.
+func _test_ladder_resets_on_chunk_reuse() -> void:
+	_start_test("Ladder Reset On Chunk Reuse")
+
+	var chunk: Node3D = ROCKY_CHUNK_SCENE.instantiate() as Node3D
+	add_child(chunk)
+	await get_tree().physics_frame
+
+	var barrier: StaticBody3D = chunk.find_child("FragileBarrierLeftLane", true, false) as StaticBody3D
+	_assert(barrier != null, "The rocky chunk must contain the fragile ladder barrier.")
+	if barrier == null:
+		chunk.queue_free()
+		_end_test("Ladder Reset On Chunk Reuse")
+		return
+
+	barrier.receive_arrow(GameConfig.ARROW_TYPE_NORMAL)
+	for _frame in range(60):
+		await get_tree().physics_frame
+	_assert(barrier.global_transform.basis.get_euler().x < -0.3,
+		"The ladder must lie toppled before the chunk is recycled.")
+
+	chunk.activate(Vector3(0.0, 0.0, -120.0))
+	await get_tree().process_frame
+
+	_assert(not barrier.is_destroyed, "A recycled chunk must restore its ladder.")
+	_assert(absf(barrier.global_transform.basis.get_euler().x) < 0.01,
+		"A recycled chunk must present an upright ladder.")
+	_assert(barrier.collision_layer == GameConfig.LAYER_TARGET,
+		"A restored ladder must block its lane again.")
+
+	chunk.queue_free()
+	_end_test("Ladder Reset On Chunk Reuse")
 
 
 ## Verifies arrow pickups report their type and hide on player contact.

@@ -3,6 +3,8 @@ extends Node3D
 ## Base class for modular track chunks in RobinRunner.
 ## Manages standardized entry/exit snap points, collision ground, and lane markers.
 
+signal activated
+
 @export var chunk_length: float = GameConfig.CHUNK_LENGTH
 
 @onready var start_anchor: Marker3D = $StartAnchor
@@ -40,6 +42,7 @@ func activate(spawn_position: Vector3) -> void:
 	set_process(true)
 	set_physics_process(true)
 	_restore_pickups()
+	activated.emit()
 
 
 ## Called when the chunk passes behind the player and is returned to the pool.
