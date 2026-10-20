@@ -34,13 +34,16 @@ const ARROW_MUZZLE_HEIGHT: float = 1.0
 const SHOOT_DRAW_TIME: float = 0.12
 const SHOOT_RELEASE_TIME: float = 0.28
 const ARROW_MODEL_LENGTH: float = 0.9
+const ARROW_CROSS_SECTION_SCALE: float = 0.4
 const BOW_MODEL_LENGTH: float = 0.55
 const PICKUP_COLLECT_TIME: float = 0.35
 
-# Pickup Idle Motion
-const PICKUP_BOB_HEIGHT: float = 0.12
-const PICKUP_BOB_SPEED: float = 2.0
-const PICKUP_SPIN_SPEED: float = 1.2
+# Grounded Pickup Pose
+const PICKUP_TILT_DEGREES: float = 50.0
+const PICKUP_TILT_RANGE_DEGREES: float = 15.0
+const PICKUP_YAW_RANGE_DEGREES: float = 25.0
+const PICKUP_BURY_DEPTH: float = 0.06
+const PICKUP_SPAWN_CHANCE: float = 0.35
 
 # Track & World Generation
 const CHUNK_LENGTH: float = 30.0

@@ -4,8 +4,8 @@ extends Node3D
 
 const GameConfig = preload("res://scripts/common/game_config.gd")
 
-# The mesh's native axis is baked into a rotation so the arrow points along its flight path.
-const MESH_LOCAL_ROTATION: Vector3 = Vector3(-90.0, 0.0, 0.0)
+# The model's pointed head sits on +Z, so a half-turn aligns it with the flight path.
+const MESH_LOCAL_ROTATION: Vector3 = Vector3(0.0, 180.0, 0.0)
 
 signal finished(arrow)
 
@@ -27,18 +27,19 @@ func _ready() -> void:
 	deactivate()
 
 
-## Normalizes the arrow mesh size and aligns it with the travel direction.
+## Normalizes the arrow mesh and turns its pointed +Z head into the travel direction.
 func _prepare_mesh() -> void:
-	var mesh: Node3D = get_node_or_null("Mesh")
+	var mesh: Node3D = get_node_or_null("Mesh") as Node3D
 	if mesh:
-		MeshFit.fit_longest_axis(mesh, GameConfig.ARROW_MODEL_LENGTH)
+		MeshFit.fit_longest_axis(mesh, GameConfig.ARROW_MODEL_LENGTH, GameConfig.ARROW_CROSS_SECTION_SCALE)
 		mesh.rotation_degrees = MESH_LOCAL_ROTATION
 
 
 ## Creates the glowing head and the particle emitter shown only for flame arrows.
 func _build_flame_visuals() -> void:
-	var tip: Vector3 = Vector3(0.0, 0.0, -GameConfig.ARROW_MODEL_LENGTH * 0.5)
-	var visuals: Dictionary = FlameVisual.build(self, tip)
+	var mesh: Node3D = get_node_or_null("Mesh") as Node3D
+	var tip: Vector3 = MeshFit.local_long_axis_end(mesh, true) if mesh else Vector3.ZERO
+	var visuals: Dictionary = FlameVisual.build(self, tip, true)
 	_flame_head = visuals["head"]
 	_flame_fx = visuals["fx"]
 

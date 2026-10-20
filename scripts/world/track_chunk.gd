@@ -58,10 +58,12 @@ func _restore_pickups() -> void:
 	_restore_descendants(pickups)
 
 
-## Recursively calls restore() on any descendant that supports it.
+## Recursively calls respawn() on any descendant that supports it.
 func _restore_descendants(node: Node) -> void:
 	for child in node.get_children():
-		if child.has_method("restore"):
+		if child.has_method("respawn"):
+			child.respawn()
+		elif child.has_method("restore"):
 			child.restore()
 		_restore_descendants(child)
 

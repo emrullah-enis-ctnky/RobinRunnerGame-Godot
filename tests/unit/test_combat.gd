@@ -10,6 +10,7 @@ const ARROW_POOL_SCRIPT: GDScript = preload("res://scripts/combat/arrow_pool.gd"
 const TARGET_SCENE: PackedScene = preload("res://scenes/obstacles/target_archery.tscn")
 const TREE_SCENE: PackedScene = preload("res://scenes/obstacles/obstacle_tree.tscn")
 const PICKUP_SCENE: PackedScene = preload("res://scenes/combat/arrow_pickup_normal.tscn")
+const FLAME_PICKUP_SCENE: PackedScene = preload("res://scenes/combat/arrow_pickup_flame.tscn")
 
 var _tests_passed: int = 0
 var _tests_total: int = 0
@@ -108,6 +109,23 @@ func _test_arrow_lifecycle() -> void:
 	arrow.activate(Vector3.ZERO, Vector3.FORWARD, GameConfig.ARROW_TYPE_FLAME)
 	_assert(arrow.visible, "activate() must show the arrow.")
 	_assert(arrow.is_physics_processing(), "activate() must start the arrow moving.")
+
+	var mesh: Node3D = arrow.get_node("Mesh") as Node3D
+	var head_direction: Vector3 = (mesh.global_transform.basis * Vector3(0.0, 0.0, 1.0)).normalized()
+	_assert(head_direction.dot(Vector3.FORWARD) > 0.99,
+		"The arrow head must point along its travel direction.")
+	_assert(absf(head_direction.y) < 0.01,
+		"The arrow must fly parallel to the ground.")
+
+	var flame_fx: GPUParticles3D = null
+	for child in arrow.get_children():
+		if child is GPUParticles3D:
+			flame_fx = child
+			break
+	_assert(flame_fx != null and flame_fx.local_coords,
+		"Flame particles must follow the arrow instead of trailing behind it.")
+	_assert(flame_fx != null and flame_fx.position.z < -0.3,
+		"Flame must emit at the arrow's leading tip, not at its rear.")
 
 	var start_z: float = arrow.global_position.z
 	await get_tree().physics_frame
@@ -213,6 +231,30 @@ func _test_arrow_pickup() -> void:
 		"Pickups must sit on LAYER_PICKUP.")
 	_assert(pickup.collision_mask == GameConfig.LAYER_PLAYER,
 		"Pickups must watch the player layer.")
+
+	var rest_position: Vector3 = pickup.global_position
+	for _frame in range(10):
+		await get_tree().physics_frame
+	_assert(pickup.global_position.is_equal_approx(rest_position),
+		"Pickups must stay planted instead of bobbing.")
+
+	var pickup_mesh: Node3D = pickup.get_node("Mesh") as Node3D
+	_assert(not is_zero_approx(pickup_mesh.rotation.x),
+		"Pickups must tilt the arrow into the ground.")
+	_assert(is_zero_approx(MeshFit.local_bounds(pickup_mesh).end.z),
+		"Pickups must pivot on the arrow tip, not the mesh centre.")
+
+	var flame_pickup: Area3D = FLAME_PICKUP_SCENE.instantiate() as Area3D
+	flame_pickup.position = Vector3(50.0, 0.0, 0.0)
+	add_child(flame_pickup)
+	var flame_fx: GPUParticles3D = null
+	for child in flame_pickup.get_children():
+		if child is GPUParticles3D:
+			flame_fx = child
+			break
+	_assert(flame_fx != null and flame_fx.position.length() < 0.01,
+		"Flame pickups must burn at the buried tip, not at the shaft end.")
+	flame_pickup.queue_free()
 
 	var picked: Dictionary = {"type": "", "value": 0}
 	if has_node("/root/EventBus"):
