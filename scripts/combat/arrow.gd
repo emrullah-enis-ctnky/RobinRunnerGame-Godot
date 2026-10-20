@@ -16,6 +16,7 @@ signal stuck(arrow)
 var arrow_type: String = GameConfig.ARROW_TYPE_NORMAL
 
 var _direction: Vector3 = Vector3.FORWARD
+var _launch_origin: Vector3 = Vector3.ZERO
 var _timer: float = 0.0
 var _flame_head: MeshInstance3D
 var _flame_fx: GPUParticles3D
@@ -49,6 +50,7 @@ func _build_flame_visuals() -> void:
 func activate(origin: Vector3, direction: Vector3, type: String) -> void:
 	arrow_type = type
 	_direction = direction.normalized()
+	_launch_origin = origin
 	_timer = lifetime
 	global_position = origin
 	look_at(global_position + _direction, Vector3.UP)
@@ -105,6 +107,11 @@ func _resolve_hit(hit: Dictionary) -> bool:
 
 	body.stick_arrow(self, hit.get("position", global_position))
 	return true
+
+
+## Returns how far the arrow travelled from its launch point to the given impact.
+func travel_distance_to(point: Vector3) -> float:
+	return _launch_origin.distance_to(point)
 
 
 ## Plants the arrow with its tip on the impact point and stops the flight.

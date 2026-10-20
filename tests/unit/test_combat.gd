@@ -42,6 +42,7 @@ func _run_all_tests() -> void:
 	await _test_arrow_lifecycle()
 	await _test_arrow_pool()
 	await _test_arrow_hit_resolution()
+	await _test_archery_target_sticking()
 	await _test_ladder_topple()
 	await _test_ladder_resets_on_chunk_reuse()
 	await _test_arrow_pickup()
@@ -185,20 +186,17 @@ func _test_arrow_pool() -> void:
 func _test_arrow_hit_resolution() -> void:
 	_start_test("Arrow Hit Resolution")
 
-	# A normal arrow destroys a standard destructible target.
+	# Archery targets keep both arrow types embedded instead of being destroyed.
 	var target: StaticBody3D = TARGET_SCENE.instantiate() as StaticBody3D
 	add_child(target)
 	_assert(target.required_arrow_types().has(GameConfig.ARROW_TYPE_NORMAL),
-		"The archery target must be vulnerable to normal arrows.")
+		"The archery target must be registered as a normal-arrow target.")
 	_assert(target.receive_arrow(GameConfig.ARROW_TYPE_NORMAL),
-		"A normal arrow must destroy the archery target.")
-	_assert(target.is_destroyed, "A destroyed target must be flagged.")
-	target.restore()
-
-	# A flame arrow leaves a normal-only target intact.
-	_assert(not target.receive_arrow(GameConfig.ARROW_TYPE_FLAME),
-		"A flame arrow must not destroy a normal-only target.")
-	_assert(not target.is_destroyed, "A mismatched arrow must leave the target intact.")
+		"A normal arrow must register on the archery target.")
+	_assert(not target.is_destroyed, "A normal arrow must not destroy the archery target.")
+	_assert(target.receive_arrow(GameConfig.ARROW_TYPE_FLAME),
+		"A flame arrow must register on the archery target too.")
+	_assert(not target.is_destroyed, "A flame arrow must not destroy the archery target.")
 	target.queue_free()
 
 	# A flame arrow burns a tree while a normal arrow does not.
@@ -223,6 +221,101 @@ func _test_arrow_hit_resolution() -> void:
 	tree.queue_free()
 
 	_end_test("Arrow Hit Resolution")
+
+
+## Verifies arrows embed in archery targets with distance-based accuracy and stacking physics.
+func _test_archery_target_sticking() -> void:
+	_start_test("Archery Target Sticking")
+
+	var target: StaticBody3D = TARGET_SCENE.instantiate() as StaticBody3D
+	target.position = Vector3(0.0, 0.0, -10.0)
+	add_child(target)
+	await get_tree().physics_frame
+
+	# A real arrow flies in and embeds without destroying the target.
+	var arrow: Arrow = ARROW_SCENE.instantiate() as Arrow
+	add_child(arrow)
+	arrow.activate(Vector3(0.0, 0.64, 0.0), Vector3.FORWARD, GameConfig.ARROW_TYPE_NORMAL)
+
+	var waited: int = 0
+	while arrow.get_parent() != target and waited < 60:
+		await get_tree().physics_frame
+		waited += 1
+
+	_assert(arrow.get_parent() == target, "An arrow must embed in the archery target.")
+	_assert(not arrow.is_physics_processing(), "A stuck arrow must stop flying.")
+	_assert(not target.is_destroyed, "A stuck arrow must not destroy the target.")
+
+	# Very close shots always land the bullseye.
+	var face_hit: Vector3 = target.to_global(ArcheryTarget.BOARD_CENTER + Vector3(0.0, 0.0, 0.5))
+	var near_bullseyes: int = 0
+	for _sample in range(500):
+		if _ring_of(target.roll_impact_point(face_hit, ArcheryTarget.NEAR_DISTANCE)) == 0:
+			near_bullseyes += 1
+	_assert(near_bullseyes == 500,
+		"Very close shots must always land the bullseye (got %d/500)." % near_bullseyes)
+
+	# Long shots spread toward the middle and outer rings.
+	var far_outer: int = 0
+	var far_bullseyes: int = 0
+	for _sample in range(500):
+		var ring: int = _ring_of(target.roll_impact_point(face_hit, ArcheryTarget.FAR_DISTANCE))
+		if ring >= 2:
+			far_outer += 1
+		if ring == 0:
+			far_bullseyes += 1
+	_assert(far_outer > 300,
+		"Long shots must mostly land the middle and outer rings (got %d/500)." % far_outer)
+	_assert(far_bullseyes < 150,
+		"Long shots must rarely land the bullseye (got %d/500)." % far_bullseyes)
+
+	# Arrows that land on top of each other push each other apart.
+	var stack_target: StaticBody3D = TARGET_SCENE.instantiate() as StaticBody3D
+	stack_target.position = Vector3(20.0, 0.0, -10.0)
+	add_child(stack_target)
+	await get_tree().physics_frame
+
+	var impact: Vector3 = ArcheryTarget.BOARD_CENTER + Vector3(0.0, 0.0, 0.5)
+	var first: Arrow = _embed_test_arrow(stack_target, impact)
+	var second: Arrow = _embed_test_arrow(stack_target, impact)
+	await get_tree().process_frame
+
+	var first_axis: Vector3 = first.basis.z.normalized()
+	var second_axis: Vector3 = second.basis.z.normalized()
+	_assert(absf(first_axis.z) < 0.99 and absf(second_axis.z) < 0.99,
+		"Stacked arrows must both leave their perpendicular pose.")
+	_assert(first_axis.dot(second_axis) < 0.99,
+		"Stacked arrows must tilt in different directions.")
+	_assert(stack_target._stuck.size() == 2, "The target must keep every embedded arrow.")
+
+	stack_target.restore()
+	await get_tree().process_frame
+	_assert(not is_instance_valid(first) and not is_instance_valid(second),
+		"Restoring the target must drop its embedded arrows.")
+
+	stack_target.queue_free()
+	target.queue_free()
+	_end_test("Archery Target Sticking")
+
+
+## Builds an arrow and embeds it directly at a target-local impact point.
+func _embed_test_arrow(target: StaticBody3D, local_point: Vector3) -> Arrow:
+	var arrow: Arrow = ARROW_SCENE.instantiate() as Arrow
+	add_child(arrow)
+	var hit_world: Vector3 = target.to_global(local_point)
+	arrow.activate(hit_world + Vector3(0.0, 0.0, 1.0), Vector3.FORWARD, GameConfig.ARROW_TYPE_NORMAL)
+	target.stick_arrow(arrow, hit_world)
+	return arrow
+
+
+## Returns the ring index (0 bullseye .. 3 outer) for a target-local point.
+func _ring_of(point: Vector3) -> int:
+	var offset := Vector2(point.x - ArcheryTarget.BOARD_CENTER.x, point.y - ArcheryTarget.BOARD_CENTER.y)
+	var fraction: float = offset.length() / ArcheryTarget.BOARD_RADIUS
+	for ring in range(ArcheryTarget.RING_RADII.size()):
+		if fraction <= ArcheryTarget.RING_RADII[ring] + 0.0001:
+			return ring
+	return ArcheryTarget.RING_RADII.size() - 1
 
 
 ## Verifies an arrow topples the ladder around its base and stays stuck while it falls.
