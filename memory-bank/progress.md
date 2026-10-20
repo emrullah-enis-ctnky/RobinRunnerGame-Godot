@@ -2,8 +2,8 @@
 
 ## Project Status Overview
 - **Current Phase**: Phase 7: Combat & Ability System (Steps 7.1-7.6, plus the 7.6b/7.6c pickups and bow/HUD passes, the 7.6d hand-bone bow attachment and the 7.6e ladder topple pass, implemented; Step 7.7 manual test pending; Step 6.3 pulled in per user decision)
-- **Active Branch**: `feature/combat-abilities`
-- **Next Phase**: Phase 7 Step 7.7 manual test and merge into `main` on user approval; Phase 6 leftovers (6.5-6.7) and Phase 8 remain open
+- **Active Branch**: `main` (Phase 7 merged from `feature/combat-abilities`, merge commit `fc74152`)
+- **Next Phase**: Phase 7 Step 7.7 manual test; Phase 6 leftovers (6.5-6.7) and Phase 8 remain open
 - **Overall Health**: Green (All six automated suites pass: core, player, camera, world 5/5, obstacles 9/9, combat 8/8)
 
 ---
@@ -93,7 +93,7 @@
 ---
 
 ### [ ] Phase 7: Combat & Ability System (Arrows, Quiver & Arrow Types)
-- **Branch**: `feature/combat-abilities` (active)
+- **Branch**: `feature/combat-abilities` (merged into `main` at `fc74152`); Step 7.7 manual pass still open
 - **Objective**: Deliver active archery combat — a quiver of collectible arrows, a pooled straight-line projectile, automatic arrow-type selection, shootable hazards, and the bow draw/aim/release animation.
 - **Design decisions (confirmed with the user)**: ammo is a **quiver** of collected arrows (the distance-charged ability gauge was dropped); two arrow types (`normal`, `flame`) chosen **automatically** at fire time; the flame arrow is **procedural** (`weapon-arrow.glb` + emissive head + `GPUParticles3D`, no Blender); arrow pickups live in Phase 7; arrows fly in a **straight line** (no gravity); Step 6.3 was pulled into this phase.
 - [x] Step 7.1: Arrow projectile scene (`scenes/combat/arrow.tscn` + `scripts/combat/arrow.gd`). A straight-line `Arrow` (`Node3D`) advances each physics frame and resolves hits with a ray query (mask `LAYER_OBSTACLE | LAYER_TARGET`) instead of a moving `Area3D`, so a 40 m/s projectile cannot tunnel. `activate()`/`deactivate()` make it `ObjectPool`-compatible; the flame variant toggles a shared emissive head and fire emitter built by `scripts/combat/flame_visual.gd` (`FlameVisual`).
