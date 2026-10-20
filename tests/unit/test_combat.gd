@@ -9,6 +9,7 @@ const ARROW_SCENE: PackedScene = preload("res://scenes/combat/arrow.tscn")
 const ARROW_POOL_SCRIPT: GDScript = preload("res://scripts/combat/arrow_pool.gd")
 const TARGET_SCENE: PackedScene = preload("res://scenes/obstacles/target_archery.tscn")
 const TREE_SCENE: PackedScene = preload("res://scenes/obstacles/obstacle_tree.tscn")
+const BARRIER_SCENE: PackedScene = preload("res://scenes/obstacles/barrier_fragile.tscn")
 const PICKUP_SCENE: PackedScene = preload("res://scenes/combat/arrow_pickup_normal.tscn")
 const FLAME_PICKUP_SCENE: PackedScene = preload("res://scenes/combat/arrow_pickup_flame.tscn")
 
@@ -40,6 +41,7 @@ func _run_all_tests() -> void:
 	await _test_arrow_lifecycle()
 	await _test_arrow_pool()
 	await _test_arrow_hit_resolution()
+	await _test_ladder_topple()
 	await _test_arrow_pickup()
 	await _test_smart_arrow_selection()
 
@@ -219,6 +221,44 @@ func _test_arrow_hit_resolution() -> void:
 	tree.queue_free()
 
 	_end_test("Arrow Hit Resolution")
+
+
+## Verifies an arrow topples the ladder around its base and stays stuck while it falls.
+func _test_ladder_topple() -> void:
+	_start_test("Ladder Topple & Stuck Arrow")
+
+	var barrier: StaticBody3D = BARRIER_SCENE.instantiate() as StaticBody3D
+	barrier.position = Vector3(0.0, 0.0, -8.0)
+	add_child(barrier)
+	await get_tree().physics_frame
+
+	_assert(barrier.has_method("stick_arrow"), "The ladder barrier must accept stuck arrows.")
+
+	var arrow: Arrow = ARROW_SCENE.instantiate() as Arrow
+	add_child(arrow)
+	arrow.activate(Vector3(0.0, 1.0, 0.0), Vector3.FORWARD, GameConfig.ARROW_TYPE_NORMAL)
+
+	var waited: int = 0
+	while arrow.get_parent() != barrier and waited < 60:
+		await get_tree().physics_frame
+		waited += 1
+
+	_assert(arrow.get_parent() == barrier, "An arrow must embed in the ladder it knocks down.")
+	_assert(not arrow.is_physics_processing(), "A stuck arrow must stop flying.")
+
+	var planted_position: Vector3 = arrow.global_position
+	for _frame in range(60):
+		await get_tree().physics_frame
+
+	_assert(barrier.global_transform.basis.get_euler().x < -0.3,
+		"The ladder must topple forward around its base.")
+	_assert(not arrow.global_position.is_equal_approx(planted_position),
+		"A stuck arrow must ride the toppling ladder.")
+	_assert(barrier.collision_layer == 0, "A knocked-down ladder must stop blocking the lane.")
+
+	arrow.queue_free()
+	barrier.queue_free()
+	_end_test("Ladder Topple & Stuck Arrow")
 
 
 ## Verifies arrow pickups report their type and hide on player contact.

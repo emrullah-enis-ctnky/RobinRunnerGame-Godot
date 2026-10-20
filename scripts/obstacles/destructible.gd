@@ -22,11 +22,16 @@ func destroy() -> void:
 
 	is_destroyed = true
 	set_deferred("collision_layer", 0)
-	hide()
+	_apply_destroyed_state()
 
 	if has_node("/root/EventBus"):
 		var bus: Node = get_node("/root/EventBus")
 		bus.target_destroyed.emit(name, score_reward)
+
+
+## Presents the destroyed state; subclasses override to animate instead of hiding.
+func _apply_destroyed_state() -> void:
+	hide()
 
 
 ## Re-enables the target so recycled chunks can present it again.
@@ -34,6 +39,12 @@ func restore() -> void:
 	is_destroyed = false
 	set_deferred("collision_layer", GameConfig.LAYER_TARGET)
 	show()
+	_reset_visual_state()
+
+
+## Restores any custom destruction presentation; subclasses override as needed.
+func _reset_visual_state() -> void:
+	pass
 
 
 ## Returns the arrow types that can destroy this target.

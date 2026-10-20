@@ -23,12 +23,19 @@ func _spawn(origin: Vector3, direction: Vector3, arrow_type: String) -> void:
 		return
 	if not arrow.finished.is_connected(_on_arrow_finished):
 		arrow.finished.connect(_on_arrow_finished)
+	if not arrow.stuck.is_connected(_on_arrow_stuck):
+		arrow.stuck.connect(_on_arrow_stuck)
 	arrow.activate(origin, direction, arrow_type)
 
 
 ## Returns a spent arrow to the pool.
 func _on_arrow_finished(arrow: Arrow) -> void:
 	_pool.release(arrow)
+
+
+## Drops an embedded arrow from pool management; the struck hazard now owns it.
+func _on_arrow_stuck(arrow: Arrow) -> void:
+	_pool.forget(arrow)
 
 
 ## Returns the number of arrows currently in flight.

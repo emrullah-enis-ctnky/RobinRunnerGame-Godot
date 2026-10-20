@@ -8,6 +8,7 @@ const GameConfig = preload("res://scripts/common/game_config.gd")
 const MESH_LOCAL_ROTATION: Vector3 = Vector3(0.0, 180.0, 0.0)
 
 signal finished(arrow)
+signal stuck(arrow)
 
 @export var speed: float = GameConfig.ARROW_SPEED
 @export var lifetime: float = GameConfig.ARROW_LIFETIME
@@ -78,8 +79,9 @@ func _physics_process(delta: float) -> void:
 	var hit: Dictionary = _raycast(global_position, global_position + step)
 	if hit.is_empty():
 		global_position += step
-	else:
-		_resolve_hit(hit.get("collider"))
+		return
+
+	if not _resolve_hit(hit):
 		_finish()
 
 
@@ -92,10 +94,30 @@ func _raycast(from: Vector3, to: Vector3) -> Dictionary:
 	return space.intersect_ray(query)
 
 
-## Applies the arrow type to the hit body when it can be destroyed.
-func _resolve_hit(body: Object) -> void:
-	if body != null and body.has_method("receive_arrow"):
-		body.receive_arrow(arrow_type)
+## Applies the hit to the surface; returns true when the arrow embeds and stays behind.
+func _resolve_hit(hit: Dictionary) -> bool:
+	var body: Object = hit.get("collider")
+	if body == null or not body.has_method("receive_arrow"):
+		return false
+
+	if not body.receive_arrow(arrow_type) or not body.has_method("stick_arrow"):
+		return false
+
+	body.stick_arrow(self, hit.get("position", global_position))
+	return true
+
+
+## Plants the arrow with its tip on the impact point and stops the flight.
+func embed_at(hit_position: Vector3) -> void:
+	var mesh: Node3D = get_node_or_null("Mesh") as Node3D
+	if mesh:
+		var tip_offset: Vector3 = global_transform.basis * MeshFit.local_long_axis_end(mesh, true)
+		global_position = hit_position - tip_offset
+
+	_flame_head.visible = false
+	_flame_fx.emitting = false
+	set_physics_process(false)
+	stuck.emit(self)
 
 
 ## Ends the flight and notifies the pool for recycling.
