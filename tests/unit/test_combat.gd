@@ -45,6 +45,8 @@ func _run_all_tests() -> void:
 	await _test_arrow_pool()
 	await _test_arrow_hit_resolution()
 	await _test_archery_target_sticking()
+	await _test_arrow_tip_leading()
+	await _test_long_range_shot()
 	await _test_ladder_topple()
 	await _test_ladder_resets_on_chunk_reuse()
 	await _test_arrow_pickup()
@@ -318,6 +320,72 @@ func _ring_of(point: Vector3) -> int:
 		if fraction <= ARCHERY_TARGET_SCRIPT.RING_RADII[ring] + 0.0001:
 			return ring
 	return ARCHERY_TARGET_SCRIPT.RING_RADII.size() - 1
+
+
+## Verifies the tip leads the hit test so an arrow plants on the face instead of
+## passing through it before the root reaches the board.
+func _test_arrow_tip_leading() -> void:
+	_start_test("Arrow Tip Leading")
+
+	var target: StaticBody3D = TARGET_SCENE.instantiate() as StaticBody3D
+	target.position = Vector3(0.0, 0.0, -20.0)
+	add_child(target)
+	await get_tree().physics_frame
+
+	var face_local := Vector3(
+		ARCHERY_TARGET_SCRIPT.BOARD_CENTER.x,
+		ARCHERY_TARGET_SCRIPT.BOARD_CENTER.y,
+		ARCHERY_TARGET_SCRIPT.BOARD_FACE_Z)
+	var face_world: Vector3 = target.to_global(face_local)
+
+	# The root starts a full metre behind the collision front, so only the tip can
+	# reach the board within the observed window.
+	var arrow: Arrow = ARROW_SCENE.instantiate() as Arrow
+	add_child(arrow)
+	arrow.speed = 6.0
+	arrow.activate(face_world + Vector3(0.0, 0.0, 1.0), Vector3.FORWARD, GameConfig.ARROW_TYPE_NORMAL)
+
+	for _frame in range(7):
+		await get_tree().physics_frame
+
+	_assert(arrow.get_parent() == target,
+		"The leading tip must register the hit before the arrow root reaches the board.")
+	_assert(not arrow.is_physics_processing(), "A tip-led hit must stop the flight.")
+
+	var tip_local: Vector3 = target.to_local(arrow.get_tip_position())
+	_assert(absf(tip_local.z - ARCHERY_TARGET_SCRIPT.BOARD_FACE_Z) < 0.02,
+		"The embedded tip must sit on the visible board face (got z=%.3f)." % tip_local.z)
+	_assert(arrow.global_position.z > face_world.z,
+		"The arrow shaft must stay in front of the board instead of passing through it.")
+
+	target.queue_free()
+	_end_test("Arrow Tip Leading")
+
+
+## Verifies a shot fired at a distant target still embeds instead of expiring early.
+func _test_long_range_shot() -> void:
+	_start_test("Long Range Shot")
+
+	var target: StaticBody3D = TARGET_SCENE.instantiate() as StaticBody3D
+	target.position = Vector3(0.0, 0.0, -35.0)
+	add_child(target)
+	await get_tree().physics_frame
+
+	var arrow: Arrow = ARROW_SCENE.instantiate() as Arrow
+	add_child(arrow)
+	arrow.activate(Vector3(0.0, 0.64, 0.0), Vector3.FORWARD, GameConfig.ARROW_TYPE_NORMAL)
+
+	var waited: int = 0
+	while arrow.get_parent() != target and waited < 150:
+		await get_tree().physics_frame
+		waited += 1
+
+	_assert(arrow.get_parent() == target, "A long shot must still embed in a distant target.")
+	_assert(not arrow.is_physics_processing(), "A distant stuck arrow must stop flying.")
+	_assert(not target.is_destroyed, "A distant arrow must not destroy the target.")
+
+	target.queue_free()
+	_end_test("Long Range Shot")
 
 
 ## Verifies an arrow topples the ladder around its base and stays stuck while it falls.

@@ -6,6 +6,8 @@ const GameConfig = preload("res://scripts/common/game_config.gd")
 
 # The model's pointed head sits on +Z, so a half-turn aligns it with the flight path.
 const MESH_LOCAL_ROTATION: Vector3 = Vector3(0.0, 180.0, 0.0)
+# Small sweep radius that catches narrow targets the centre line would graze past.
+const HIT_SWEEP_RADIUS: float = 0.07
 
 signal finished(arrow)
 signal stuck(arrow)
@@ -18,23 +20,34 @@ var arrow_type: String = GameConfig.ARROW_TYPE_NORMAL
 var _direction: Vector3 = Vector3.FORWARD
 var _launch_origin: Vector3 = Vector3.ZERO
 var _timer: float = 0.0
+var _tip_offset: Vector3 = Vector3.ZERO
+var _sweep_shape: SphereShape3D
 var _flame_head: MeshInstance3D
 var _flame_fx: GPUParticles3D
 
 
-## Builds the flame visuals once so every pooled arrow reuses them.
+## Builds the flame visuals and hit sweep once so every pooled arrow reuses them.
 func _ready() -> void:
 	_prepare_mesh()
 	_build_flame_visuals()
+	_prepare_hit_sweep()
 	deactivate()
 
 
-## Normalizes the arrow mesh and turns its pointed +Z head into the travel direction.
+## Normalizes the arrow mesh, turns its pointed +Z head into the travel direction,
+## and caches where the tip sits in the arrow's local space.
 func _prepare_mesh() -> void:
 	var mesh: Node3D = get_node_or_null("Mesh") as Node3D
 	if mesh:
 		MeshFit.fit_longest_axis(mesh, GameConfig.ARROW_MODEL_LENGTH, GameConfig.ARROW_CROSS_SECTION_SCALE)
 		mesh.rotation_degrees = MESH_LOCAL_ROTATION
+		_tip_offset = MeshFit.local_long_axis_end(mesh, true)
+
+
+## Builds the small sphere used to sweep for narrow targets between tips.
+func _prepare_hit_sweep() -> void:
+	_sweep_shape = SphereShape3D.new()
+	_sweep_shape.radius = HIT_SWEEP_RADIUS
 
 
 ## Creates the glowing head and the particle emitter shown only for flame arrows.
@@ -78,13 +91,28 @@ func _physics_process(delta: float) -> void:
 		return
 
 	var step: Vector3 = _direction * speed * delta
-	var hit: Dictionary = _raycast(global_position, global_position + step)
+	var tip: Vector3 = get_tip_position()
+	var hit: Dictionary = _find_hit(tip, tip + step)
 	if hit.is_empty():
 		global_position += step
 		return
 
 	if not _resolve_hit(hit):
 		_finish()
+
+
+## Returns the arrow tip's world position, which leads the cast instead of the root.
+func get_tip_position() -> Vector3:
+	return global_position + global_transform.basis * _tip_offset
+
+
+## Finds the first shootable surface along the travelled segment, using a thin ray
+## first and a small sphere sweep so narrow or distant targets cannot slip by.
+func _find_hit(from: Vector3, to: Vector3) -> Dictionary:
+	var hit: Dictionary = _raycast(from, to)
+	if not hit.is_empty():
+		return hit
+	return _sweep(from, to - from)
 
 
 ## Queries the physics world for the first shootable surface along a segment.
@@ -96,13 +124,41 @@ func _raycast(from: Vector3, to: Vector3) -> Dictionary:
 	return space.intersect_ray(query)
 
 
+## Sweeps a small sphere along the segment to catch targets just off the centre line.
+func _sweep(from: Vector3, motion: Vector3) -> Dictionary:
+	if _sweep_shape == null:
+		return {}
+
+	var space: PhysicsDirectSpaceState3D = get_world_3d().direct_space_state
+	var query := PhysicsShapeQueryParameters3D.new()
+	query.shape = _sweep_shape
+	query.transform = Transform3D(Basis.IDENTITY, from)
+	query.motion = motion
+	query.collision_mask = GameConfig.LAYER_OBSTACLE | GameConfig.LAYER_TARGET
+	query.collide_with_areas = false
+
+	var fractions: PackedFloat32Array = space.cast_motion(query)
+	if fractions.is_empty() or fractions[0] >= 1.0:
+		return {}
+
+	query.transform = Transform3D(Basis.IDENTITY, from + motion * fractions[0])
+	var result: Dictionary = space.get_rest_info(query)
+	if result.is_empty():
+		return {}
+	result["position"] = result.get("point", from)
+	return result
+
+
 ## Applies the hit to the surface; returns true when the arrow embeds and stays behind.
 func _resolve_hit(hit: Dictionary) -> bool:
 	var body: Object = hit.get("collider")
 	if body == null or not body.has_method("receive_arrow"):
 		return false
 
-	if not body.receive_arrow(arrow_type) or not body.has_method("stick_arrow"):
+	# A destructible/ shootable surface consumes the arrow; a surface that only
+	# accepts sticking (tall trees) catches it like a dart instead of letting it pass.
+	body.receive_arrow(arrow_type)
+	if not body.has_method("stick_arrow"):
 		return false
 
 	body.stick_arrow(self, hit.get("position", global_position))
@@ -116,10 +172,7 @@ func travel_distance_to(point: Vector3) -> float:
 
 ## Plants the arrow with its tip on the impact point and stops the flight.
 func embed_at(hit_position: Vector3) -> void:
-	var mesh: Node3D = get_node_or_null("Mesh") as Node3D
-	if mesh:
-		var tip_offset: Vector3 = global_transform.basis * MeshFit.local_long_axis_end(mesh, true)
-		global_position = hit_position - tip_offset
+	global_position = hit_position - global_transform.basis * _tip_offset
 
 	_flame_head.visible = false
 	_flame_fx.emitting = false

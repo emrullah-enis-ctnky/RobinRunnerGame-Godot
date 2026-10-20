@@ -12,6 +12,9 @@ const MAX_SPREAD: float = 1.4
 const RING_RADII: Array[float] = [0.15, 0.45, 0.72, 0.95]
 const BOARD_CENTER: Vector3 = Vector3(0.0, 0.64, 0.0)
 const BOARD_RADIUS: float = 0.5
+# Front face of the scaled target mesh (measured at z = 0.411), so arrows plant on
+# the visible board instead of stopping at the deeper collision box front (z = 0.5).
+const BOARD_FACE_Z: float = 0.41
 
 # A new arrow landing this close to an embedded one pushes both apart.
 const STACK_RADIUS: float = 0.14
@@ -52,7 +55,7 @@ func stick_arrow(arrow: Node3D, hit_position: Vector3) -> void:
 
 ## Returns a target-local impact point; closer shots scatter less, very close shots
 ## land the bullseye exactly, and long shots spread toward the outer rings.
-func roll_impact_point(hit_position: Vector3, shot_distance: float) -> Vector3:
+func roll_impact_point(_hit_position: Vector3, shot_distance: float) -> Vector3:
 	var accuracy: float = clampf(
 		(shot_distance - NEAR_DISTANCE) / (FAR_DISTANCE - NEAR_DISTANCE), 0.0, 1.0)
 	var spread: float = MAX_SPREAD * accuracy
@@ -62,11 +65,10 @@ func roll_impact_point(hit_position: Vector3, shot_distance: float) -> Vector3:
 		radius_fraction = minf(absf(_rng.randfn(0.0, spread)), RING_RADII[RING_RADII.size() - 1])
 
 	var angle: float = _rng.randf_range(0.0, TAU)
-	var face_z: float = to_local(hit_position).z
 	return Vector3(
 		BOARD_CENTER.x + cos(angle) * radius_fraction * BOARD_RADIUS,
 		BOARD_CENTER.y + sin(angle) * radius_fraction * BOARD_RADIUS,
-		face_z
+		BOARD_FACE_Z
 	)
 
 
