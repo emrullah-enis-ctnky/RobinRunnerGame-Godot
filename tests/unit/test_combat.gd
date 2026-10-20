@@ -263,7 +263,17 @@ func _test_ladder_topple() -> void:
 		"A stuck arrow must ride the toppling ladder.")
 	_assert(barrier.collision_layer == 0, "A knocked-down ladder must stop blocking the lane.")
 
+	# A flame arrow also topples the ladder.
+	var flame_barrier: StaticBody3D = BARRIER_SCENE.instantiate() as StaticBody3D
+	flame_barrier.position = Vector3(0.0, 0.0, -20.0)
+	add_child(flame_barrier)
+	await get_tree().physics_frame
+	_assert(flame_barrier.receive_arrow(GameConfig.ARROW_TYPE_FLAME),
+		"A flame arrow must knock the ladder down too.")
+	_assert(flame_barrier.is_destroyed, "A flame-struck ladder must start toppling.")
+
 	arrow.queue_free()
+	flame_barrier.queue_free()
 	barrier.queue_free()
 	_end_test("Ladder Topple & Stuck Arrow")
 
