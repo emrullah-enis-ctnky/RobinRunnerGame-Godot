@@ -17,8 +17,8 @@ var _angle: float = 0.0
 var _angular_speed: float = 0.0
 var _base_basis: Basis = Basis.IDENTITY
 var _fall_axis: Vector3 = Vector3.LEFT
-var _stuck_arrows: Array[Node3D] = []
 var _collision_cleared: bool = false
+var _barrier_stuck_arrows: Array[Node3D] = []
 
 
 ## Captures the upright pose and parks the fall simulation until the barrier is hit.
@@ -69,7 +69,7 @@ func stick_arrow(arrow: Node3D, hit_position: Vector3) -> bool:
 	if arrow.has_method("embed_at"):
 		arrow.embed_at(hit_position)
 	arrow.reparent(self, true)
-	_stuck_arrows.append(arrow)
+	_barrier_stuck_arrows.append(arrow)
 	return true
 
 
@@ -82,7 +82,7 @@ func _reset_visual_state() -> void:
 	global_transform.basis = _base_basis
 	set_physics_process(false)
 
-	for arrow in _stuck_arrows:
+	for arrow in _barrier_stuck_arrows:
 		if is_instance_valid(arrow):
 			arrow.queue_free()
-	_stuck_arrows.clear()
+	_barrier_stuck_arrows.clear()

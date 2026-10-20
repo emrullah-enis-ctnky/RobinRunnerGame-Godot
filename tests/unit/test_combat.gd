@@ -13,6 +13,8 @@ const PICKUP_BURST_SCRIPT: GDScript = preload("res://scripts/combat/pickup_burst
 const BURNABLE_TREE_SCRIPT: GDScript = preload("res://scripts/obstacles/burnable_tree.gd")
 const TREE_SCENE: PackedScene = preload("res://scenes/obstacles/obstacle_tree.tscn")
 const BARRIER_SCENE: PackedScene = preload("res://scenes/obstacles/barrier_fragile.tscn")
+const FENCE_SCENE: PackedScene = preload("res://scenes/obstacles/obstacle_fence.tscn")
+const ARCH_SCENE: PackedScene = preload("res://scenes/world/props/overhead_arch.tscn")
 const ROCKY_CHUNK_SCENE: PackedScene = preload("res://scenes/world/chunks/track_chunk_rocky.tscn")
 const PICKUP_SCENE: PackedScene = preload("res://scenes/combat/arrow_pickup_normal.tscn")
 const FLAME_PICKUP_SCENE: PackedScene = preload("res://scenes/combat/arrow_pickup_flame.tscn")
@@ -49,6 +51,7 @@ func _run_all_tests() -> void:
 	await _test_arrow_tip_leading()
 	await _test_long_range_shot()
 	await _test_tree_arrow_sticking()
+	await _test_tall_structure_sticking()
 	await _test_ladder_topple()
 	await _test_ladder_resets_on_chunk_reuse()
 	await _test_arrow_pickup()
@@ -446,6 +449,53 @@ func _test_tree_arrow_sticking() -> void:
 
 	tree.queue_free()
 	_end_test("Tree Arrow Sticking")
+
+
+## Verifies every tall structure catches arrows while short obstacles do not.
+func _test_tall_structure_sticking() -> void:
+	_start_test("Tall Structure Sticking")
+
+	var arch: Node3D = ARCH_SCENE.instantiate() as Node3D
+	arch.position = Vector3(0.0, 0.0, -10.0)
+	add_child(arch)
+	await get_tree().physics_frame
+
+	var beam: StaticBody3D = arch.get_node("HazardBody") as StaticBody3D
+	var arrow: Arrow = ARROW_SCENE.instantiate() as Arrow
+	add_child(arrow)
+	arrow.activate(Vector3(0.0, 1.25, 0.0), Vector3.FORWARD, GameConfig.ARROW_TYPE_NORMAL)
+
+	var waited: int = 0
+	while arrow.get_parent() != beam and waited < 90:
+		await get_tree().physics_frame
+		waited += 1
+
+	_assert(arrow.get_parent() == beam,
+		"An arrow must stick into the tall arch structure.")
+	_assert(not arrow.is_physics_processing(), "A structure-stuck arrow must stop flying.")
+
+	# A short obstacle stays pass-through: the arrow is consumed, not embedded.
+	var fence: StaticBody3D = FENCE_SCENE.instantiate() as StaticBody3D
+	fence.position = Vector3(0.0, 0.0, -25.0)
+	add_child(fence)
+	await get_tree().physics_frame
+
+	var low_arrow: Arrow = ARROW_SCENE.instantiate() as Arrow
+	add_child(low_arrow)
+	low_arrow.activate(Vector3(0.0, 0.34, 0.0), Vector3.FORWARD, GameConfig.ARROW_TYPE_NORMAL)
+
+	waited = 0
+	while low_arrow.visible and waited < 90:
+		await get_tree().physics_frame
+		waited += 1
+
+	_assert(low_arrow.get_parent() != fence,
+		"A short obstacle must not catch an arrow like a tall structure.")
+	_assert(not low_arrow.visible, "An arrow hitting a short obstacle must be consumed.")
+
+	arch.queue_free()
+	fence.queue_free()
+	_end_test("Tall Structure Sticking")
 
 
 ## Verifies an arrow topples the ladder around its base and stays stuck while it falls.
