@@ -26,20 +26,6 @@ func _ready() -> void:
 	# around it reads as the whole ladder tipping over that point.
 	set_physics_process(false)
 
-	var chunk: Node = _find_chunk()
-	if chunk != null:
-		chunk.activated.connect(restore)
-
-
-## Returns the pooled track chunk this barrier belongs to, when there is one.
-func _find_chunk() -> TrackChunk:
-	var node: Node = get_parent()
-	while node != null:
-		if node is TrackChunk:
-			return node as TrackChunk
-		node = node.get_parent()
-	return null
-
 
 ## Starts the fall in place of the default hide-on-destroy behaviour.
 func _apply_destroyed_state() -> void:

@@ -271,8 +271,22 @@ func _test_ladder_resets_on_chunk_reuse() -> void:
 	add_child(chunk)
 	await get_tree().physics_frame
 
-	var barrier: StaticBody3D = chunk.find_child("FragileBarrierLeftLane", true, false) as StaticBody3D
-	_assert(barrier != null, "The rocky chunk must contain the fragile ladder barrier.")
+	var generator: Node = chunk.get_node_or_null("ChunkHazards")
+	_assert(generator != null, "The rocky chunk must generate its hazards.")
+	if generator == null:
+		chunk.queue_free()
+		_end_test("Ladder Reset On Chunk Reuse")
+		return
+
+	# Force every generated row to be a ladder so the reset can be observed.
+	var ladder_palette: Array[PackedScene] = [BARRIER_SCENE]
+	generator.hazard_scenes = ladder_palette
+
+	chunk.activate(Vector3.ZERO)
+	await get_tree().process_frame
+
+	var barrier: StaticBody3D = _find_ladder(chunk)
+	_assert(barrier != null, "The rocky chunk must present a ladder barrier.")
 	if barrier == null:
 		chunk.queue_free()
 		_end_test("Ladder Reset On Chunk Reuse")
@@ -287,14 +301,27 @@ func _test_ladder_resets_on_chunk_reuse() -> void:
 	chunk.activate(Vector3(0.0, 0.0, -120.0))
 	await get_tree().process_frame
 
-	_assert(not barrier.is_destroyed, "A recycled chunk must restore its ladder.")
-	_assert(absf(barrier.global_transform.basis.get_euler().x) < 0.01,
-		"A recycled chunk must present an upright ladder.")
-	_assert(barrier.collision_layer == GameConfig.LAYER_TARGET,
-		"A restored ladder must block its lane again.")
+	_assert(not is_instance_valid(barrier), "The toppled ladder must be discarded on reuse.")
+
+	var reset_barrier: StaticBody3D = _find_ladder(chunk)
+	_assert(reset_barrier != null, "A recycled chunk must present a ladder barrier again.")
+	if reset_barrier != null:
+		_assert(not reset_barrier.is_destroyed, "A recycled chunk must restore its ladder.")
+		_assert(absf(reset_barrier.global_transform.basis.get_euler().x) < 0.01,
+			"A recycled chunk must present an upright ladder.")
+		_assert(reset_barrier.collision_layer == GameConfig.LAYER_TARGET,
+			"A restored ladder must block its lane again.")
 
 	chunk.queue_free()
 	_end_test("Ladder Reset On Chunk Reuse")
+
+
+## Returns the first generated ladder barrier under a chunk.
+func _find_ladder(chunk: Node) -> StaticBody3D:
+	for node in chunk.find_children("*", "StaticBody3D", true, false):
+		if node is TopplingBarrier:
+			return node as StaticBody3D
+	return null
 
 
 ## Verifies arrow pickups report their type and hide on player contact.
