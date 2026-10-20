@@ -58,7 +58,7 @@ func _run_all_tests() -> void:
 	_test_hazard_visual_collider_alignment()
 	_test_lethal_hit_resolution()
 	_test_arch_head_bump_feedback()
-	_test_chunk_route_passability()
+	await _test_chunk_route_passability()
 
 
 ## Verifies every static hazard sits on the obstacle layer with a real collider.
@@ -323,7 +323,7 @@ func _test_arch_head_bump_feedback() -> void:
 	_end_test("Overhead Arch Head-Bump Feedback")
 
 
-## Verifies every chunk row of hazards always leaves at least one clear lane.
+## Verifies every generated chunk layout keeps a passable route with a sensible hazard count.
 func _test_chunk_route_passability() -> void:
 	_start_test("Chunk Hazard Rows & Route Passability")
 
@@ -340,32 +340,71 @@ func _test_chunk_route_passability() -> void:
 
 		add_child(chunk)
 
-		# Group every lane-blocking hazard by the chunk-depth row it occupies
-		var rows: Dictionary = {}
-		for node in chunk.find_children("*", "Node3D", true, false):
-			if not node.is_in_group("obstacle"):
-				continue
-			var row_index: int = int(round(node.position.z / GameConfig.LANE_WIDTH))
-			var lane_index: int = int(round(node.position.x / GameConfig.LANE_WIDTH))
-			if not rows.has(row_index):
-				rows[row_index] = []
-			rows[row_index].append(lane_index)
-
-		_assert(rows.size() > 0, "%s must place at least one hazard row." % path)
-
-		var lanes: Array = [GameConfig.LANE_LEFT, GameConfig.LANE_CENTER, GameConfig.LANE_RIGHT]
-		for row_index in rows.keys():
-			var blocked_lanes: Array = rows[row_index]
-			var free_lanes: int = 0
-			for lane in lanes:
-				if not blocked_lanes.has(lane):
-					free_lanes += 1
-			_assert(free_lanes >= 1,
-				"%s row at z=%.0f must leave a clear lane (free: %d)." % [path, float(row_index) * GameConfig.LANE_WIDTH, free_lanes])
+		# Re-activate repeatedly so the random layouts are all inspected.
+		for _iteration in range(30):
+			chunk.activate(Vector3.ZERO)
+			await get_tree().process_frame
+			_assert_chunk_layout(chunk, path)
 
 		chunk.queue_free()
 
 	_end_test("Chunk Hazard Rows & Route Passability")
+
+
+## Groups one generated layout into hazard rows and asserts the route stays reachable.
+func _assert_chunk_layout(chunk: Node3D, path: String) -> void:
+	var rows: Dictionary = {}
+	for node in chunk.find_children("*", "Node3D", true, false):
+		# The arch body lives in its own group but still occupies a lane.
+		if not (node.is_in_group("obstacle") or node.is_in_group("overhead_barrier")):
+			continue
+		var local: Vector3 = chunk.to_local(node.global_position)
+		var row_index: int = int(round(local.z / GameConfig.LANE_WIDTH))
+		var lane_index: int = int(round(local.x / GameConfig.LANE_WIDTH))
+		if not rows.has(row_index):
+			rows[row_index] = []
+		rows[row_index].append(lane_index)
+
+	_assert(rows.size() >= 2 and rows.size() <= 4,
+		"%s must place 2-4 hazard rows per chunk (got %d)." % [path, rows.size()])
+
+	var row_order: Array = rows.keys()
+	row_order.sort()
+	row_order.reverse()
+
+	var lanes: Array = [GameConfig.LANE_LEFT, GameConfig.LANE_CENTER, GameConfig.LANE_RIGHT]
+	var lane_usage: Dictionary = {}
+	var blocked_total: int = 0
+	var previous_dense_free: int = 99
+	for row_index in row_order:
+		var blocked_lanes: Array = rows[row_index]
+		_assert(blocked_lanes.size() < 3,
+			"%s must never block all three lanes in one row." % path)
+
+		for lane in blocked_lanes:
+			lane_usage[lane] = lane_usage.get(lane, 0) + 1
+		blocked_total += blocked_lanes.size()
+
+		var free_lanes: Array = []
+		for lane in lanes:
+			if not blocked_lanes.has(lane):
+				free_lanes.append(lane)
+		_assert(free_lanes.size() >= 1,
+			"%s row at z=%.0f must leave a clear lane (free: %d)." % [path, float(row_index) * GameConfig.LANE_WIDTH, free_lanes.size()])
+
+		if blocked_lanes.size() >= 2:
+			if previous_dense_free != 99 and free_lanes.size() == 1:
+				_assert(absi(free_lanes[0] - previous_dense_free) <= 1,
+					"%s dense rows must not force a two-lane jump." % path)
+			previous_dense_free = free_lanes[0] if free_lanes.size() == 1 else 99
+		else:
+			previous_dense_free = 99
+
+	# Once there are enough hazards, none of the three lanes may stay empty.
+	if blocked_total >= 3:
+		for lane in lanes:
+			_assert(lane_usage.get(lane, 0) > 0,
+				"%s must spread hazards across all three lanes (lane %d unused)." % [path, lane])
 
 
 ## Returns the first collision shape directly owned by a physics body.
