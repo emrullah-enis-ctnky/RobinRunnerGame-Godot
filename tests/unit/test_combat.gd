@@ -8,6 +8,8 @@ const PLAYER_SCENE: PackedScene = preload("res://scenes/player/player.tscn")
 const ARROW_SCENE: PackedScene = preload("res://scenes/combat/arrow.tscn")
 const ARROW_POOL_SCRIPT: GDScript = preload("res://scripts/combat/arrow_pool.gd")
 const TARGET_SCENE: PackedScene = preload("res://scenes/obstacles/target_archery.tscn")
+const ARCHERY_TARGET_SCRIPT: GDScript = preload("res://scripts/obstacles/archery_target.gd")
+const PICKUP_BURST_SCRIPT: GDScript = preload("res://scripts/combat/pickup_burst.gd")
 const TREE_SCENE: PackedScene = preload("res://scenes/obstacles/obstacle_tree.tscn")
 const BARRIER_SCENE: PackedScene = preload("res://scenes/obstacles/barrier_fragile.tscn")
 const ROCKY_CHUNK_SCENE: PackedScene = preload("res://scenes/world/chunks/track_chunk_rocky.tscn")
@@ -247,10 +249,10 @@ func _test_archery_target_sticking() -> void:
 	_assert(not target.is_destroyed, "A stuck arrow must not destroy the target.")
 
 	# Very close shots always land the bullseye.
-	var face_hit: Vector3 = target.to_global(ArcheryTarget.BOARD_CENTER + Vector3(0.0, 0.0, 0.5))
+	var face_hit: Vector3 = target.to_global(ARCHERY_TARGET_SCRIPT.BOARD_CENTER + Vector3(0.0, 0.0, 0.5))
 	var near_bullseyes: int = 0
 	for _sample in range(500):
-		if _ring_of(target.roll_impact_point(face_hit, ArcheryTarget.NEAR_DISTANCE)) == 0:
+		if _ring_of(target.roll_impact_point(face_hit, ARCHERY_TARGET_SCRIPT.NEAR_DISTANCE)) == 0:
 			near_bullseyes += 1
 	_assert(near_bullseyes == 500,
 		"Very close shots must always land the bullseye (got %d/500)." % near_bullseyes)
@@ -259,7 +261,7 @@ func _test_archery_target_sticking() -> void:
 	var far_outer: int = 0
 	var far_bullseyes: int = 0
 	for _sample in range(500):
-		var ring: int = _ring_of(target.roll_impact_point(face_hit, ArcheryTarget.FAR_DISTANCE))
+		var ring: int = _ring_of(target.roll_impact_point(face_hit, ARCHERY_TARGET_SCRIPT.FAR_DISTANCE))
 		if ring >= 2:
 			far_outer += 1
 		if ring == 0:
@@ -275,7 +277,7 @@ func _test_archery_target_sticking() -> void:
 	add_child(stack_target)
 	await get_tree().physics_frame
 
-	var impact: Vector3 = ArcheryTarget.BOARD_CENTER + Vector3(0.0, 0.0, 0.5)
+	var impact: Vector3 = ARCHERY_TARGET_SCRIPT.BOARD_CENTER + Vector3(0.0, 0.0, 0.5)
 	var first: Arrow = _embed_test_arrow(stack_target, impact)
 	var second: Arrow = _embed_test_arrow(stack_target, impact)
 	await get_tree().process_frame
@@ -310,12 +312,12 @@ func _embed_test_arrow(target: StaticBody3D, local_point: Vector3) -> Arrow:
 
 ## Returns the ring index (0 bullseye .. 3 outer) for a target-local point.
 func _ring_of(point: Vector3) -> int:
-	var offset := Vector2(point.x - ArcheryTarget.BOARD_CENTER.x, point.y - ArcheryTarget.BOARD_CENTER.y)
-	var fraction: float = offset.length() / ArcheryTarget.BOARD_RADIUS
-	for ring in range(ArcheryTarget.RING_RADII.size()):
-		if fraction <= ArcheryTarget.RING_RADII[ring] + 0.0001:
+	var offset := Vector2(point.x - ARCHERY_TARGET_SCRIPT.BOARD_CENTER.x, point.y - ARCHERY_TARGET_SCRIPT.BOARD_CENTER.y)
+	var fraction: float = offset.length() / ARCHERY_TARGET_SCRIPT.BOARD_RADIUS
+	for ring in range(ARCHERY_TARGET_SCRIPT.RING_RADII.size()):
+		if fraction <= ARCHERY_TARGET_SCRIPT.RING_RADII[ring] + 0.0001:
 			return ring
-	return ArcheryTarget.RING_RADII.size() - 1
+	return ARCHERY_TARGET_SCRIPT.RING_RADII.size() - 1
 
 
 ## Verifies an arrow topples the ladder around its base and stays stuck while it falls.
@@ -485,10 +487,17 @@ func _test_arrow_pickup() -> void:
 		waited += 1
 	_assert(picked["type"] == "arrow_normal", "Collecting must report the arrow type.")
 	_assert(picked["value"] == 1, "Collecting must report the arrow amount.")
+	_assert(not get_tree().get_nodes_in_group("pickup_burst").is_empty(),
+		"Collecting a pickup must spawn a spark burst.")
 
 	# The collect effect flies and shrinks the arrow before it hides.
 	await get_tree().create_timer(GameConfig.PICKUP_COLLECT_TIME + 0.2).timeout
 	_assert(not pickup.visible, "A collected pickup must hide after its collect effect.")
+
+	# The burst cleans itself up after the sparks burn out.
+	await get_tree().create_timer(PICKUP_BURST_SCRIPT.FREE_DELAY + 0.3).timeout
+	_assert(get_tree().get_nodes_in_group("pickup_burst").is_empty(),
+		"The spark burst must free itself after it finishes.")
 
 	pickup.restore()
 	_assert(pickup.visible, "restore() must show the pickup again.")

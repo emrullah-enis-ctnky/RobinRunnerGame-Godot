@@ -3,6 +3,7 @@ extends Area3D
 ## Collectible arrow planted in the track; grants quiver ammo on player contact.
 
 const GameConfig = preload("res://scripts/common/game_config.gd")
+const PickupBurst = preload("res://scripts/combat/pickup_burst.gd")
 
 # Never scale to exactly zero: a singular basis is rejected by Jolt Physics.
 const COLLECT_MIN_SCALE: float = 0.01
@@ -70,14 +71,31 @@ func _on_body_entered(body: Node3D) -> void:
 	_collect(body)
 
 
-## Lifts the arrow toward the player's quiver while shrinking it away.
+## Kicks up a spark burst, then lifts the arrow toward the quiver while shrinking it away.
 func _collect(player: Node3D) -> void:
 	set_deferred("monitoring", false)
+	_stop_flame()
+	PickupBurst.spawn(get_parent(), global_position, _burst_color())
 	_collect_tween = create_tween()
 	_collect_tween.set_parallel(true)
 	_collect_tween.tween_property(self, "global_position", player.global_position + Vector3(0.0, 1.2, 0.3), GameConfig.PICKUP_COLLECT_TIME).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
 	_collect_tween.tween_property(self, "scale", Vector3.ONE * COLLECT_MIN_SCALE, GameConfig.PICKUP_COLLECT_TIME).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_IN)
 	_collect_tween.chain().tween_callback(hide)
+
+
+## Extinguishes the pickup fire the moment the arrow is taken.
+func _stop_flame() -> void:
+	if _flame_head:
+		_flame_head.visible = false
+	if _flame_fx:
+		_flame_fx.emitting = false
+
+
+## Returns the spark color that matches the collected arrow type.
+func _burst_color() -> Color:
+	if arrow_type == GameConfig.ARROW_TYPE_FLAME:
+		return PickupBurst.FLAME_COLOR
+	return PickupBurst.NORMAL_COLOR
 
 
 ## Re-enables and repositions the pickup so recycled chunks can present it again.
@@ -88,6 +106,11 @@ func restore() -> void:
 	position = _base_position
 	show()
 	set_deferred("monitoring", true)
+	if arrow_type == GameConfig.ARROW_TYPE_FLAME:
+		if _flame_head:
+			_flame_head.visible = true
+		if _flame_fx:
+			_flame_fx.emitting = true
 
 
 ## Rolls the spawn chance when a chunk re-activates, keeping pickups sparse.
