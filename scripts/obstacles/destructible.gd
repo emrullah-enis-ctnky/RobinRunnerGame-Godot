@@ -21,7 +21,6 @@ func destroy() -> void:
 		return
 
 	is_destroyed = true
-	set_deferred("collision_layer", 0)
 	_apply_destroyed_state()
 
 	if has_node("/root/EventBus"):
@@ -31,6 +30,7 @@ func destroy() -> void:
 
 ## Presents the destroyed state; subclasses override to animate instead of hiding.
 func _apply_destroyed_state() -> void:
+	set_deferred("collision_layer", 0)
 	hide()
 
 

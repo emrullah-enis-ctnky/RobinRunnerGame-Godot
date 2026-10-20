@@ -249,6 +249,11 @@ func _test_ladder_topple() -> void:
 	_assert(not arrow.is_physics_processing(), "A stuck arrow must stop flying.")
 
 	var planted_position: Vector3 = arrow.global_position
+	for _frame in range(8):
+		await get_tree().physics_frame
+	_assert(barrier.collision_layer == GameConfig.LAYER_TARGET,
+		"A toppling ladder must keep blocking the lane until it is nearly flat.")
+
 	for _frame in range(60):
 		await get_tree().physics_frame
 
