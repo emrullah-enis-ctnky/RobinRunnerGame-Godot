@@ -14,6 +14,7 @@ var _rng: RandomNumberGenerator = RandomNumberGenerator.new()
 var _chunk: TrackChunk
 var _lane_objects: Node3D
 var _generated: Array[Node3D] = []
+var _lane_usage: Array[int] = [0, 0, 0]
 
 
 ## Finds the owning chunk and regenerates the layout every time it is recycled.
@@ -43,6 +44,7 @@ func _generate() -> void:
 	if _lane_objects == null or hazard_scenes.is_empty():
 		return
 
+	_lane_usage = [0, 0, 0]
 	var rows: Array[float] = _pick_rows()
 	var previous_free_lane: int = _NO_LANE
 
@@ -55,9 +57,11 @@ func _generate() -> void:
 					blocked.append(lane)
 			previous_free_lane = free_lane
 		else:
-			blocked.append(_pick_blocked_lane(previous_free_lane))
+			blocked.append(_pick_least_used_lane())
 			previous_free_lane = _NO_LANE
 
+		for lane in blocked:
+			_lane_usage[lane] += 1
 		_spawn_row(blocked, row_z)
 
 
@@ -80,22 +84,36 @@ func _pick_rows() -> Array[float]:
 	return chosen
 
 
-## Returns a free lane at most one lane away from the previous dense row's free lane.
+## Returns the free lane that blocks the two least-used lanes, at most one lane
+## away from the previous dense row's free lane.
 func _pick_free_lane(previous_free_lane: int) -> int:
+	var candidates: Array[int] = []
 	if previous_free_lane == _NO_LANE:
-		return _rng.randi_range(0, 2)
-	return clampi(previous_free_lane + _rng.randi_range(-1, 1), 0, 2)
+		candidates = [0, 1, 2]
+	else:
+		for lane in range(previous_free_lane - 1, previous_free_lane + 2):
+			if lane >= 0 and lane <= 2:
+				candidates.append(lane)
+
+	var highest_usage: int = -1
+	for lane in candidates:
+		highest_usage = maxi(highest_usage, _lane_usage[lane])
+
+	var ties: Array[int] = []
+	for lane in candidates:
+		if _lane_usage[lane] == highest_usage:
+			ties.append(lane)
+	return ties[_rng.randi_range(0, ties.size() - 1)]
 
 
-## Picks a blocked lane that keeps the previous dense row's free lane open.
-func _pick_blocked_lane(previous_free_lane: int) -> int:
-	if previous_free_lane == _NO_LANE:
-		return _rng.randi_range(0, 2)
-
-	var lane: int = _rng.randi_range(0, 2)
-	while lane == previous_free_lane:
-		lane = _rng.randi_range(0, 2)
-	return lane
+## Picks the least-used lane so hazards spread evenly across the track.
+func _pick_least_used_lane() -> int:
+	var lowest_usage: int = _lane_usage.min()
+	var ties: Array[int] = []
+	for lane in range(3):
+		if _lane_usage[lane] == lowest_usage:
+			ties.append(lane)
+	return ties[_rng.randi_range(0, ties.size() - 1)]
 
 
 ## Instantiates one distinct hazard per blocked lane in the row.

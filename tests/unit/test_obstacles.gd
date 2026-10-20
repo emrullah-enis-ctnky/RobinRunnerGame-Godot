@@ -372,13 +372,19 @@ func _assert_chunk_layout(chunk: Node3D, path: String) -> void:
 	row_order.sort()
 	row_order.reverse()
 
+	var lanes: Array = [GameConfig.LANE_LEFT, GameConfig.LANE_CENTER, GameConfig.LANE_RIGHT]
+	var lane_usage: Dictionary = {}
+	var blocked_total: int = 0
 	var previous_dense_free: int = 99
 	for row_index in row_order:
 		var blocked_lanes: Array = rows[row_index]
 		_assert(blocked_lanes.size() < 3,
 			"%s must never block all three lanes in one row." % path)
 
-		var lanes: Array = [GameConfig.LANE_LEFT, GameConfig.LANE_CENTER, GameConfig.LANE_RIGHT]
+		for lane in blocked_lanes:
+			lane_usage[lane] = lane_usage.get(lane, 0) + 1
+		blocked_total += blocked_lanes.size()
+
 		var free_lanes: Array = []
 		for lane in lanes:
 			if not blocked_lanes.has(lane):
@@ -393,6 +399,12 @@ func _assert_chunk_layout(chunk: Node3D, path: String) -> void:
 			previous_dense_free = free_lanes[0] if free_lanes.size() == 1 else 99
 		else:
 			previous_dense_free = 99
+
+	# Once there are enough hazards, none of the three lanes may stay empty.
+	if blocked_total >= 3:
+		for lane in lanes:
+			_assert(lane_usage.get(lane, 0) > 0,
+				"%s must spread hazards across all three lanes (lane %d unused)." % [path, lane])
 
 
 ## Returns the first collision shape directly owned by a physics body.
