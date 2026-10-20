@@ -1,0 +1,19 @@
+[gd_scene format=3 uid="uid://carrowcounterentry"]
+
+[ext_resource type="Script" path="res://scripts/ui/arrow_counter_entry.gd" id="1_entry"]
+
+[node name="ArrowCounterEntry" type="Control"]
+custom_minimum_size = Vector2(120, 48)
+mouse_filter = 2
+script = ExtResource("1_entry")
+
+[node name="Count" type="Label" parent="."]
+anchor_left = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -74.0
+offset_right = -10.0
+theme_override_font_sizes/font_size = 30
+text = "0"
+horizontal_alignment = 2
+vertical_alignment = 1

@@ -19,6 +19,7 @@ config/icon="res://icon.svg"
 
 EventBus="*res://scripts/managers/event_bus.gd"
 GameManager="*res://scripts/managers/game_manager.gd"
+AbilityManager="*res://scripts/managers/ability_manager.gd"
 MCPRuntimeServer="*res://addons/godot_mcp_toolkit/runtime/mcp_runtime_server.gd"
 
 [display]

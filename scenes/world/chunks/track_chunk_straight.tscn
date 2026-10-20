@@ -3,6 +3,7 @@
 [ext_resource type="PackedScene" uid="uid://c6trackchunkbase" path="res://scenes/world/track_chunk_base.tscn" id="1_base"]
 [ext_resource type="PackedScene" path="res://scenes/obstacles/obstacle_fence.tscn" id="2_fence"]
 [ext_resource type="PackedScene" path="res://scenes/obstacles/obstacle_stones.tscn" id="3_stones"]
+[ext_resource type="PackedScene" path="res://scenes/combat/arrow_pickup_normal.tscn" id="4_pickup_normal"]
 
 [node name="TrackChunkStraight" instance=ExtResource("1_base")]
 
@@ -11,3 +12,6 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 0, -10)
 
 [node name="StonesRightLane" parent="LaneObjects" index="1" instance=ExtResource("3_stones")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 0, -22)
+
+[node name="NormalArrowCenter" parent="Pickups" index="0" instance=ExtResource("4_pickup_normal")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -5)

@@ -5,6 +5,7 @@
 [ext_resource type="PackedScene" uid="uid://coverheadarch" path="res://scenes/world/props/overhead_arch.tscn" id="3_arch"]
 [ext_resource type="PackedScene" path="res://scenes/obstacles/target_archery.tscn" id="4_target"]
 [ext_resource type="PackedScene" path="res://scenes/obstacles/obstacle_tree_tall.tscn" id="5_tree_tall"]
+[ext_resource type="PackedScene" path="res://scenes/combat/arrow_pickup_flame.tscn" id="6_pickup_flame"]
 
 [node name="TrackChunkForest" instance=ExtResource("1_base")]
 
@@ -19,3 +20,6 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 0, -20)
 
 [node name="TreeTallCenterLane" parent="LaneObjects" index="3" instance=ExtResource("5_tree_tall")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -26)
+
+[node name="FlameArrowCenter" parent="Pickups" index="0" instance=ExtResource("6_pickup_flame")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -4)

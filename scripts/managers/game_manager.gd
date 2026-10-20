@@ -17,9 +17,11 @@ var distance_traveled: float = 0.0
 var high_score: int = 0
 
 
-## Initializes the game manager and prepares baseline values.
+## Initializes the game manager, prepares baseline values, and banks target rewards.
 func _ready() -> void:
 	reset_game()
+	if has_node("/root/EventBus"):
+		get_node("/root/EventBus").target_destroyed.connect(_on_target_destroyed)
 
 
 ## Updates running metrics and speed progression while actively playing.
@@ -90,3 +92,8 @@ func reset_game() -> void:
 func add_score(amount: int) -> void:
 	score += amount
 	EventBus.score_updated.emit(score)
+
+
+## Banks the reward broadcast when a shootable target is destroyed.
+func _on_target_destroyed(_target_name: String, score_reward: int) -> void:
+	add_score(score_reward)

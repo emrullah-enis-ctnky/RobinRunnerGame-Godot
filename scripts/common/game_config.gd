@@ -23,11 +23,27 @@ const JUMP_VELOCITY: float = 7.5
 const GRAVITY: float = 22.0
 
 # Ability & Combat Constants
-const MAX_ABILITY_GAUGE: float = 100.0
-const ABILITY_CHARGE_PER_METER: float = 0.4
-const ABILITY_CHARGE_PER_COIN: float = 10.0
+const ARROW_TYPE_NORMAL: String = "normal"
+const ARROW_TYPE_FLAME: String = "flame"
+const START_AMMO_NORMAL: int = 3
+const START_AMMO_FLAME: int = 1
 const ARROW_SPEED: float = 40.0
 const ARROW_LIFETIME: float = 3.0
+const ARROW_SCAN_RANGE: float = 45.0
+const ARROW_MUZZLE_HEIGHT: float = 1.0
+const SHOOT_DRAW_TIME: float = 0.12
+const SHOOT_RELEASE_TIME: float = 0.28
+const ARROW_MODEL_LENGTH: float = 0.9
+const ARROW_CROSS_SECTION_SCALE: float = 0.4
+const BOW_MODEL_LENGTH: float = 0.55
+const PICKUP_COLLECT_TIME: float = 0.35
+
+# Grounded Pickup Pose
+const PICKUP_TILT_DEGREES: float = 50.0
+const PICKUP_TILT_RANGE_DEGREES: float = 15.0
+const PICKUP_YAW_RANGE_DEGREES: float = 25.0
+const PICKUP_BURY_DEPTH: float = 0.06
+const PICKUP_SPAWN_CHANCE: float = 0.35
 
 # Track & World Generation
 const CHUNK_LENGTH: float = 30.0

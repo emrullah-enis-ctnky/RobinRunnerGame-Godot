@@ -153,6 +153,7 @@ godot --headless res://tests/unit/test_player_controller.tscn
 godot --headless res://tests/unit/test_camera_controller.tscn
 godot --headless res://tests/unit/test_world_generation.tscn
 godot --headless res://tests/unit/test_obstacles.tscn
+godot --headless res://tests/unit/test_combat.tscn
 ```
 
 ---

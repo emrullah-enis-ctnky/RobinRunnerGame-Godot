@@ -1,6 +1,6 @@
 [gd_scene format=3]
 
-[ext_resource type="Script" path="res://scripts/obstacles/destructible.gd" id="1_destructible"]
+[ext_resource type="Script" path="res://scripts/obstacles/toppling_barrier.gd" id="1_destructible"]
 [ext_resource type="PackedScene" path="res://assets/models/ladder.glb" id="2_mesh"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_block"]
@@ -13,6 +13,7 @@ script = ExtResource("1_destructible")
 hazard_type = "fragile_barrier"
 is_lethal = true
 score_reward = 50
+destroyed_by = PackedStringArray("normal")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8, 0)

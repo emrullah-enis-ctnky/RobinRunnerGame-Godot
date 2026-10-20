@@ -1,6 +1,6 @@
 [gd_scene format=3]
 
-[ext_resource type="Script" path="res://scripts/obstacles/obstacle.gd" id="1_obstacle"]
+[ext_resource type="Script" path="res://scripts/obstacles/burnable_tree.gd" id="1_obstacle"]
 [ext_resource type="PackedScene" path="res://assets/models/tree-high.glb" id="2_mesh"]
 [ext_resource type="Script" path="res://scripts/world/wind_foliage.gd" id="3_wind"]
 
@@ -13,6 +13,8 @@ collision_mask = 0
 script = ExtResource("1_obstacle")
 hazard_type = "tree"
 is_lethal = true
+destroyed_by = PackedStringArray("flame")
+score_reward = 75
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.75, 0)
