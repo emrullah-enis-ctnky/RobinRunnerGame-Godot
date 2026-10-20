@@ -62,14 +62,15 @@ func _physics_process(delta: float) -> void:
 
 
 ## Embeds a spent arrow in the barrier so it topples along with it.
-func stick_arrow(arrow: Node3D, hit_position: Vector3) -> void:
+func stick_arrow(arrow: Node3D, hit_position: Vector3) -> bool:
 	if arrow == null:
-		return
+		return false
 
 	if arrow.has_method("embed_at"):
 		arrow.embed_at(hit_position)
 	arrow.reparent(self, true)
 	_stuck_arrows.append(arrow)
+	return true
 
 
 ## Returns the barrier upright and drops the arrows left stuck in it.

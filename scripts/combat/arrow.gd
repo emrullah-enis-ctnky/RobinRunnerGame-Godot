@@ -155,14 +155,15 @@ func _resolve_hit(hit: Dictionary) -> bool:
 	if body == null or not body.has_method("receive_arrow"):
 		return false
 
-	# A destructible/ shootable surface consumes the arrow; a surface that only
-	# accepts sticking (tall trees) catches it like a dart instead of letting it pass.
+	# A shootable surface may destroy itself on the hit, while a surface that only
+	# accepts sticking (a tall tree hit by a non-matching arrow) catches the arrow
+	# like a dart. stick_arrow() reports whether the arrow actually stayed behind.
 	body.receive_arrow(arrow_type)
 	if not body.has_method("stick_arrow"):
 		return false
 
-	body.stick_arrow(self, hit.get("position", global_position))
-	return true
+	var stuck: bool = body.stick_arrow(self, hit.get("position", global_position))
+	return stuck
 
 
 ## Returns how far the arrow travelled from its launch point to the given impact.

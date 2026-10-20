@@ -10,6 +10,7 @@ const ARROW_POOL_SCRIPT: GDScript = preload("res://scripts/combat/arrow_pool.gd"
 const TARGET_SCENE: PackedScene = preload("res://scenes/obstacles/target_archery.tscn")
 const ARCHERY_TARGET_SCRIPT: GDScript = preload("res://scripts/obstacles/archery_target.gd")
 const PICKUP_BURST_SCRIPT: GDScript = preload("res://scripts/combat/pickup_burst.gd")
+const BURNABLE_TREE_SCRIPT: GDScript = preload("res://scripts/obstacles/burnable_tree.gd")
 const TREE_SCENE: PackedScene = preload("res://scenes/obstacles/obstacle_tree.tscn")
 const BARRIER_SCENE: PackedScene = preload("res://scenes/obstacles/barrier_fragile.tscn")
 const ROCKY_CHUNK_SCENE: PackedScene = preload("res://scenes/world/chunks/track_chunk_rocky.tscn")
@@ -47,6 +48,7 @@ func _run_all_tests() -> void:
 	await _test_archery_target_sticking()
 	await _test_arrow_tip_leading()
 	await _test_long_range_shot()
+	await _test_tree_arrow_sticking()
 	await _test_ladder_topple()
 	await _test_ladder_resets_on_chunk_reuse()
 	await _test_arrow_pickup()
@@ -386,6 +388,64 @@ func _test_long_range_shot() -> void:
 
 	target.queue_free()
 	_end_test("Long Range Shot")
+
+
+## Verifies a non-burning arrow embeds in a tall tree like a dart, with close shots
+## landing on the aim point and far shots scattering toward the collider edges.
+func _test_tree_arrow_sticking() -> void:
+	_start_test("Tree Arrow Sticking")
+
+	var tree: StaticBody3D = TREE_SCENE.instantiate() as StaticBody3D
+	tree.position = Vector3(0.0, 0.0, -10.0)
+	add_child(tree)
+	await get_tree().physics_frame
+
+	var arrow: Arrow = ARROW_SCENE.instantiate() as Arrow
+	add_child(arrow)
+	arrow.activate(Vector3(0.0, GameConfig.ARROW_MUZZLE_HEIGHT, 0.0), Vector3.FORWARD, GameConfig.ARROW_TYPE_NORMAL)
+
+	var waited: int = 0
+	while arrow.get_parent() != tree and waited < 90:
+		await get_tree().physics_frame
+		waited += 1
+
+	_assert(arrow.get_parent() == tree,
+		"A normal arrow must stick into a tree it cannot burn.")
+	_assert(not arrow.is_physics_processing(), "A tree-stuck arrow must stop flying.")
+	_assert(not tree.is_destroyed, "Sticking an arrow must not destroy the tree.")
+	_assert(tree.collision_layer == GameConfig.LAYER_OBSTACLE,
+		"A tree carrying an arrow must stay lethal.")
+
+	# Close shots land on the aim point; far shots scatter toward the collider edges.
+	var aim: Vector3 = tree.to_global(
+		Vector3(0.0, GameConfig.ARROW_MUZZLE_HEIGHT, 0.45))
+	var near_error: float = 0.0
+	var far_error: float = 0.0
+	var far_edge: int = 0
+	var far_front: float = 0.0
+	for _sample in range(400):
+		var near_point: Vector3 = tree.roll_stick_point(aim, BURNABLE_TREE_SCRIPT.STICK_NEAR_DISTANCE)
+		near_error = maxf(near_error,
+			Vector2(near_point.x, near_point.y - GameConfig.ARROW_MUZZLE_HEIGHT).length())
+
+		var far_point: Vector3 = tree.roll_stick_point(aim, BURNABLE_TREE_SCRIPT.STICK_FAR_DISTANCE)
+		far_error += Vector2(far_point.x, far_point.y - GameConfig.ARROW_MUZZLE_HEIGHT).length()
+		far_front = far_point.z
+		if absf(far_point.x) > 0.25 or absf(far_point.y - GameConfig.ARROW_MUZZLE_HEIGHT) > 0.5:
+			far_edge += 1
+
+	_assert(near_error < 0.001, "Close shots must land on the aim point.")
+	_assert(far_error / 400.0 > 0.1, "Far shots must scatter across the tree face.")
+	_assert(far_edge > 100, "Far shots must often land near the tree's outer edge.")
+	_assert(absf(far_front - 0.45) < 0.001,
+		"Stuck arrows must sit on the tree's front face (got z=%.3f)." % far_front)
+
+	tree.receive_arrow(GameConfig.ARROW_TYPE_FLAME)
+	await get_tree().process_frame
+	_assert(not is_instance_valid(arrow), "Burning the tree must drop its stuck arrows.")
+
+	tree.queue_free()
+	_end_test("Tree Arrow Sticking")
 
 
 ## Verifies an arrow topples the ladder around its base and stays stuck while it falls.

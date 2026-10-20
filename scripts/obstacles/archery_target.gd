@@ -36,9 +36,9 @@ func receive_arrow(_arrow_type: String) -> bool:
 
 
 ## Embeds an arrow on the target face, at a ring chosen from the shot distance.
-func stick_arrow(arrow: Node3D, hit_position: Vector3) -> void:
+func stick_arrow(arrow: Node3D, hit_position: Vector3) -> bool:
 	if arrow == null:
-		return
+		return false
 
 	var distance: float = FAR_DISTANCE
 	if arrow.has_method("travel_distance_to"):
@@ -51,6 +51,7 @@ func stick_arrow(arrow: Node3D, hit_position: Vector3) -> void:
 
 	_stuck.append({"arrow": arrow, "point": impact})
 	_separate_overlapping(arrow, impact)
+	return true
 
 
 ## Returns a target-local impact point; closer shots scatter less, very close shots
