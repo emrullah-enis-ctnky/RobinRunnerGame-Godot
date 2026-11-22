@@ -101,7 +101,7 @@ func _test_biome_decorators_and_curved_materials() -> void:
 		chunk.activate(Vector3(0.0, 0.0, -45.0))
 		await get_tree().process_frame
 
-		var decor: Node3D = chunk.get_node_or_null("BiomeDecor") as Node3D
+		var decor: Node3D = chunk.get_node_or_null("BiomeDecorator/BiomeDecor") as Node3D
 		_assert(decor != null and decor.get_child_count() > 5,
 			"Chunk %s should populate BiomeDecor children on activate" % chunk.name)
 

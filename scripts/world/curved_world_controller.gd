@@ -6,9 +6,9 @@ extends Node
 const CURVED_SHADER: Shader = preload("res://shaders/curved_world.gdshader")
 
 @export var player_path: NodePath = NodePath("../Player")
-@export var max_horizontal_curve: float = 0.00145
-@export var vertical_curve: float = 0.00055
-@export var meander_frequency: float = 0.011
+@export var max_horizontal_curve: float = 0.00095
+@export var vertical_curve: float = 0.00038
+@export var meander_frequency: float = 0.0065
 
 # Shared cache mapping original StandardMaterial3D -> curved ShaderMaterial
 static var _material_cache: Dictionary = {}
@@ -69,7 +69,7 @@ static func apply_to_tree(root: Node) -> void:
 static func _apply_to_mesh_instance(mi: MeshInstance3D) -> void:
 	if mi.mesh == null:
 		return
-	mi.extra_cull_margin = maxf(mi.extra_cull_margin, 22.0)
+	mi.extra_cull_margin = maxf(mi.extra_cull_margin, 80.0)
 	var surf_count: int = mi.mesh.get_surface_count()
 	for s in range(surf_count):
 		var mat: Material = mi.get_active_material(s)

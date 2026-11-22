@@ -91,12 +91,15 @@ func apply_time(hour: float) -> void:
 		_sky_mat.set_shader_parameter("moon_strength", clampf((moon_dir.y + 0.15) * 2.2, 0.0, 1.0))
 
 	if _sun_light != null:
-		var active_dir: Vector3 = sun_dir if is_day else moon_dir
-		var elev: float = maxf(active_dir.y, 0.22)
+		# Smoothly fade directional energy to zero across the horizon so switching between
+		# sun and moon never causes an abrupt 180-degree shadow jump across the world.
+		var active_dir: Vector3 = sun_dir if sun_dir.y >= 0.0 else moon_dir
+		var horizon_fade: float = smoothstep(0.0, 0.14, absf(sun_dir.y))
+		var elev: float = maxf(active_dir.y, 0.28)
 		var light_from := Vector3(active_dir.x, elev, active_dir.z).normalized()
 		_sun_light.look_at_from_position(light_from * 20.0, Vector3.ZERO, Vector3.UP)
 		_sun_light.light_color = sample["light_col"]
-		_sun_light.light_energy = sample["light_energy"]
+		_sun_light.light_energy = float(sample["light_energy"]) * horizon_fade
 
 	if _world_env != null and _world_env.environment != null:
 		var env: Environment = _world_env.environment
@@ -104,12 +107,12 @@ func apply_time(hour: float) -> void:
 		env.ambient_light_energy = sample["ambient_energy"]
 		env.fog_enabled = true
 		env.fog_mode = Environment.FOG_MODE_DEPTH
-		env.fog_light_color = (sample["sky_horizon"] as Color).lerp(sample["ground_horizon"] as Color, 0.35)
+		env.fog_light_color = (sample["sky_horizon"] as Color).lerp(sample["ground_horizon"] as Color, 0.25)
 		env.fog_light_energy = 1.0
-		env.fog_density = 0.008
-		env.fog_depth_begin = 55.0
-		env.fog_depth_end = 185.0
-		env.fog_sky_affect = 0.25
+		env.fog_density = 0.01
+		env.fog_depth_begin = 42.0
+		env.fog_depth_end = 135.0
+		env.fog_sky_affect = 0.35
 
 
 func _on_game_restarted() -> void:
