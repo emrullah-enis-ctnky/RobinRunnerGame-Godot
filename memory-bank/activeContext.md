@@ -1,15 +1,14 @@
 # Active Context: RobinRunner
 
 ## Current Work Focus
-Phase 9 (User Interface & HUD) is complete on `feature/ui-hud` (Steps 9.1–9.6 verified by user). Awaiting explicit user approval to merge `feature/ui-hud` into `main`.
+World atmosphere & day/night cycle pass implemented on `feature/world-atmosphere` (branched from `main` after merging Phase 9). Awaiting user visual inspection in Godot.
 
 ## Recent Changes
-- Built `NotebookUITheme` (`scripts/ui/notebook_ui_theme.gd`) and `NotebookCard` (`scripts/ui/notebook_card.gd`) for consistent parchment-notebook menus, curved leaves, 3D rings, golden banners, soft-beveled green/orange buttons, and dark-wood HUD pill frames.
-- Implemented `UIManager` (`scripts/ui/ui_manager.gd`, `layer = 110`) with a dedicated stylized forest Main Menu backdrop, 3-2-1 center countdown, Pause Menu (`Esc`/`P`), and bottom slide-up Game Over card after `DamageOverlay`'s death fade.
-- Implemented `SettingsManager` (`scripts/managers/settings_manager.gd`, autoload) + `SettingsPanels` (`scripts/ui/settings_panels.gd`) with instant auto-saving Music/SFX sliders & mute buttons, Display panel (windowed preset resolutions `1280x720` to monitor max + borderless fullscreen), multi-key rebindable Controls with Reset Defaults, and EN/TR/DE flag Language switcher.
-- Added `ScoreDistanceHUD` with floating `+score` popups (targets & coins), clean `%10`/`%20` combo steps (every 10 coins) and `-%20` stumble penalty, plus an animated combo badge under `CoinCounterHUD`.
-- Fixed track start offset (`TRACK_START_OFFSET_Z = 12.0`) and `TrackSpawner`/`RunnerCamera` reset on `EventBus.game_restarted`.
+- Created `shaders/stylized_sky.gdshader`: custom `shader_type sky` with multi-stop sky/ground gradient, glowing sun and moon discs with halos, twinkling night stars, and drifting stylized clouds.
+- Implemented `DayNightCycle` (`scripts/world/day_night_cycle.gd`): randomizes starting time of day (`0.0..24.0`) on start and restart, advances smoothly over a 180s full 24h cycle while playing, and interpolates sky shader uniforms, `SunLight` angle/color/energy, ambient light, and depth fog.
+- Implemented `WorldScenery` (`scripts/world/world_scenery.gd`): adds distant low-poly valley floor & mountain peaks tracking player Z, plus 6 leapfrogging side-forest strips populated with Kenney trees, rocks, and camp tents flanking both sides of the track.
+- Wired `DayNightCycle` and `WorldScenery` into `scenes/world/world.tscn` and added `tests/unit/test_world_atmosphere.gd` + `.tscn` (2 suites).
 
 ## Next Steps
-1. On explicit user approval, merge `feature/ui-hud` into `main`.
-2. Proceed to Phase 10 (Audio & Visual Polish) or finish Phase 6 leftovers (Steps 6.5–6.7).
+1. User visual inspection of the random starting hours, sky/clouds/stars/sun/moon, and flanking forest/mountain scenery.
+2. On user approval, merge `feature/world-atmosphere` into `main` and continue Phase 10 (AudioManager, SFX, music, particles).
