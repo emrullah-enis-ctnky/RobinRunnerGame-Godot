@@ -1,4 +1,4 @@
-[gd_scene format=3 uid="uid://ctestatmosphere"]
+[gd_scene format=3 uid="uid://cacmyelt3kybm"]
 
 [ext_resource type="Script" path="res://tests/unit/test_world_atmosphere.gd" id="1_test"]
 

@@ -1,4 +1,4 @@
-[gd_scene load_steps=16 format=3 uid="uid://bworldmain"]
+[gd_scene load_steps=17 format=3 uid="uid://bworldmain"]
 
 [ext_resource type="Script" path="res://scenes/world/world.gd" id="1_world"]
 [ext_resource type="PackedScene" uid="uid://c7m8x4w6laq1r" path="res://scenes/player/player.tscn" id="2_player"]
@@ -12,6 +12,7 @@
 [ext_resource type="PackedScene" path="res://scenes/ui/ui_manager.tscn" id="10_ui_manager"]
 [ext_resource type="Script" path="res://scripts/world/day_night_cycle.gd" id="11_daynight"]
 [ext_resource type="Script" path="res://scripts/world/world_scenery.gd" id="12_scenery"]
+[ext_resource type="Script" path="res://scripts/world/curved_world_controller.gd" id="13_curved"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_world"]
 sky_top_color = Color(0.25, 0.52, 0.88, 1)
@@ -62,6 +63,9 @@ script = ExtResource("11_daynight")
 
 [node name="WorldScenery" type="Node3D" parent="."]
 script = ExtResource("12_scenery")
+
+[node name="CurvedWorldController" type="Node" parent="."]
+script = ExtResource("13_curved")
 
 [node name="ArrowPool" type="Node3D" parent="."]
 script = ExtResource("6_arrowpool")

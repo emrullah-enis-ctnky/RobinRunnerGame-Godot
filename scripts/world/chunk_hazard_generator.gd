@@ -2,6 +2,7 @@ class_name ChunkHazardGenerator
 extends Node3D
 ## Rebuilds a chunk's hazards with a fresh, always-passable layout on every reuse.
 
+const CurvedWorld = preload("res://scripts/world/curved_world_controller.gd")
 const _NO_LANE: int = 99
 
 @export var hazard_scenes: Array[PackedScene] = []
@@ -130,6 +131,7 @@ func _spawn_row(blocked_lanes: Array[int], row_z: float) -> void:
 			continue
 		hazard.position = Vector3(GameConfig.get_lane_x(blocked_lanes[i] - 1), 0.0, row_z)
 		_lane_objects.add_child(hazard)
+		CurvedWorld.apply_to_tree(hazard)
 		_generated.append(hazard)
 
 

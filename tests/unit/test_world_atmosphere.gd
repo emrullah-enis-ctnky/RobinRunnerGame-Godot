@@ -1,8 +1,12 @@
 extends Node
-## Automated unit tests for DayNightCycle (random start, 24h cycle, sky/lighting) and WorldScenery.
+## Automated unit tests for DayNightCycle, WorldScenery, ChunkBiomeDecorator, and CurvedWorldController.
 
 const DayNightScript = preload("res://scripts/world/day_night_cycle.gd")
 const SceneryScript = preload("res://scripts/world/world_scenery.gd")
+const CurvedWorldScript = preload("res://scripts/world/curved_world_controller.gd")
+const FOREST_CHUNK_SCENE: PackedScene = preload("res://scenes/world/chunks/track_chunk_forest.tscn")
+const ROCKY_CHUNK_SCENE: PackedScene = preload("res://scenes/world/chunks/track_chunk_rocky.tscn")
+const STRAIGHT_CHUNK_SCENE: PackedScene = preload("res://scenes/world/chunks/track_chunk_straight.tscn")
 
 var _passed: int = 0
 var _failed: int = 0
@@ -17,10 +21,12 @@ func _ready() -> void:
 
 func _run_all_tests() -> void:
 	await _test_day_night_cycle()
-	await _test_world_scenery_wrapping()
+	await _test_world_scenery_horizon()
+	await _test_biome_decorators_and_curved_materials()
+	await _test_curved_world_controller()
 
 
-## Verifies DayNightCycle randomizes starting time, advances smoothly, and switches day/night palettes.
+## Verifies DayNightCycle randomizes starting time and transitions day/night lighting & stars.
 func _test_day_night_cycle() -> void:
 	_start_test("DayNightCycle Random Start & Palette Progression")
 	var host := Node3D.new()
@@ -59,9 +65,9 @@ func _test_day_night_cycle() -> void:
 	_end_test("DayNightCycle Random Start & Palette Progression")
 
 
-## Verifies WorldScenery creates flanking forest strips and wraps them forward as player advances.
-func _test_world_scenery_wrapping() -> void:
-	_start_test("WorldScenery Horizon & Strip Wrapping")
+## Verifies WorldScenery creates distant mountain horizon and anchors it to player Z.
+func _test_world_scenery_horizon() -> void:
+	_start_test("WorldScenery Horizon Anchor")
 	var host := Node3D.new()
 	add_child(host)
 
@@ -73,16 +79,65 @@ func _test_world_scenery_wrapping() -> void:
 	host.add_child(scenery)
 	await get_tree().process_frame
 
-	_assert(scenery._strips.size() == SceneryScript.STRIP_COUNT, "Should spawn configured forest strips")
-	var first_z_before: float = scenery._strips[0].global_position.z
+	_assert(scenery._horizon_root != null and scenery._horizon_root.get_child_count() >= 5,
+		"WorldScenery should build distant mountain horizon meshes")
 	fake_player.global_position.z = -80.0
 	scenery._process(0.016)
-	_assert(scenery._strips[0].global_position.z < first_z_before, "Passed forest strip should leapfrog ahead")
 	_assert(is_equal_approx(scenery._horizon_root.global_position.z, -80.0), "Horizon mountains should track player Z")
 
 	host.queue_free()
 	await get_tree().process_frame
-	_end_test("WorldScenery Horizon & Strip Wrapping")
+	_end_test("WorldScenery Horizon Anchor")
+
+
+## Verifies all 3 chunk variants populate BiomeDecor on activation and apply curved_world shader.
+func _test_biome_decorators_and_curved_materials() -> void:
+	_start_test("ChunkBiomeDecorator Biomes & Curved Shader")
+	for scene in [STRAIGHT_CHUNK_SCENE, FOREST_CHUNK_SCENE, ROCKY_CHUNK_SCENE]:
+		var chunk: TrackChunk = scene.instantiate() as TrackChunk
+		add_child(chunk)
+		await get_tree().process_frame
+
+		chunk.activate(Vector3(0.0, 0.0, -45.0))
+		await get_tree().process_frame
+
+		var decor: Node3D = chunk.get_node_or_null("BiomeDecor") as Node3D
+		_assert(decor != null and decor.get_child_count() > 5,
+			"Chunk %s should populate BiomeDecor children on activate" % chunk.name)
+
+		var deck: MeshInstance3D = chunk.get_node_or_null("Visuals/TrackDeck") as MeshInstance3D
+		_assert(deck != null and deck.get_active_material(0) is ShaderMaterial,
+			"TrackDeck on %s should use curved ShaderMaterial" % chunk.name)
+
+		chunk.queue_free()
+		await get_tree().process_frame
+	_end_test("ChunkBiomeDecorator Biomes & Curved Shader")
+
+
+## Verifies CurvedWorldController updates global shader uniforms and resets on exit.
+func _test_curved_world_controller() -> void:
+	_start_test("CurvedWorldController Global Uniforms")
+	var host := Node3D.new()
+	add_child(host)
+
+	var fake_player := Node3D.new()
+	fake_player.name = "Player"
+	fake_player.position = Vector3(0.0, 0.0, -42.0)
+	host.add_child(fake_player)
+
+	var ctrl: Node = CurvedWorldScript.new()
+	host.add_child(ctrl)
+	await get_tree().process_frame
+	ctrl._process(0.016)
+
+	var origin: Vector3 = RenderingServer.global_shader_parameter_get("curve_origin")
+	var strength: Vector2 = RenderingServer.global_shader_parameter_get("curve_strength")
+	_assert(is_equal_approx(origin.z, -42.0), "curve_origin.z should track player Z")
+	_assert(strength.y > 0.0, "Vertical horizon curve strength should be positive")
+
+	host.queue_free()
+	await get_tree().process_frame
+	_end_test("CurvedWorldController Global Uniforms")
 
 
 func _start_test(test_name: String) -> void:

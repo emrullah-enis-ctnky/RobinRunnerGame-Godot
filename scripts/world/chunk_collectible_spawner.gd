@@ -3,6 +3,7 @@ extends Node3D
 ## Populates coin lines and jump arcs on a track chunk without overlapping tall hazards.
 
 const GameConfig = preload("res://scripts/common/game_config.gd")
+const CurvedWorld = preload("res://scripts/world/curved_world_controller.gd")
 const COIN_SCENE: PackedScene = preload("res://scenes/collectibles/coin.tscn")
 
 const COIN_SPACING_Z: float = 1.65
@@ -90,6 +91,7 @@ func _spawn_line(lane_x: float, start_z: float, count: int) -> void:
 		var coin: Node3D = COIN_SCENE.instantiate() as Node3D
 		coin.position = Vector3(lane_x, GameConfig.COIN_HOVER_HEIGHT, start_z - float(i) * COIN_SPACING_Z)
 		_pickups_node.add_child(coin)
+		CurvedWorld.apply_to_tree(coin)
 		_generated.append(coin)
 
 
@@ -100,6 +102,7 @@ func _spawn_arc(lane_x: float, center_z: float) -> void:
 		var coin: Node3D = COIN_SCENE.instantiate() as Node3D
 		coin.position = Vector3(lane_x, JUMP_ARC_HEIGHTS[i], center_z + offsets_z[i])
 		_pickups_node.add_child(coin)
+		CurvedWorld.apply_to_tree(coin)
 		_generated.append(coin)
 
 

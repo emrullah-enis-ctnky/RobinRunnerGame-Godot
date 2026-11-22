@@ -13,6 +13,7 @@ roughness = 0.85
 [sub_resource type="BoxMesh" id="BoxMesh_deck"]
 material = SubResource("StandardMaterial3D_track")
 size = Vector3(6.6, 0.2, 30)
+subdivide_depth = 12
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_divider"]
 albedo_color = Color(0.72, 0.6, 0.45, 1)
@@ -21,6 +22,7 @@ roughness = 0.7
 [sub_resource type="BoxMesh" id="BoxMesh_divider"]
 material = SubResource("StandardMaterial3D_divider")
 size = Vector3(0.08, 0.02, 30)
+subdivide_depth = 12
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_curb"]
 albedo_color = Color(0.32, 0.22, 0.14, 1)
@@ -29,6 +31,7 @@ roughness = 0.8
 [sub_resource type="BoxMesh" id="BoxMesh_curb"]
 material = SubResource("StandardMaterial3D_curb")
 size = Vector3(0.3, 0.35, 30)
+subdivide_depth = 12
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_foundation"]
 albedo_color = Color(0.3, 0.31, 0.33, 1)
@@ -37,6 +40,7 @@ roughness = 0.9
 [sub_resource type="BoxMesh" id="BoxMesh_foundation"]
 material = SubResource("StandardMaterial3D_foundation")
 size = Vector3(6.8, 2.6, 30)
+subdivide_depth = 12
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_pillar"]
 albedo_color = Color(0.26, 0.27, 0.29, 1)

@@ -1,14 +1,14 @@
 # Active Context: RobinRunner
 
 ## Current Work Focus
-World atmosphere & day/night cycle pass implemented on `feature/world-atmosphere` (branched from `main` after merging Phase 9). Awaiting user visual inspection in Godot.
+World atmosphere, biome-matched chunk scenery, overhead framing/stream crossings, and curved-world horizon shader implemented on `feature/world-atmosphere`. Awaiting user visual inspection in Godot.
 
 ## Recent Changes
-- Created `shaders/stylized_sky.gdshader`: custom `shader_type sky` with multi-stop sky/ground gradient, glowing sun and moon discs with halos, twinkling night stars, and drifting stylized clouds.
-- Implemented `DayNightCycle` (`scripts/world/day_night_cycle.gd`): randomizes starting time of day (`0.0..24.0`) on start and restart, advances smoothly over a 180s full 24h cycle while playing, and interpolates sky shader uniforms, `SunLight` angle/color/energy, ambient light, and depth fog.
-- Implemented `WorldScenery` (`scripts/world/world_scenery.gd`): adds distant low-poly valley floor & mountain peaks tracking player Z, plus 6 leapfrogging side-forest strips populated with Kenney trees, rocks, and camp tents flanking both sides of the track.
-- Wired `DayNightCycle` and `WorldScenery` into `scenes/world/world.tscn` and added `tests/unit/test_world_atmosphere.gd` + `.tscn` (2 suites).
+- Added global shader parameters (`curve_origin`, `curve_strength`) in `project.godot`, created `shaders/curved_world.gdshader`, injected the same bend into `shaders/foliage_wind.gdshader`, and subdivided `TrackChunkBase` meshes (`subdivide_depth = 12`) for smooth curving.
+- Created `CurvedWorldController` (`scripts/world/curved_world_controller.gd`) to meander the trail gently left/right with subtle vertical horizon roll and apply the curved shader across chunks, biome props, hazards, coins, arrows, and horizon mountains.
+- Created `ChunkBiomeDecorator` (`scripts/world/chunk_biome_decorator.gd`) attached to `TrackChunkStraight`, `TrackChunkForest`, and `TrackChunkRocky`: builds flush flanking banks (zero gap), dense leaning canopies & undergrowth (`forest`), canyon cliffs & timber gateways (`rocky`), archer camp outposts (`straight`), and woodland stream-bridge crossings with wooden railings (50% of straight chunks past launch).
+- Streamlined `WorldScenery` to anchor the distant curved mountain ring and valley floor to the horizon, and expanded `tests/unit/test_world_atmosphere.gd` to 4 suites.
 
 ## Next Steps
-1. User visual inspection of the random starting hours, sky/clouds/stars/sun/moon, and flanking forest/mountain scenery.
+1. User visual inspection of the curved world, biome transitions (forest / canyon / camp / stream bridge), high overhead framing, and random day/night sky.
 2. On user approval, merge `feature/world-atmosphere` into `main` and continue Phase 10 (AudioManager, SFX, music, particles).

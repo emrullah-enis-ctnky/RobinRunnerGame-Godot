@@ -3,6 +3,7 @@ extends Node3D
 ## Straight-line projectile fired by the player and recycled through ArrowPool.
 
 const GameConfig = preload("res://scripts/common/game_config.gd")
+const CurvedWorld = preload("res://scripts/world/curved_world_controller.gd")
 
 # The model's pointed head sits on +Z, so a half-turn aligns it with the flight path.
 const MESH_LOCAL_ROTATION: Vector3 = Vector3(0.0, 180.0, 0.0)
@@ -42,6 +43,7 @@ func _prepare_mesh() -> void:
 		MeshFit.fit_longest_axis(mesh, GameConfig.ARROW_MODEL_LENGTH, GameConfig.ARROW_CROSS_SECTION_SCALE)
 		mesh.rotation_degrees = MESH_LOCAL_ROTATION
 		_tip_offset = MeshFit.local_long_axis_end(mesh, true)
+		CurvedWorld.apply_to_tree(mesh)
 
 
 ## Builds the small sphere used to sweep for narrow targets between tips.
