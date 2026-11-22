@@ -7,6 +7,7 @@
 [ext_resource type="PackedScene" uid="uid://c8n4v2x6bq7zp" path="res://scenes/ui/damage_overlay.tscn" id="5_overlay"]
 [ext_resource type="Script" path="res://scripts/combat/arrow_pool.gd" id="6_arrowpool"]
 [ext_resource type="PackedScene" path="res://scenes/ui/arrow_counter_hud.tscn" id="7_hud"]
+[ext_resource type="PackedScene" path="res://scenes/ui/coin_counter_hud.tscn" id="8_coin_hud"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_world"]
 sky_top_color = Color(0.25, 0.52, 0.88, 1)
@@ -58,3 +59,5 @@ script = ExtResource("6_arrowpool")
 [node name="DamageOverlay" parent="." instance=ExtResource("5_overlay")]
 
 [node name="ArrowCounterHUD" parent="." instance=ExtResource("7_hud")]
+
+[node name="CoinCounterHUD" parent="." instance=ExtResource("8_coin_hud")]

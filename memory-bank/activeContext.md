@@ -10,6 +10,7 @@ Phase 8 (Pickups, Collectibles & Scoring) is implemented on `feature/collectible
 - Implemented `CoinPickup` (`scripts/collectibles/coin_pickup.gd` + `scenes/collectibles/coin.tscn`) with `MeshFit` normalization (`0.42 m`), idle spin/bobbing, pop-and-vanish tween, and golden `PickupBurst` sparks.
 - Added `ChunkCollectibleSpawner` (`scripts/world/chunk_collectible_spawner.gd`) on `track_chunk_base.tscn` to spawn coin lines on clear lanes and 3-coin jump arcs over low obstacles.
 - Enabled ring-based scoring (`100` bullseye / `60` / `40` / `20`) on `ArcheryTarget` when arrows embed.
+- Added a minimal top-left `CoinCounterHUD` (`scenes/ui/coin_counter_hud.tscn` + `scripts/ui/coin_counter_hud.gd`) in `world.tscn` bound to `EventBus.coins_updated`.
 - Added `tests/unit/test_collectibles_scoring.gd` + `.tscn` (5 suites).
 
 ## Next Steps
