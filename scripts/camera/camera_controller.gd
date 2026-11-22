@@ -38,9 +38,11 @@ func _ready() -> void:
 
 ## Snaps the camera back to its clean starting framing on run restart.
 func _reset_camera() -> void:
-	shake_intensity = 0.0
+	trauma = 0.0
 	fov = base_fov
 	rotation = base_rotation
+	h_offset = 0.0
+	v_offset = 0.0
 	if is_instance_valid(target):
 		global_position = target.global_position + follow_offset
 	else:
