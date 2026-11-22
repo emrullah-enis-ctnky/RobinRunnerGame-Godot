@@ -19,7 +19,7 @@ var _music_lbl: Label
 var _sfx_lbl: Label
 var _controls_btn: Button
 var _language_btn: Button
-var _save_btn: Button
+var _settings_back_btn: Button
 
 var _lang_buttons: Dictionary = {}
 var _lang_back_btn: Button
@@ -38,7 +38,7 @@ func build(root: Control, owner: Node) -> void:
 	_owner_node = owner
 
 	settings_card = _make_card("SettingsPanel", _t("title_settings"), Vector2(360.0, 440.0))
-	settings_card.close_requested.connect(_on_save_and_close)
+	settings_card.close_requested.connect(_on_close_settings)
 	root.add_child(settings_card)
 	_populate_settings(settings_card)
 
@@ -144,7 +144,7 @@ func refresh_texts() -> void:
 	_sfx_lbl.text = _t("lbl_sfx")
 	_controls_btn.text = _t("btn_controls")
 	_language_btn.text = _t("btn_language")
-	_save_btn.text = _t("btn_save")
+	_settings_back_btn.text = _t("btn_back")
 	_lang_back_btn.text = _t("btn_back")
 	_reset_btn.text = _t("btn_reset_defaults")
 	_controls_back_btn.text = _t("btn_back")
@@ -238,9 +238,9 @@ func _populate_settings(card: Control) -> void:
 	spacer.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	vbox.add_child(spacer)
 
-	_save_btn = _make_button("SaveButton", _t("btn_save"), true, 20)
-	_save_btn.pressed.connect(_on_save_and_close)
-	vbox.add_child(_save_btn)
+	_settings_back_btn = _make_button("SettingsBackButton", _t("btn_back"), true, 20)
+	_settings_back_btn.pressed.connect(_on_close_settings)
+	vbox.add_child(_settings_back_btn)
 
 
 func _populate_language(card: Control) -> void:
@@ -407,10 +407,7 @@ func _refresh_language_selection() -> void:
 		btn.queue_redraw()
 
 
-func _on_save_and_close() -> void:
-	var sm: Node = _settings()
-	if sm != null:
-		sm.save_settings()
+func _on_close_settings() -> void:
 	hide_all()
 	closed.emit()
 

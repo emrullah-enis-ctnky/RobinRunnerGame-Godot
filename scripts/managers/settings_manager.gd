@@ -141,50 +141,55 @@ func t(key: String) -> String:
 	return table.get(key, STRINGS["en"].get(key, key))
 
 
-## Sets music volume (0.0 to 1.0) and unmutes if raised above zero.
+## Sets music volume (0.0 to 1.0), unmutes if raised above zero, and saves immediately.
 func set_music_volume(val: float) -> void:
 	music_volume = clampf(val, 0.0, 1.0)
 	if music_volume > 0.01:
 		music_muted = false
 	_apply_audio()
+	save_settings()
 	settings_changed.emit()
 
 
-## Toggles music mute on or off.
+## Toggles music mute on or off and saves immediately.
 func set_music_muted(muted: bool) -> void:
 	music_muted = muted
 	_apply_audio()
+	save_settings()
 	settings_changed.emit()
 
 
-## Sets sound-effects volume (0.0 to 1.0) and unmutes if raised above zero.
+## Sets sound-effects volume (0.0 to 1.0), unmutes if raised above zero, and saves immediately.
 func set_sfx_volume(val: float) -> void:
 	sfx_volume = clampf(val, 0.0, 1.0)
 	if sfx_volume > 0.01:
 		sfx_muted = false
 	_apply_audio()
+	save_settings()
 	settings_changed.emit()
 
 
-## Toggles sound-effects mute on or off.
+## Toggles sound-effects mute on or off and saves immediately.
 func set_sfx_muted(muted: bool) -> void:
 	sfx_muted = muted
 	_apply_audio()
+	save_settings()
 	settings_changed.emit()
 
 
-## Switches the active language ("en", "tr", "de") and notifies UI listeners.
+## Switches the active language ("en", "tr", "de"), saves immediately, and notifies UI listeners.
 func set_language(lang_code: String) -> void:
 	if not STRINGS.has(lang_code):
 		return
 	if language == lang_code:
 		return
 	language = lang_code
+	save_settings()
 	language_changed.emit(language)
 	settings_changed.emit()
 
 
-## Adds a keyboard or mouse binding to an action if not already bound.
+## Adds a keyboard or mouse binding to an action if not already bound, and saves immediately.
 func add_action_event(action: String, event: InputEvent) -> bool:
 	if not InputMap.has_action(action) or event == null:
 		return false
@@ -192,12 +197,13 @@ func add_action_event(action: String, event: InputEvent) -> bool:
 		if _events_match(existing, event):
 			return false
 	InputMap.action_add_event(action, event)
+	save_settings()
 	controls_changed.emit()
 	settings_changed.emit()
 	return true
 
 
-## Removes a binding at index from an action while keeping at least one binding active.
+## Removes a binding at index from an action while keeping at least one binding active, and saves.
 func remove_action_event(action: String, index: int) -> bool:
 	if not InputMap.has_action(action):
 		return false
@@ -205,12 +211,13 @@ func remove_action_event(action: String, index: int) -> bool:
 	if events.size() <= 1 or index < 0 or index >= events.size():
 		return false
 	InputMap.action_erase_event(action, events[index])
+	save_settings()
 	controls_changed.emit()
 	settings_changed.emit()
 	return true
 
 
-## Restores all managed input actions back to the project.godot defaults.
+## Restores all managed input actions back to the project.godot defaults and saves immediately.
 func reset_controls_to_defaults() -> void:
 	for action in MANAGED_ACTIONS:
 		if not InputMap.has_action(action):
@@ -220,6 +227,7 @@ func reset_controls_to_defaults() -> void:
 		for ev in defaults:
 			if ev is InputEvent:
 				InputMap.action_add_event(action, (ev as InputEvent).duplicate())
+	save_settings()
 	controls_changed.emit()
 	settings_changed.emit()
 
