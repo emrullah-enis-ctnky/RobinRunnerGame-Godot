@@ -26,6 +26,8 @@ func _ready() -> void:
 	_load_default_chunk_scenes()
 	_initialize_pools()
 	spawn_initial_track()
+	if has_node("/root/EventBus"):
+		get_node("/root/EventBus").game_restarted.connect(spawn_initial_track)
 
 
 func _physics_process(_delta: float) -> void:

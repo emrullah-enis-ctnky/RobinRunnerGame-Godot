@@ -171,10 +171,7 @@ func _start_countdown(is_restart: bool) -> void:
 		_is_counting_down = false
 		_countdown_label.visible = false
 		if has_node("/root/GameManager"):
-			if is_restart:
-				get_node("/root/GameManager").restart_game()
-			else:
-				get_node("/root/GameManager").start_game()
+			get_node("/root/GameManager").start_game()
 	)
 
 

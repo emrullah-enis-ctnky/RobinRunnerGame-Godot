@@ -33,6 +33,18 @@ func _ready() -> void:
 	if has_node("/root/EventBus"):
 		var bus: Node = get_node("/root/EventBus")
 		bus.player_hit_hazard.connect(_on_player_hit_hazard)
+		bus.game_restarted.connect(_reset_camera)
+
+
+## Snaps the camera back to its clean starting framing on run restart.
+func _reset_camera() -> void:
+	shake_intensity = 0.0
+	fov = base_fov
+	rotation = base_rotation
+	if is_instance_valid(target):
+		global_position = target.global_position + follow_offset
+	else:
+		global_position = follow_offset
 
 
 ## Updates camera position, dynamic FOV, and screen shake every frame.
