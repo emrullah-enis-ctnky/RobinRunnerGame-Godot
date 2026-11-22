@@ -1,19 +1,20 @@
 class_name UIManager
 extends CanvasLayer
-## Coordinates Main Menu, Controls, Pause, and Game Over screens using the unified notebook theme.
+## Coordinates Main Menu, Controls, 3-2-1 Countdown, Pause, and Game Over screens.
 
 const ThemeRef = preload("res://scripts/ui/notebook_ui_theme.gd")
 const NotebookCardScript = preload("res://scripts/ui/notebook_card.gd")
 
-const BACKDROP_MENU: Color = Color(0.05, 0.12, 0.08, 0.28)
-const BACKDROP_PAUSE: Color = Color(0.04, 0.08, 0.06, 0.56)
-const BACKDROP_GAMEOVER: Color = Color(0.03, 0.03, 0.04, 0.48)
+const DEATH_FADE_WAIT: float = 1.25
+const SLIDE_DURATION: float = 0.45
 
-var _backdrop: ColorRect
+var _backdrop: Control
+var _backdrop_tint: Color = Color(0.06, 0.16, 0.10, 0.42)
 var _main_menu: Control
 var _controls_panel: Control
 var _pause_menu: Control
 var _game_over_panel: Control
+var _countdown_label: Label
 
 var _best_label: Label
 var _go_score_value: Label
@@ -24,12 +25,15 @@ var _go_coins_value: Label
 
 var _return_to_pause: bool = false
 var _last_high_score: int = 0
+var _countdown_tween: Tween
+var _gameover_tween: Tween
+var _is_counting_down: bool = false
 
 
-## Builds all menu cards, binds EventBus signals, and syncs to the initial READY state.
+## Builds all menu cards, countdown label, binds EventBus signals, and shows Main Menu.
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
-	layer = 20
+	layer = 110
 	_build_ui()
 
 	if has_node("/root/EventBus"):
@@ -47,7 +51,7 @@ func _ready() -> void:
 
 ## Handles Esc / P pause toggling during active gameplay or pause.
 func _unhandled_input(event: InputEvent) -> void:
-	if not event.is_action_pressed("pause"):
+	if _is_counting_down or not event.is_action_pressed("pause"):
 		return
 	if not has_node("/root/GameManager"):
 		return
@@ -65,11 +69,13 @@ func _unhandled_input(event: InputEvent) -> void:
 		get_viewport().set_input_as_handled()
 
 
-## Shows the Main Menu floating over the live 3D forest world.
+## Shows the Main Menu floating over a soft forest-tinted live 3D backdrop.
 func show_main_menu() -> void:
+	_cancel_sequences()
 	_hide_all()
-	_backdrop.color = BACKDROP_MENU
+	_backdrop_tint = Color(0.06, 0.16, 0.10, 0.45)
 	_backdrop.visible = true
+	_backdrop.queue_redraw()
 	if _best_label != null and has_node("/root/GameManager"):
 		var hs: int = get_node("/root/GameManager").high_score
 		_best_label.visible = hs > 0
@@ -80,16 +86,16 @@ func show_main_menu() -> void:
 ## Shows the Pause Menu over the paused 3D world.
 func show_pause_menu() -> void:
 	_hide_all()
-	_backdrop.color = BACKDROP_PAUSE
+	_backdrop_tint = Color(0.04, 0.08, 0.06, 0.58)
 	_backdrop.visible = true
+	_backdrop.queue_redraw()
 	_pause_menu.visible = true
 
 
-## Shows the Game Over summary card with final score, distance, coins, and best score.
-func show_game_over(final_score: int, distance_traveled: float) -> void:
+## Shows the Game Over summary card, sliding up from the bottom after death fade completes.
+func show_game_over(final_score: int, distance_traveled: float, immediate: bool = false) -> void:
+	_cancel_sequences()
 	_hide_all()
-	_backdrop.color = BACKDROP_GAMEOVER
-	_backdrop.visible = true
 
 	var hs: int = final_score
 	if has_node("/root/GameManager"):
@@ -104,10 +110,72 @@ func show_game_over(final_score: int, distance_traveled: float) -> void:
 	_go_coins_value.text = str(coins)
 	_go_new_best_label.visible = (final_score > 0 and final_score > _last_high_score)
 	_last_high_score = hs
-	_game_over_panel.visible = true
+
+	var target_pos: Vector2 = _centered_pos(_game_over_panel.size)
+	if immediate:
+		_backdrop_tint = Color(0.02, 0.02, 0.03, 0.50)
+		_backdrop.visible = true
+		_backdrop.queue_redraw()
+		_game_over_panel.position = target_pos
+		_game_over_panel.modulate.a = 1.0
+		_game_over_panel.visible = true
+		return
+
+	var vp_h: float = get_viewport().get_visible_rect().size.y
+	if vp_h <= 0.0:
+		vp_h = 720.0
+	_game_over_panel.position = Vector2(target_pos.x, vp_h + 60.0)
+	_game_over_panel.modulate.a = 0.0
+
+	_gameover_tween = create_tween()
+	_gameover_tween.tween_interval(DEATH_FADE_WAIT)
+	_gameover_tween.tween_callback(func() -> void:
+		_backdrop_tint = Color(0.02, 0.02, 0.03, 0.35)
+		_backdrop.visible = true
+		_backdrop.queue_redraw()
+		_game_over_panel.visible = true
+	)
+	_gameover_tween.tween_property(_game_over_panel, "position:y", target_pos.y, SLIDE_DURATION).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	_gameover_tween.parallel().tween_property(_game_over_panel, "modulate:a", 1.0, SLIDE_DURATION * 0.6)
 
 
-## Hides all menus when gameplay is active.
+## Starts the 3-2-1 center countdown before launching or restarting a run.
+func _start_countdown(is_restart: bool) -> void:
+	_cancel_sequences()
+	get_tree().paused = false
+	_hide_all()
+
+	if is_restart and has_node("/root/GameManager"):
+		get_node("/root/GameManager").reset_game()
+	if is_restart and has_node("/root/EventBus"):
+		get_node("/root/EventBus").game_restarted.emit()
+
+	_is_counting_down = true
+	_countdown_label.visible = true
+
+	_countdown_tween = create_tween()
+	for num in ["3", "2", "1"]:
+		_countdown_tween.tween_callback(func() -> void:
+			_countdown_label.text = num
+			_countdown_label.pivot_offset = _countdown_label.size * 0.5
+			_countdown_label.scale = Vector2(1.45, 1.45)
+			_countdown_label.modulate.a = 1.0
+		)
+		_countdown_tween.tween_property(_countdown_label, "scale", Vector2.ONE, 0.35).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+		_countdown_tween.tween_interval(0.50)
+		_countdown_tween.tween_property(_countdown_label, "modulate:a", 0.2, 0.15)
+
+	_countdown_tween.tween_callback(func() -> void:
+		_is_counting_down = false
+		_countdown_label.visible = false
+		if has_node("/root/GameManager"):
+			if is_restart:
+				get_node("/root/GameManager").restart_game()
+			else:
+				get_node("/root/GameManager").start_game()
+	)
+
+
 func _on_game_started() -> void:
 	get_tree().paused = false
 	_hide_all()
@@ -123,13 +191,11 @@ func _on_game_resumed() -> void:
 
 
 func _on_game_over(final_score: int, distance_traveled: float) -> void:
-	show_game_over(final_score, distance_traveled)
+	show_game_over(final_score, distance_traveled, false)
 
 
 func _on_play_pressed() -> void:
-	get_tree().paused = false
-	if has_node("/root/GameManager"):
-		get_node("/root/GameManager").start_game()
+	_start_countdown(false)
 
 
 func _on_resume_pressed() -> void:
@@ -139,12 +205,11 @@ func _on_resume_pressed() -> void:
 
 
 func _on_restart_pressed() -> void:
-	get_tree().paused = false
-	if has_node("/root/GameManager"):
-		get_node("/root/GameManager").restart_game()
+	_start_countdown(true)
 
 
 func _on_menu_pressed() -> void:
+	_cancel_sequences()
 	get_tree().paused = false
 	if has_node("/root/GameManager"):
 		get_node("/root/GameManager").reset_game()
@@ -156,8 +221,9 @@ func _on_menu_pressed() -> void:
 func _on_controls_pressed(from_pause: bool) -> void:
 	_return_to_pause = from_pause
 	_hide_all()
-	_backdrop.color = BACKDROP_PAUSE if from_pause else BACKDROP_MENU
+	_backdrop_tint = Color(0.04, 0.08, 0.06, 0.58) if from_pause else Color(0.06, 0.16, 0.10, 0.45)
 	_backdrop.visible = true
+	_backdrop.queue_redraw()
 	_controls_panel.visible = true
 
 
@@ -172,15 +238,34 @@ func _on_quit_pressed() -> void:
 	get_tree().quit()
 
 
+func _cancel_sequences() -> void:
+	_is_counting_down = false
+	if _countdown_tween != null and _countdown_tween.is_valid():
+		_countdown_tween.kill()
+	if _gameover_tween != null and _gameover_tween.is_valid():
+		_gameover_tween.kill()
+	if _countdown_label != null:
+		_countdown_label.visible = false
+
+
 func _hide_all() -> void:
 	_backdrop.visible = false
 	_main_menu.visible = false
 	_controls_panel.visible = false
 	_pause_menu.visible = false
 	_game_over_panel.visible = false
+	if _countdown_label != null and not _is_counting_down:
+		_countdown_label.visible = false
 
 
-## Builds the full-screen backdrop and the four consistent notebook cards.
+func _centered_pos(card_size: Vector2) -> Vector2:
+	var vp: Vector2 = get_viewport().get_visible_rect().size
+	if vp.x <= 0.0:
+		vp = Vector2(1152.0, 648.0)
+	return (vp - card_size) * 0.5
+
+
+## Builds the atmospheric forest backdrop, countdown label, and four notebook cards.
 func _build_ui() -> void:
 	var root := Control.new()
 	root.name = "Root"
@@ -188,28 +273,50 @@ func _build_ui() -> void:
 	root.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(root)
 
-	_backdrop = ColorRect.new()
+	_backdrop = Control.new()
 	_backdrop.name = "Backdrop"
 	_backdrop.set_anchors_preset(Control.PRESET_FULL_RECT)
-	_backdrop.color = BACKDROP_MENU
+	_backdrop.draw.connect(_draw_backdrop)
 	root.add_child(_backdrop)
 
-	_main_menu = _create_card("MainMenu", "ROBIN RUNNER", Vector2(320.0, 390.0), false, false)
+	_main_menu = _create_card("MainMenu", "ROBIN RUNNER", Vector2(330.0, 400.0), false, false)
 	root.add_child(_main_menu)
 	_populate_main_menu(_main_menu)
 
-	_controls_panel = _create_card("ControlsPanel", "CONTROLS", Vector2(360.0, 410.0), true, true)
+	_controls_panel = _create_card("ControlsPanel", "CONTROLS", Vector2(370.0, 410.0), true, true)
 	_controls_panel.close_requested.connect(_close_controls)
 	root.add_child(_controls_panel)
 	_populate_controls(_controls_panel)
 
-	_pause_menu = _create_card("PauseMenu", "PAUSED", Vector2(320.0, 380.0), false, false)
+	_pause_menu = _create_card("PauseMenu", "PAUSED", Vector2(330.0, 390.0), false, false)
 	root.add_child(_pause_menu)
 	_populate_pause_menu(_pause_menu)
 
-	_game_over_panel = _create_card("GameOverPanel", "GAME OVER", Vector2(340.0, 410.0), true, false)
+	_game_over_panel = _create_card("GameOverPanel", "GAME OVER", Vector2(350.0, 420.0), true, false)
 	root.add_child(_game_over_panel)
 	_populate_game_over(_game_over_panel)
+
+	_countdown_label = Label.new()
+	_countdown_label.name = "CountdownLabel"
+	_countdown_label.set_anchors_preset(Control.PRESET_CENTER)
+	_countdown_label.offset_left = -120.0
+	_countdown_label.offset_top = -100.0
+	_countdown_label.offset_right = 120.0
+	_countdown_label.offset_bottom = 100.0
+	_countdown_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_countdown_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	_countdown_label.visible = false
+	_countdown_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	ThemeRef.style_label(_countdown_label, 128, ThemeRef.TEXT_GOLD, 10)
+	root.add_child(_countdown_label)
+
+
+## Draws a soft atmospheric vignette so the 3D forest feels inviting behind the menu.
+func _draw_backdrop() -> void:
+	var s: Vector2 = _backdrop.size
+	_backdrop.draw_rect(Rect2(Vector2.ZERO, s), _backdrop_tint, true)
+	# Warm radial glow behind the centered notebook card
+	_backdrop.draw_circle(s * 0.5, minf(s.x, s.y) * 0.42, Color(0.95, 0.85, 0.55, 0.12))
 
 
 func _create_card(node_name: String, title: String, card_size: Vector2, inset: bool, close_tab: bool) -> Control:
@@ -229,8 +336,8 @@ func _create_card(node_name: String, title: String, card_size: Vector2, inset: b
 
 func _populate_main_menu(card: Control) -> void:
 	var vbox := VBoxContainer.new()
-	vbox.position = Vector2(40.0, 96.0)
-	vbox.size = Vector2(card.size.x - 80.0, card.size.y - 120.0)
+	vbox.position = Vector2(44.0, 102.0)
+	vbox.size = Vector2(card.size.x - 88.0, card.size.y - 126.0)
 	vbox.add_theme_constant_override("separation", 14)
 	vbox.alignment = BoxContainer.ALIGNMENT_CENTER
 	card.add_child(vbox)
@@ -261,8 +368,8 @@ func _populate_main_menu(card: Control) -> void:
 
 func _populate_controls(card: Control) -> void:
 	var vbox := VBoxContainer.new()
-	vbox.position = Vector2(44.0, 108.0)
-	vbox.size = Vector2(card.size.x - 88.0, card.size.y - 134.0)
+	vbox.position = Vector2(46.0, 112.0)
+	vbox.size = Vector2(card.size.x - 92.0, card.size.y - 138.0)
 	vbox.add_theme_constant_override("separation", 12)
 	card.add_child(vbox)
 
@@ -299,8 +406,8 @@ func _populate_controls(card: Control) -> void:
 
 func _populate_pause_menu(card: Control) -> void:
 	var vbox := VBoxContainer.new()
-	vbox.position = Vector2(40.0, 98.0)
-	vbox.size = Vector2(card.size.x - 80.0, card.size.y - 122.0)
+	vbox.position = Vector2(44.0, 102.0)
+	vbox.size = Vector2(card.size.x - 88.0, card.size.y - 126.0)
 	vbox.add_theme_constant_override("separation", 12)
 	vbox.alignment = BoxContainer.ALIGNMENT_CENTER
 	card.add_child(vbox)
@@ -324,8 +431,8 @@ func _populate_pause_menu(card: Control) -> void:
 
 func _populate_game_over(card: Control) -> void:
 	var vbox := VBoxContainer.new()
-	vbox.position = Vector2(44.0, 102.0)
-	vbox.size = Vector2(card.size.x - 88.0, card.size.y - 126.0)
+	vbox.position = Vector2(46.0, 106.0)
+	vbox.size = Vector2(card.size.x - 92.0, card.size.y - 130.0)
 	vbox.add_theme_constant_override("separation", 10)
 	card.add_child(vbox)
 
@@ -376,30 +483,32 @@ func _make_button(btn_name: String, label: String, is_primary: bool) -> Button:
 	var btn := Button.new()
 	btn.name = btn_name
 	btn.text = label
-	btn.custom_minimum_size = Vector2(0.0, 46.0)
+	btn.custom_minimum_size = Vector2(0.0, 48.0)
 	ThemeRef.style_button(btn, is_primary, 20)
 	return btn
 
 
-## Creates the iconic circular green Play button with a cream triangle icon.
+## Creates the iconic circular green Play button with a soft drop shadow and glossy highlight.
 func _create_play_circle_button() -> BaseButton:
 	var btn := Button.new()
-	btn.custom_minimum_size = Vector2(88.0, 88.0)
+	btn.custom_minimum_size = Vector2(96.0, 96.0)
 	btn.flat = true
 	btn.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
 	btn.draw.connect(func() -> void:
 		var center := btn.size * 0.5
-		var r: float = 40.0
+		var r: float = 42.0
 		var fill: Color = ThemeRef.GREEN_HOVER if btn.is_hovered() else ThemeRef.GREEN_FILL
 		if btn.button_pressed:
 			fill = ThemeRef.GREEN_PRESSED
-		btn.draw_circle(center + Vector2(0.0, 4.0), r, ThemeRef.GREEN_LIP)
+		# Soft drop shadow + 3D bottom lip
+		btn.draw_circle(center + Vector2(0.0, 7.0), r + 1.0, Color(0.12, 0.06, 0.02, 0.28))
+		btn.draw_circle(center + Vector2(0.0, 5.0), r, ThemeRef.GREEN_LIP)
 		btn.draw_circle(center, r, fill)
-		btn.draw_arc(center - Vector2(0.0, 2.0), r - 5.0, PI * 1.15, PI * 1.75, 14, Color(0.75, 1.0, 0.55, 0.6), 4.0, true)
+		btn.draw_arc(center - Vector2(0.0, 2.0), r - 6.0, PI * 1.15, PI * 1.75, 16, Color(0.80, 1.0, 0.62, 0.55), 5.0, true)
 		var tri := PackedVector2Array([
-			center + Vector2(-10.0, -16.0),
-			center + Vector2(18.0, 0.0),
-			center + Vector2(-10.0, 16.0),
+			center + Vector2(-10.0, -17.0),
+			center + Vector2(19.0, 0.0),
+			center + Vector2(-10.0, 17.0),
 		])
 		btn.draw_colored_polygon(tri, ThemeRef.TEXT_WHITE)
 	)

@@ -34,9 +34,13 @@ func _test_ui_manager_lifecycle() -> void:
 		"Main Menu should be visible in READY state")
 
 	ui._on_play_pressed()
+	_assert(ui._is_counting_down and ui._countdown_label.visible and not ui._main_menu.visible,
+		"Pressing Play should hide Main Menu and start 3-2-1 countdown")
+	ui._cancel_sequences()
+	gm.start_game()
 	await get_tree().process_frame
 	_assert(gm.current_state == gm.GameState.PLAYING and not ui._main_menu.visible,
-		"Pressing Play should start game and hide Main Menu")
+		"GameManager.start_game() should enter PLAYING and keep Main Menu hidden")
 
 	gm.pause_game()
 	await get_tree().process_frame
@@ -49,7 +53,7 @@ func _test_ui_manager_lifecycle() -> void:
 
 	gm.add_score(250)
 	gm.distance_traveled = 84.3
-	gm.trigger_game_over()
+	ui.show_game_over(gm.score, gm.distance_traveled, true)
 	await get_tree().process_frame
 	_assert(ui._game_over_panel.visible and ui._go_score_value.text == "250" and ui._go_distance_value.text == "84m",
 		"Game Over panel should display final score and distance")

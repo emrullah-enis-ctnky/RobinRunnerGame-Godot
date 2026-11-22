@@ -3,5 +3,5 @@
 [ext_resource type="Script" path="res://scripts/ui/ui_manager.gd" id="1_uimanager"]
 
 [node name="UIManager" type="CanvasLayer"]
-layer = 20
+layer = 110
 script = ExtResource("1_uimanager")
