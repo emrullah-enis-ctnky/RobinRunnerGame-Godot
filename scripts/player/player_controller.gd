@@ -185,15 +185,15 @@ func _physics_process(delta: float) -> void:
 
 ## Captures discrete player inputs for lane switching, jumping, and ducking/sliding.
 func _handle_input() -> void:
-	if Input.is_action_just_pressed("move_left") or Input.is_key_pressed(KEY_A) and not Input.is_key_pressed(KEY_D):
+	if Input.is_action_just_pressed("move_left"):
 		change_lane(-1)
-	elif Input.is_action_just_pressed("move_right") or Input.is_key_pressed(KEY_D) and not Input.is_key_pressed(KEY_A):
+	elif Input.is_action_just_pressed("move_right"):
 		change_lane(1)
 
-	if (Input.is_action_just_pressed("jump") or Input.is_key_pressed(KEY_SPACE) or Input.is_key_pressed(KEY_W)) and is_on_floor():
+	if Input.is_action_just_pressed("jump") and is_on_floor():
 		jump()
 
-	if Input.is_action_just_pressed("move_down") or Input.is_key_pressed(KEY_S) or Input.is_key_pressed(KEY_DOWN):
+	if Input.is_action_just_pressed("move_down"):
 		if is_on_floor():
 			duck()
 		else:
