@@ -401,16 +401,40 @@ func _apply_audio() -> void:
 func _apply_display() -> void:
 	if OS.has_feature("web") or DisplayServer.get_name() == "headless":
 		return
+	var win: Window = get_window()
+	if win == null:
+		return
+
+	var screen_sz: Vector2i = DisplayServer.screen_get_size()
 	if fullscreen:
-		DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_FULLSCREEN)
+		if not win.is_embedded():
+			DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_FULLSCREEN)
+		if screen_sz.y > 0:
+			get_viewport().scaling_3d_scale = clampf(float(resolution.y) / float(screen_sz.y), 0.25, 1.0)
 	else:
-		DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_WINDOWED)
-		DisplayServer.window_set_size(resolution)
-		var screen_pos: Vector2i = DisplayServer.screen_get_position()
-		var screen_sz: Vector2i = DisplayServer.screen_get_size()
-		if screen_sz.x > 0 and screen_sz.y > 0:
-			var centered: Vector2i = screen_pos + (screen_sz - resolution) / 2
-			DisplayServer.window_set_position(centered)
+		get_viewport().scaling_3d_scale = 1.0
+		if not win.is_embedded():
+			var was_fullscreen: bool = DisplayServer.window_get_mode() == DisplayServer.WINDOW_MODE_FULLSCREEN
+			DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_WINDOWED)
+			if was_fullscreen:
+				call_deferred("_apply_windowed_bounds")
+			else:
+				_apply_windowed_bounds()
+
+
+func _apply_windowed_bounds() -> void:
+	var win: Window = get_window()
+	if win == null or win.is_embedded() or fullscreen:
+		return
+	var usable: Rect2i = DisplayServer.screen_get_usable_rect()
+	var target: Vector2i = resolution
+	if usable.size.x > 0 and usable.size.y > 0:
+		target.x = mini(target.x, usable.size.x)
+		target.y = mini(target.y, usable.size.y)
+	DisplayServer.window_set_size(target)
+	if usable.size.x > 0 and usable.size.y > 0:
+		var centered: Vector2i = usable.position + (usable.size - target) / 2
+		DisplayServer.window_set_position(centered)
 
 
 func _apply_bus(bus_name: String, vol: float, muted: bool) -> void:

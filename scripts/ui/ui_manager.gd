@@ -328,6 +328,7 @@ func _build_ui() -> void:
 	_backdrop.name = "Backdrop"
 	_backdrop.set_anchors_preset(Control.PRESET_FULL_RECT)
 	_backdrop.draw.connect(_draw_backdrop)
+	_backdrop.resized.connect(_backdrop.queue_redraw)
 	root.add_child(_backdrop)
 
 	_main_menu = _create_card("MainMenu", _t("title_main"), Vector2(330.0, 400.0), false, false)
