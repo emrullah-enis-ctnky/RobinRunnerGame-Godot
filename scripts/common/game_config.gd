@@ -63,6 +63,21 @@ const STUMBLE_DURATION: float = 0.6
 const STUMBLE_SPEED_FACTOR: float = 0.45
 const DAMAGE_WINDOW_DURATION: float = 5.0
 
+# Collectibles & Scoring Constants
+const COLLECTIBLE_TYPE_COIN: String = "coin"
+const COIN_MODEL_DIAMETER: float = 0.42
+const COIN_HOVER_HEIGHT: float = 0.75
+const COIN_SPIN_SPEED_DEG: float = 200.0
+const COIN_BOB_AMPLITUDE: float = 0.08
+const COIN_BOB_SPEED: float = 3.2
+const COIN_COLLECT_TIME: float = 0.16
+const COIN_SCORE_VALUE: int = 10
+const SCORE_PER_METER: float = 1.0
+const COMBO_WINDOW_SECONDS: float = 2.5
+const COMBO_STEP_COINS: int = 5
+const COMBO_MULTIPLIER_STEP: float = 0.25
+const COMBO_MAX_MULTIPLIER: float = 2.5
+
 
 ## Returns the 3D X coordinate for a specific lane index.
 static func get_lane_x(lane_index: int) -> float:
