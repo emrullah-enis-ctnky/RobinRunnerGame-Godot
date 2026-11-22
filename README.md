@@ -99,7 +99,7 @@ res://
 ├── scripts/
 │   ├── combat/             # Arrow trajectory and combat handlers
 │   ├── common/             # GameConfig constants and helper utilities
-│   ├── managers/           # EventBus, GameManager, and AbilityManager autoloads
+│   ├── managers/           # EventBus, GameManager, AbilityManager, and ScoreManager autoloads
 │   ├── obstacles/          # Obstacle behavior and destructible logic
 │   ├── player/             # Player movement and input controllers
 │   ├── ui/                 # UI binders and HUD controllers
@@ -154,6 +154,7 @@ godot --headless res://tests/unit/test_camera_controller.tscn
 godot --headless res://tests/unit/test_world_generation.tscn
 godot --headless res://tests/unit/test_obstacles.tscn
 godot --headless res://tests/unit/test_combat.tscn
+godot --headless res://tests/unit/test_collectibles_scoring.tscn
 ```
 
 ---
@@ -170,7 +171,7 @@ The project is developed in phased, modular Kanban increments:
 - [x] **Phase 5**: Obstacles & Environmental Hazards
 - [ ] **Phase 6**: Animation System (Character & World Animations) *(Steps 6.1–6.4, 6.8 complete; 6.5–6.7 open)*
 - [ ] **Phase 7**: Combat & Ability System (Arrows, Quiver & Arrow Types) *(Steps 7.1–7.6f implemented; Step 7.7 manual test pending)*
-- [ ] **Phase 8**: Pickups, Collectibles & Scoring
+- [ ] **Phase 8**: Pickups, Collectibles & Scoring *(Steps 8.1–8.5 implemented; Step 8.6 manual test pending)*
 - [ ] **Phase 9**: User Interface & HUD
 - [ ] **Phase 10**: Audio & Visual Polish
 - [ ] **Phase 11**: Performance Optimization & Multi-Platform Export (Desktop, Web, Android)

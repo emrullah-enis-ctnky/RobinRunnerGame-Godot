@@ -1,0 +1,16 @@
+[gd_scene format=3 uid="uid://c8coinpickup01"]
+
+[ext_resource type="Script" path="res://scripts/collectibles/coin_pickup.gd" id="1_coin_script"]
+[ext_resource type="PackedScene" path="res://assets/models/coin-star.glb" id="2_coin_mesh"]
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_coin"]
+radius = 0.42
+
+[node name="CoinPickup" type="Area3D" groups=["pickup", "coin"]]
+collision_layer = 32
+script = ExtResource("1_coin_script")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+shape = SubResource("SphereShape3D_coin")
+
+[node name="Mesh" parent="." instance=ExtResource("2_coin_mesh")]

@@ -10,6 +10,7 @@ const MAX_SPREAD: float = 1.4
 
 # Bullseye, inner, middle and outer ring boundaries as fractions of the board radius.
 const RING_RADII: Array[float] = [0.15, 0.45, 0.72, 0.95]
+const RING_SCORES: Array[int] = [100, 60, 40, 20]
 const BOARD_CENTER: Vector3 = Vector3(0.0, 0.64, 0.0)
 const BOARD_RADIUS: float = 0.5
 # Front face of the scaled target mesh (measured at z = 0.411), so arrows plant on
@@ -51,7 +52,18 @@ func stick_arrow(arrow: Node3D, hit_position: Vector3) -> bool:
 
 	_stuck.append({"arrow": arrow, "point": impact})
 	_separate_overlapping(arrow, impact)
+	if has_node("/root/EventBus"):
+		get_node("/root/EventBus").target_destroyed.emit("target_archery", score_for_impact(impact))
 	return true
+
+
+## Returns the ring score for a target-local impact point based on distance from center.
+func score_for_impact(point: Vector3) -> int:
+	var fraction: float = Vector2(point.x - BOARD_CENTER.x, point.y - BOARD_CENTER.y).length() / BOARD_RADIUS
+	for i in range(RING_RADII.size()):
+		if fraction <= RING_RADII[i]:
+			return RING_SCORES[i]
+	return RING_SCORES[RING_SCORES.size() - 1]
 
 
 ## Returns a target-local impact point; closer shots scatter less, very close shots

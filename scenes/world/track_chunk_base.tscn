@@ -1,6 +1,7 @@
 [gd_scene format=3 uid="uid://c6trackchunkbase"]
 
 [ext_resource type="Script" path="res://scripts/world/track_chunk.gd" id="1_chunk"]
+[ext_resource type="Script" path="res://scripts/world/chunk_collectible_spawner.gd" id="2_coin_spawner"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_ground"]
 size = Vector3(6.6, 3, 30)
@@ -109,3 +110,6 @@ mesh = SubResource("BoxMesh_curb")
 [node name="LaneObjects" type="Node3D" parent="."]
 
 [node name="Pickups" type="Node3D" parent="."]
+
+[node name="ChunkCollectibles" type="Node3D" parent="."]
+script = ExtResource("2_coin_spawner")

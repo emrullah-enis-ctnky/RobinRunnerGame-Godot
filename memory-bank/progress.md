@@ -1,9 +1,9 @@
 # Progress & Kanban Roadmap: RobinRunner
 
 ## Project Status Overview
-- **Current Phase**: Phase 7: Combat & Ability System (Steps 7.1-7.6, plus the 7.6b/7.6c pickups and bow/HUD passes, the 7.6d hand-bone bow attachment, the 7.6e ladder topple pass and the 7.6f archery target sticking pass, implemented; Step 7.7 manual test pending; Step 6.3 pulled in per user decision)
-- **Active Branch**: `feature/combat-abilities` (merged `main` in at `b747e41`; ladder, flame-arrow and archery-target passes on top)
-- **Next Phase**: Merge `feature/combat-abilities` on user approval; Phase 7 Step 7.7 manual test; Phase 6 leftovers (6.5-6.7) and Phase 8 remain open
+- **Current Phase**: Phase 8: Pickups, Collectibles & Scoring (Steps 8.1–8.5 implemented on `feature/collectibles-scoring`; Step 8.6 manual visual/cadence test pending)
+- **Active Branch**: `feature/collectibles-scoring`
+- **Next Phase**: Step 8.6 manual inspection and merge `feature/collectibles-scoring` on user approval; then Phase 9 (UI & HUD) or Phase 6 leftovers (6.5–6.7)
 - **Overall Health**: Green (All six automated suites pass per documented runs: core, player, camera, world 5/5, obstacles 9/9, combat 13/13)
 
 ---
@@ -114,12 +114,12 @@
 
 ### [ ] Phase 8: Pickups, Collectibles & Scoring
 - **Branch**: `feature/collectibles-scoring`
-- **Objective**: Create rewarding collectible loops, score calculation, and ability boosters.
-- [ ] Step 8.1: Implement `ScoreManager` calculating distance score and collectible multipliers.
-- [ ] Step 8.2: Create Collectible Coin/Essence scene with gentle idle bobbing and rotation.
-- [ ] Step 8.3: Implement Collectible Spawner populating lane patterns along track chunks.
-- [ ] Step 8.4: Implement Pickup collection triggers granting immediate score and ability gauge bonuses.
-- [ ] Step 8.5: Automated unit tests for score accumulation and pickup triggers.
+- **Objective**: Create rewarding collectible loops, score calculation, and archery target ring rewards.
+- [x] Step 8.1: Implement `ScoreManager` (`scripts/managers/score_manager.gd`, registered as autoload in `project.godot`) calculating incremental distance score, coin combo multipliers (up to 2.5x across 2.5s windows, reset on hazard damage), and integrating `ArcheryTarget` ring-based scoring (`100`/`60`/`40`/`20` via `EventBus.target_destroyed`).
+- [x] Step 8.2: Create Collectible Star Coin scene (`scenes/collectibles/coin.tscn` + `scripts/collectibles/coin_pickup.gd`) using the custom Blender-authored `assets/models/coin-star.glb` normalized to `GameConfig.COIN_MODEL_DIAMETER` (`0.42 m`, proportional to the `~1.55 m` archer), with Y-axis idle spin, sinusoidal bobbing, pop-and-vanish collect tween, and golden `PickupBurst` sparks.
+- [x] Step 8.3: Implement `ChunkCollectibleSpawner` (`scripts/world/chunk_collectible_spawner.gd` attached to `track_chunk_base.tscn`) populating 4-coin ground lines on clear lanes and 3-coin jump arcs over low jumpable hazards without overlapping tall/lethal obstacles.
+- [x] Step 8.4: Implement Pickup collection triggers (`CoinPickup._on_body_entered`) emitting `EventBus.collectible_picked("coin", value)` and updating `EventBus.coins_updated` / `combo_updated`.
+- [x] Step 8.5: Automated unit tests in `tests/unit/test_collectibles_scoring.gd` + `.tscn` (5 test suites covering coin size/idle, pickup burst/restore, `ScoreManager` distance/combo/reset, `ArcheryTarget` ring scoring, and `ChunkCollectibleSpawner`).
 - [ ] Step 8.6: Collectible pickup cadence and readability inspection (User Manual Test).
 
 ---

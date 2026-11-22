@@ -27,6 +27,8 @@ signal target_destroyed(target_name: String, score_reward: int)
 signal score_updated(current_score: int)
 signal distance_updated(distance_meters: float)
 signal collectible_picked(collectible_type: String, value: int)
+signal coins_updated(coin_count: int)
+signal combo_updated(combo_count: int, multiplier: float)
 
 
 ## Resets all signals and listeners when switching runs.
