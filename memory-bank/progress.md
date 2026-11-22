@@ -1,9 +1,9 @@
 # Progress & Kanban Roadmap: RobinRunner
 
 ## Project Status Overview
-- **Current Phase**: Phase 8: Pickups, Collectibles & Scoring (Steps 8.1–8.5 implemented on `feature/collectibles-scoring`; Step 8.6 manual visual/cadence test pending)
+- **Current Phase**: Phase 8: Pickups, Collectibles & Scoring (Complete — Steps 8.1–8.6 verified on `feature/collectibles-scoring`, awaiting merge approval)
 - **Active Branch**: `feature/collectibles-scoring`
-- **Next Phase**: Step 8.6 manual inspection and merge `feature/collectibles-scoring` on user approval; then Phase 9 (UI & HUD) or Phase 6 leftovers (6.5–6.7)
+- **Next Phase**: Merge `feature/collectibles-scoring` into `main` on user approval; then Phase 9 (UI & HUD) or Phase 6 leftovers (6.5–6.7)
 - **Overall Health**: Green (All six automated suites pass per documented runs: core, player, camera, world 5/5, obstacles 9/9, combat 13/13)
 
 ---
@@ -112,7 +112,7 @@
 
 ---
 
-### [ ] Phase 8: Pickups, Collectibles & Scoring
+### [x] Phase 8: Pickups, Collectibles & Scoring
 - **Branch**: `feature/collectibles-scoring`
 - **Objective**: Create rewarding collectible loops, score calculation, and archery target ring rewards.
 - [x] Step 8.1: Implement `ScoreManager` (`scripts/managers/score_manager.gd`, registered as autoload in `project.godot`) calculating incremental distance score, coin combo multipliers (up to 2.5x across 2.5s windows, reset on hazard damage), and integrating `ArcheryTarget` ring-based scoring (`100`/`60`/`40`/`20` via `EventBus.target_destroyed`).
@@ -120,7 +120,7 @@
 - [x] Step 8.3: Implement `ChunkCollectibleSpawner` (`scripts/world/chunk_collectible_spawner.gd` attached to `track_chunk_base.tscn`) populating 4-coin ground lines on clear lanes and 3-coin jump arcs over low jumpable hazards without overlapping tall/lethal obstacles.
 - [x] Step 8.4: Implement Pickup collection triggers (`CoinPickup._on_body_entered`) emitting `EventBus.collectible_picked("coin", value)` and updating `EventBus.coins_updated` / `combo_updated`. Added a minimal top-left `CoinCounterHUD` (`scenes/ui/coin_counter_hud.tscn` + `scripts/ui/coin_counter_hud.gd` instanced in `world.tscn`) showing the live coin count with a golden star coin icon and pickup pulse.
 - [x] Step 8.5: Automated unit tests in `tests/unit/test_collectibles_scoring.gd` + `.tscn` (5 test suites covering coin size/idle, pickup burst/restore, `ScoreManager` distance/combo/reset, `ArcheryTarget` ring scoring, and `ChunkCollectibleSpawner`).
-- [ ] Step 8.6: Collectible pickup cadence and readability inspection (User Manual Test).
+- [x] Step 8.6: Collectible pickup cadence and readability inspection (User Manual Test — visually confirmed coin scale, idle spin/bob, pickup burst, jump arcs, and transparent `CoinCounterHUD`).
 
 ---
 

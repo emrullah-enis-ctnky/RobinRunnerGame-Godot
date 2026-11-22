@@ -1,7 +1,7 @@
 # Active Context: RobinRunner
 
 ## Current Work Focus
-Phase 8 (Pickups, Collectibles & Scoring) is implemented on `feature/collectibles-scoring` (Steps 8.1–8.5 complete; Step 8.6 manual visual & cadence verification pending).
+Phase 8 (Pickups, Collectibles & Scoring) is complete on `feature/collectibles-scoring` (Steps 8.1–8.6 verified by user). Awaiting explicit user approval to merge `feature/collectibles-scoring` into `main`.
 
 ## Recent Changes
 - Created custom stylized golden star coin model `assets/models/coin-star.glb` in Blender (`1680` verts, `1644` polys, double-sided plump 5-point star, beveled rim with stylized nicks).
@@ -14,5 +14,5 @@ Phase 8 (Pickups, Collectibles & Scoring) is implemented on `feature/collectible
 - Added `tests/unit/test_collectibles_scoring.gd` + `.tscn` (5 suites).
 
 ## Next Steps
-1. User manual test of Step 8.6 (coin size relative to the archer, spin/bobbing, pickup burst, jump arcs, and scoring) in Godot.
-2. On user approval, merge `feature/collectibles-scoring` into `main` and proceed to Phase 9 (UI & HUD).
+1. On explicit user approval, merge `feature/collectibles-scoring` into `main`.
+2. Proceed to Phase 9 (UI & HUD) or finish Phase 6 leftovers (Steps 6.5–6.7).
