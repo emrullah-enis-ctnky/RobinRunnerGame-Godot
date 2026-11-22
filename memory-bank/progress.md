@@ -1,9 +1,9 @@
 # Progress & Kanban Roadmap: RobinRunner
 
 ## Project Status Overview
-- **Current Phase**: Phase 8: Pickups, Collectibles & Scoring (Complete — Steps 8.1–8.6 verified on `feature/collectibles-scoring`, awaiting merge approval)
-- **Active Branch**: `feature/collectibles-scoring`
-- **Next Phase**: Merge `feature/collectibles-scoring` into `main` on user approval; then Phase 9 (UI & HUD) or Phase 6 leftovers (6.5–6.7)
+- **Current Phase**: Phase 9: User Interface & HUD (Steps 9.1–9.5 implemented on `feature/ui-hud`; Step 9.6 manual visual inspection pending)
+- **Active Branch**: `feature/ui-hud`
+- **Next Phase**: Step 9.6 manual visual inspection and merge `feature/ui-hud` on user approval; then Phase 10 (Audio & Visual Polish) or Phase 6 leftovers (6.5–6.7)
 - **Overall Health**: Green (All six automated suites pass per documented runs: core, player, camera, world 5/5, obstacles 9/9, combat 13/13)
 
 ---
@@ -126,12 +126,12 @@
 
 ### [ ] Phase 9: User Interface & HUD
 - **Branch**: `feature/ui-hud`
-- **Objective**: Deliver a clean, stylized user interface covering gameplay HUD, menus, and game-over loops.
-- [ ] Step 9.1: Build In-Game HUD (Real-time Score, Distance Counter; Ability Gauge Bar dropped in favor of the quiver-based `ArrowCounterHUD` already implemented in Step 7.6c).
-- [ ] Step 9.2: Build Main Menu screen (Game Title, Play Button, Controls Guide).
-- [ ] Step 9.3: Build Pause Menu overlay (Resume, Restart, Quit/Menu).
-- [ ] Step 9.4: Build Game Over screen (Final Score, High Score display, Instant Retry button).
-- [ ] Step 9.5: Bind all UI events to `EventBus` and `GameManager` signals.
+- **Objective**: Deliver a clean, stylized user interface covering gameplay HUD, menus, and game-over loops with consistent notebook-theme framing across every screen.
+- [x] Step 9.1: Build In-Game HUD (`ScoreDistanceHUD` at `scenes/ui/score_distance_hud.tscn` + `scripts/ui/score_distance_hud.gd` displaying live Score, Distance, and Combo multiplier) and unify `CoinCounterHUD` + `ArrowCounterHUD` / `ArrowCounterEntry` onto the shared `NotebookUITheme` dark-wood/cream pill frame and outlined typography; all three HUDs auto-hide in `READY` and `GAME_OVER`.
+- [x] Step 9.2: Build Main Menu screen inside `UIManager` (`scripts/ui/ui_manager.gd` + `scenes/ui/ui_manager.tscn`) using the stylized `NotebookCard` (`scripts/ui/notebook_card.gd`: parchment page, wooden backing, spiral rings, forest leaves, crimson bookmark ribbon, golden header banner, circular green Play button, orange Controls/Quit buttons) floating over the live 3D forest world in `READY` state (`world.gd` no longer auto-starts).
+- [x] Step 9.3: Build Pause Menu overlay (`PAUSED` `NotebookCard` with Resume, Restart, Controls, and Main Menu buttons; `Esc`/`P` toggles `get_tree().paused` via `PROCESS_MODE_ALWAYS`).
+- [x] Step 9.4: Build Game Over screen (`GAME OVER` `NotebookCard` displaying Final Score, High Score with `NEW BEST!` badge, Distance, and Coins, plus Play Again and Main Menu buttons).
+- [x] Step 9.5: Bind all UI events to `EventBus` and `GameManager` signals, and add automated unit tests in `tests/unit/test_ui_hud.gd` + `.tscn` (2 suites covering `UIManager` lifecycle and `ScoreDistanceHUD` updates).
 - [ ] Step 9.6: UI responsiveness, readability, and visual inspection (User Manual Test).
 
 ---

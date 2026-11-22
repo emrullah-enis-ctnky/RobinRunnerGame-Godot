@@ -10,4 +10,4 @@ extends Node3D
 func _ready() -> void:
 	if has_node("/root/GameManager"):
 		var gm: Node = get_node("/root/GameManager")
-		gm.start_game()
+		gm.reset_game()

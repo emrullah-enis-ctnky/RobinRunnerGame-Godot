@@ -1,0 +1,6 @@
+[gd_scene format=3 uid="uid://ctestuihud01"]
+
+[ext_resource type="Script" path="res://tests/unit/test_ui_hud.gd" id="1_test"]
+
+[node name="TestUIHUD" type="Node"]
+script = ExtResource("1_test")

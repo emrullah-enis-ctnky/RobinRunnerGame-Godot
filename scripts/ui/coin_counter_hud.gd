@@ -2,10 +2,12 @@ class_name CoinCounterHUD
 extends CanvasLayer
 ## Displays the current run's collected coin count in the top-left corner.
 
+const ThemeRef = preload("res://scripts/ui/notebook_ui_theme.gd")
 const GOLD_COLOR: Color = Color(1.0, 0.78, 0.12)
 const GOLD_RIM_COLOR: Color = Color(0.85, 0.56, 0.04)
 const PULSE_COLOR: Color = Color(1.0, 0.92, 0.45)
 
+@onready var _root: Control = $Root
 @onready var _panel: Control = $Root/Panel
 @onready var _count_label: Label = $Root/Panel/Count
 
@@ -14,17 +16,33 @@ var _pulse_tween: Tween
 
 ## Connects to EventBus.coins_updated and initializes the displayed count.
 func _ready() -> void:
+	ThemeRef.style_label(_count_label, 26, ThemeRef.TEXT_WHITE, 4)
 	if _panel != null:
 		_panel.draw.connect(_draw_panel)
 		_panel.queue_redraw()
 
 	if has_node("/root/EventBus"):
-		get_node("/root/EventBus").coins_updated.connect(_on_coins_updated)
+		var bus: Node = get_node("/root/EventBus")
+		bus.coins_updated.connect(_on_coins_updated)
+		bus.game_started.connect(_refresh_visibility)
+		bus.game_restarted.connect(_refresh_visibility)
+		bus.game_paused.connect(_refresh_visibility)
+		bus.game_resumed.connect(_refresh_visibility)
+		bus.game_over.connect(func(_s: int, _d: float) -> void: _refresh_visibility())
 
 	var initial: int = 0
 	if has_node("/root/ScoreManager"):
 		initial = get_node("/root/ScoreManager").coins_collected
 	_set_count(initial, false)
+	_refresh_visibility()
+
+
+## Shows the HUD only during active gameplay or pause.
+func _refresh_visibility() -> void:
+	if _root == null or not has_node("/root/GameManager"):
+		return
+	var gm: Node = get_node("/root/GameManager")
+	_root.visible = (gm.current_state == gm.GameState.PLAYING or gm.current_state == gm.GameState.PAUSED)
 
 
 ## Updates the label and plays a subtle golden pulse when coins increase.
@@ -52,8 +70,9 @@ func _set_count(coin_count: int, pulse: bool) -> void:
 	_pulse_tween.tween_property(_panel, "scale", Vector2.ONE, 0.18).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 
 
-## Draws the stylized golden star coin icon with a transparent background.
+## Draws the unified HUD pill frame and stylized golden star coin icon.
 func _draw_panel() -> void:
+	ThemeRef.draw_hud_pill(_panel, _panel.size)
 	var center := Vector2(24.0, _panel.size.y * 0.5)
 	_panel.draw_circle(center, 14.0, GOLD_RIM_COLOR)
 	_panel.draw_circle(center, 11.0, GOLD_COLOR)
