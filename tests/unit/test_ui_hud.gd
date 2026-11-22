@@ -126,6 +126,13 @@ func _test_settings_manager() -> void:
 
 	sm.reset_controls_to_defaults()
 	_assert(InputMap.action_get_events("jump").size() == before_count, "Reset defaults should restore original bindings")
+
+	var avail: Array[Vector2i] = sm.get_available_resolutions()
+	_assert(avail.size() >= 1 and avail.has(Vector2i(1280, 720)), "Available resolutions must include 1280x720")
+	sm.set_resolution(Vector2i(1280, 720))
+	_assert(sm.resolution == Vector2i(1280, 720), "Resolution should update to 1280x720")
+	sm.set_fullscreen(false)
+	_assert(not sm.fullscreen, "Fullscreen toggle should update cleanly")
 	_end_test("SettingsManager Audio, Language & Controls")
 
 

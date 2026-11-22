@@ -17,17 +17,28 @@ const MANAGED_ACTIONS: Array[String] = [
 
 const LANGUAGES: Array[String] = ["en", "tr", "de"]
 
+const PRESET_RESOLUTIONS: Array[Vector2i] = [
+	Vector2i(1280, 720),
+	Vector2i(1366, 768),
+	Vector2i(1600, 900),
+	Vector2i(1920, 1080),
+	Vector2i(2560, 1440),
+	Vector2i(3840, 2160),
+]
+
 const STRINGS: Dictionary = {
 	"en": {
 		"title_main": "ROBIN RUNNER",
 		"title_settings": "SETTINGS",
 		"title_controls": "CONTROLS",
 		"title_language": "LANGUAGE",
+		"title_display": "DISPLAY",
 		"title_paused": "PAUSED",
 		"title_gameover": "GAME OVER",
 		"btn_settings": "SETTINGS",
 		"btn_controls": "CONTROLS",
 		"btn_language": "LANGUAGE",
+		"btn_display": "DISPLAY",
 		"btn_quit": "QUIT",
 		"btn_save": "SAVE",
 		"btn_back": "BACK",
@@ -43,6 +54,10 @@ const STRINGS: Dictionary = {
 		"lbl_new_best": "NEW HIGH SCORE!",
 		"lbl_music": "MUSIC",
 		"lbl_sfx": "SOUND",
+		"lbl_resolution": "RESOLUTION",
+		"lbl_window_mode": "DISPLAY MODE",
+		"mode_fullscreen": "FULLSCREEN",
+		"mode_windowed": "WINDOWED",
 		"lbl_press_key": "PRESS ANY KEY...",
 		"act_move_left": "Move Left",
 		"act_move_right": "Move Right",
@@ -56,11 +71,13 @@ const STRINGS: Dictionary = {
 		"title_settings": "AYARLAR",
 		"title_controls": "KONTROLLER",
 		"title_language": "DİL SEÇİMİ",
+		"title_display": "GÖRÜNTÜ",
 		"title_paused": "DURAKLATILDI",
 		"title_gameover": "OYUN BİTTİ",
 		"btn_settings": "AYARLAR",
 		"btn_controls": "KONTROLLER",
 		"btn_language": "DİL",
+		"btn_display": "GÖRÜNTÜ",
 		"btn_quit": "ÇIKIŞ",
 		"btn_save": "KAYDET",
 		"btn_back": "GERİ",
@@ -76,6 +93,10 @@ const STRINGS: Dictionary = {
 		"lbl_new_best": "YENİ REKOR!",
 		"lbl_music": "MÜZİK",
 		"lbl_sfx": "SES EFEKTİ",
+		"lbl_resolution": "ÇÖZÜNÜRLÜK",
+		"lbl_window_mode": "EKRAN MODU",
+		"mode_fullscreen": "TAM EKRAN",
+		"mode_windowed": "PENCERE",
 		"lbl_press_key": "BİR TUŞA BASIN...",
 		"act_move_left": "Sola Git",
 		"act_move_right": "Sağa Git",
@@ -89,11 +110,13 @@ const STRINGS: Dictionary = {
 		"title_settings": "EINSTELLUNGEN",
 		"title_controls": "STEUERUNG",
 		"title_language": "SPRACHE",
+		"title_display": "ANZEIGE",
 		"title_paused": "PAUSIERT",
 		"title_gameover": "SPIEL VORBEI",
 		"btn_settings": "EINSTELLUNGEN",
 		"btn_controls": "STEUERUNG",
 		"btn_language": "SPRACHE",
+		"btn_display": "ANZEIGE",
 		"btn_quit": "BEENDEN",
 		"btn_save": "SPEICHERN",
 		"btn_back": "ZURÜCK",
@@ -109,6 +132,10 @@ const STRINGS: Dictionary = {
 		"lbl_new_best": "NEUER REKORD!",
 		"lbl_music": "MUSIK",
 		"lbl_sfx": "EFFEKTE",
+		"lbl_resolution": "AUFLÖSUNG",
+		"lbl_window_mode": "ANZEIGEMODUS",
+		"mode_fullscreen": "VOLLBILD",
+		"mode_windowed": "FENSTER",
 		"lbl_press_key": "TASTE DRÜCKEN...",
 		"act_move_left": "Nach Links",
 		"act_move_right": "Nach Rechts",
@@ -124,6 +151,8 @@ var music_muted: bool = false
 var sfx_volume: float = 0.8
 var sfx_muted: bool = false
 var language: String = "en"
+var fullscreen: bool = false
+var resolution: Vector2i = Vector2i(1280, 720)
 
 var _default_bindings: Dictionary = {}
 
@@ -131,8 +160,12 @@ var _default_bindings: Dictionary = {}
 ## Snapshots default InputMap bindings and loads saved settings from disk.
 func _ready() -> void:
 	_capture_default_bindings()
+	var avail: Array[Vector2i] = get_available_resolutions()
+	if not avail.is_empty():
+		resolution = avail[avail.size() - 1]
 	load_settings()
 	_apply_audio()
+	_apply_display()
 
 
 ## Returns the localized string for a key in the active language.
@@ -186,6 +219,42 @@ func set_language(lang_code: String) -> void:
 	language = lang_code
 	save_settings()
 	language_changed.emit(language)
+	settings_changed.emit()
+
+
+## Returns preset resolutions between 1280x720 and the active monitor's max resolution.
+func get_available_resolutions() -> Array[Vector2i]:
+	var screen_size: Vector2i = DisplayServer.screen_get_size()
+	var result: Array[Vector2i] = []
+	for preset in PRESET_RESOLUTIONS:
+		if screen_size.x <= 0 or (preset.x <= screen_size.x and preset.y <= screen_size.y):
+			result.append(preset)
+	if screen_size.x >= 1280 and screen_size.y >= 720 and not result.has(screen_size):
+		result.append(screen_size)
+	if result.is_empty():
+		result.append(Vector2i(1280, 720))
+	result.sort_custom(func(a: Vector2i, b: Vector2i) -> bool:
+		return (a.x * a.y) < (b.x * b.y)
+	)
+	return result
+
+
+## Sets fullscreen or windowed mode, applies immediately, and saves.
+func set_fullscreen(enabled: bool) -> void:
+	fullscreen = enabled
+	_apply_display()
+	save_settings()
+	settings_changed.emit()
+
+
+## Sets window resolution from the available presets, applies immediately, and saves.
+func set_resolution(res: Vector2i) -> void:
+	var avail: Array[Vector2i] = get_available_resolutions()
+	if not avail.has(res):
+		return
+	resolution = res
+	_apply_display()
+	save_settings()
 	settings_changed.emit()
 
 
@@ -260,6 +329,9 @@ func save_settings() -> void:
 	cfg.set_value("audio", "sfx_volume", sfx_volume)
 	cfg.set_value("audio", "sfx_muted", sfx_muted)
 	cfg.set_value("general", "language", language)
+	cfg.set_value("display", "fullscreen", fullscreen)
+	cfg.set_value("display", "res_w", resolution.x)
+	cfg.set_value("display", "res_h", resolution.y)
 
 	for action in MANAGED_ACTIONS:
 		if not InputMap.has_action(action):
@@ -289,6 +361,14 @@ func load_settings() -> void:
 	if STRINGS.has(saved_lang):
 		language = saved_lang
 
+	fullscreen = bool(cfg.get_value("display", "fullscreen", false))
+	var saved_res := Vector2i(
+		int(cfg.get_value("display", "res_w", resolution.x)),
+		int(cfg.get_value("display", "res_h", resolution.y))
+	)
+	if get_available_resolutions().has(saved_res):
+		resolution = saved_res
+
 	for action in MANAGED_ACTIONS:
 		if not cfg.has_section_key("controls", action) or not InputMap.has_action(action):
 			continue
@@ -316,6 +396,21 @@ func _capture_default_bindings() -> void:
 func _apply_audio() -> void:
 	_apply_bus("Music", music_volume, music_muted)
 	_apply_bus("SFX", sfx_volume, sfx_muted)
+
+
+func _apply_display() -> void:
+	if OS.has_feature("web") or DisplayServer.get_name() == "headless":
+		return
+	if fullscreen:
+		DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_FULLSCREEN)
+	else:
+		DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_WINDOWED)
+		DisplayServer.window_set_size(resolution)
+		var screen_pos: Vector2i = DisplayServer.screen_get_position()
+		var screen_sz: Vector2i = DisplayServer.screen_get_size()
+		if screen_sz.x > 0 and screen_sz.y > 0:
+			var centered: Vector2i = screen_pos + (screen_sz - resolution) / 2
+			DisplayServer.window_set_position(centered)
 
 
 func _apply_bus(bus_name: String, vol: float, muted: bool) -> void:

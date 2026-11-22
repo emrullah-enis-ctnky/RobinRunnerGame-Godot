@@ -10,6 +10,7 @@ signal closed
 var settings_card: Control
 var language_card: Control
 var controls_card: Control
+var display_card: Control
 
 var _music_slider: HSlider
 var _sfx_slider: HSlider
@@ -17,8 +18,17 @@ var _music_mute_btn: Button
 var _sfx_mute_btn: Button
 var _music_lbl: Label
 var _sfx_lbl: Label
+var _display_btn: Button
 var _controls_btn: Button
 var _language_btn: Button
+
+var _mode_lbl: Label
+var _windowed_btn: Button
+var _fullscreen_btn: Button
+var _res_lbl: Label
+var _res_value_lbl: Label
+var _res_prev_btn: Button
+var _res_next_btn: Button
 
 var _lang_buttons: Dictionary = {}
 
@@ -34,10 +44,15 @@ var _owner_node: Node
 func build(root: Control, owner: Node) -> void:
 	_owner_node = owner
 
-	settings_card = _make_card("SettingsPanel", _t("title_settings"), Vector2(360.0, 385.0))
+	settings_card = _make_card("SettingsPanel", _t("title_settings"), Vector2(360.0, 440.0))
 	settings_card.close_requested.connect(_on_close_settings)
 	root.add_child(settings_card)
 	_populate_settings(settings_card)
+
+	display_card = _make_card("DisplayPanel", _t("title_display"), Vector2(390.0, 355.0))
+	display_card.close_requested.connect(show_settings)
+	root.add_child(display_card)
+	_populate_display(display_card)
 
 	language_card = _make_card("LanguagePanel", _t("title_language"), Vector2(360.0, 345.0))
 	language_card.close_requested.connect(show_settings)
@@ -59,7 +74,7 @@ func build(root: Control, owner: Node) -> void:
 
 
 func is_any_visible() -> bool:
-	return settings_card.visible or language_card.visible or controls_card.visible
+	return settings_card.visible or language_card.visible or controls_card.visible or display_card.visible
 
 
 func is_capturing_key() -> bool:
@@ -73,6 +88,7 @@ func hide_all() -> void:
 	settings_card.visible = false
 	language_card.visible = false
 	controls_card.visible = false
+	display_card.visible = false
 
 
 func show_settings() -> void:
@@ -80,6 +96,12 @@ func show_settings() -> void:
 	_sync_audio_controls()
 	refresh_texts()
 	settings_card.visible = true
+
+
+func show_display() -> void:
+	hide_all()
+	_refresh_display_controls()
+	display_card.visible = true
 
 
 func show_language() -> void:
@@ -134,16 +156,23 @@ func handle_input(event: InputEvent) -> bool:
 ## Updates all labels and button texts to match the active language.
 func refresh_texts() -> void:
 	settings_card.title_text = _t("title_settings")
+	display_card.title_text = _t("title_display")
 	language_card.title_text = _t("title_language")
 	controls_card.title_text = _t("title_controls")
 
 	_music_lbl.text = _t("lbl_music")
 	_sfx_lbl.text = _t("lbl_sfx")
+	_display_btn.text = _t("btn_display")
 	_controls_btn.text = _t("btn_controls")
 	_language_btn.text = _t("btn_language")
+	_mode_lbl.text = _t("lbl_window_mode")
+	_windowed_btn.text = _t("mode_windowed")
+	_fullscreen_btn.text = _t("mode_fullscreen")
+	_res_lbl.text = _t("lbl_resolution")
 	_reset_btn.text = _t("btn_reset_defaults")
 	_capture_banner.text = _t("lbl_press_key")
 	_refresh_language_selection()
+	_refresh_display_controls()
 	_rebuild_controls_rows()
 
 
@@ -220,6 +249,10 @@ func _populate_settings(card: Control) -> void:
 	gap.custom_minimum_size = Vector2(0.0, 4.0)
 	vbox.add_child(gap)
 
+	_display_btn = _make_button("DisplayButton", _t("btn_display"), false, 19)
+	_display_btn.pressed.connect(show_display)
+	vbox.add_child(_display_btn)
+
 	_controls_btn = _make_button("ControlsButton", _t("btn_controls"), false, 19)
 	_controls_btn.pressed.connect(show_controls)
 	vbox.add_child(_controls_btn)
@@ -227,6 +260,95 @@ func _populate_settings(card: Control) -> void:
 	_language_btn = _make_button("LanguageButton", _t("btn_language"), false, 19)
 	_language_btn.pressed.connect(show_language)
 	vbox.add_child(_language_btn)
+
+
+func _populate_display(card: Control) -> void:
+	var vbox := VBoxContainer.new()
+	vbox.position = Vector2(44.0, 114.0)
+	vbox.size = Vector2(card.size.x - 88.0, card.size.y - 142.0)
+	vbox.add_theme_constant_override("separation", 14)
+	card.add_child(vbox)
+
+	_mode_lbl = Label.new()
+	ThemeRef.style_label(_mode_lbl, 16, ThemeRef.TEXT_WHITE, 3)
+	vbox.add_child(_mode_lbl)
+
+	var mode_row := HBoxContainer.new()
+	mode_row.add_theme_constant_override("separation", 10)
+	vbox.add_child(mode_row)
+
+	_windowed_btn = _make_button("WindowedButton", _t("mode_windowed"), false, 16)
+	_windowed_btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_windowed_btn.pressed.connect(func() -> void:
+		var sm: Node = _settings()
+		if sm != null:
+			sm.set_fullscreen(false)
+			_refresh_display_controls()
+	)
+	mode_row.add_child(_windowed_btn)
+
+	_fullscreen_btn = _make_button("FullscreenButton", _t("mode_fullscreen"), false, 16)
+	_fullscreen_btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_fullscreen_btn.pressed.connect(func() -> void:
+		var sm: Node = _settings()
+		if sm != null:
+			sm.set_fullscreen(true)
+			_refresh_display_controls()
+	)
+	mode_row.add_child(_fullscreen_btn)
+
+	_res_lbl = Label.new()
+	ThemeRef.style_label(_res_lbl, 16, ThemeRef.TEXT_WHITE, 3)
+	vbox.add_child(_res_lbl)
+
+	var res_row := HBoxContainer.new()
+	res_row.add_theme_constant_override("separation", 10)
+	vbox.add_child(res_row)
+
+	_res_prev_btn = _make_button("ResPrevButton", "<", false, 20)
+	_res_prev_btn.custom_minimum_size = Vector2(46.0, 44.0)
+	_res_prev_btn.pressed.connect(func() -> void: _step_resolution(-1))
+	res_row.add_child(_res_prev_btn)
+
+	_res_value_lbl = Label.new()
+	_res_value_lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_res_value_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_res_value_lbl.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	ThemeRef.style_label(_res_value_lbl, 20, ThemeRef.TEXT_GOLD, 4)
+	res_row.add_child(_res_value_lbl)
+
+	_res_next_btn = _make_button("ResNextButton", ">", false, 20)
+	_res_next_btn.custom_minimum_size = Vector2(46.0, 44.0)
+	_res_next_btn.pressed.connect(func() -> void: _step_resolution(1))
+	res_row.add_child(_res_next_btn)
+
+
+func _step_resolution(delta: int) -> void:
+	var sm: Node = _settings()
+	if sm == null:
+		return
+	var avail: Array[Vector2i] = sm.get_available_resolutions()
+	if avail.is_empty():
+		return
+	var idx: int = avail.find(sm.resolution)
+	if idx < 0:
+		idx = avail.size() - 1
+	idx = clampi(idx + delta, 0, avail.size() - 1)
+	sm.set_resolution(avail[idx])
+	_refresh_display_controls()
+
+
+func _refresh_display_controls() -> void:
+	var sm: Node = _settings()
+	if sm == null or _res_value_lbl == null:
+		return
+	ThemeRef.style_button(_windowed_btn, not sm.fullscreen, 16)
+	ThemeRef.style_button(_fullscreen_btn, sm.fullscreen, 16)
+	_res_value_lbl.text = "%d x %d" % [sm.resolution.x, sm.resolution.y]
+	var avail: Array[Vector2i] = sm.get_available_resolutions()
+	var idx: int = avail.find(sm.resolution)
+	_res_prev_btn.disabled = (idx <= 0)
+	_res_next_btn.disabled = (idx < 0 or idx >= avail.size() - 1)
 
 
 func _populate_language(card: Control) -> void:
