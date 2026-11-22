@@ -344,11 +344,20 @@ func _refresh_display_controls() -> void:
 		return
 	ThemeRef.style_button(_windowed_btn, not sm.fullscreen, 16)
 	ThemeRef.style_button(_fullscreen_btn, sm.fullscreen, 16)
-	_res_value_lbl.text = "%d x %d" % [sm.resolution.x, sm.resolution.y]
 	var avail: Array[Vector2i] = sm.get_available_resolutions()
-	var idx: int = avail.find(sm.resolution)
-	_res_prev_btn.disabled = (idx <= 0)
-	_res_next_btn.disabled = (idx < 0 or idx >= avail.size() - 1)
+	if sm.fullscreen:
+		var native_res: Vector2i = DisplayServer.screen_get_size()
+		if native_res.x > 0 and native_res.y > 0:
+			_res_value_lbl.text = "%d x %d" % [native_res.x, native_res.y]
+		else:
+			_res_value_lbl.text = "%d x %d" % [sm.resolution.x, sm.resolution.y]
+		_res_prev_btn.disabled = true
+		_res_next_btn.disabled = true
+	else:
+		_res_value_lbl.text = "%d x %d" % [sm.resolution.x, sm.resolution.y]
+		var idx: int = avail.find(sm.resolution)
+		_res_prev_btn.disabled = (idx <= 0)
+		_res_next_btn.disabled = (idx < 0 or idx >= avail.size() - 1)
 
 
 func _populate_language(card: Control) -> void:

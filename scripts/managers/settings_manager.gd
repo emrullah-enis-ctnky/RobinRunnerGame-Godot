@@ -405,11 +405,11 @@ func _apply_display() -> void:
 	if win == null:
 		return
 
-	# True cross-platform resolution scaling that works in GL Compatibility (both fullscreen & windowed)
-	win.content_scale_mode = Window.CONTENT_SCALE_MODE_VIEWPORT
+	# Keep crisp native canvas_items scaling at 1280x720 logical baseline (zero pixelation)
+	win.content_scale_mode = Window.CONTENT_SCALE_MODE_CANVAS_ITEMS
 	win.content_scale_aspect = Window.CONTENT_SCALE_ASPECT_EXPAND
-	win.content_scale_size = resolution
-	win.content_scale_factor = float(resolution.y) / 720.0
+	win.content_scale_size = Vector2i(1280, 720)
+	win.content_scale_factor = 1.0
 
 	if win.is_embedded():
 		return
