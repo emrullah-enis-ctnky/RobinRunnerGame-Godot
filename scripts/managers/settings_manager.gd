@@ -405,36 +405,38 @@ func _apply_display() -> void:
 	if win == null:
 		return
 
-	var screen_sz: Vector2i = DisplayServer.screen_get_size()
+	# True cross-platform resolution scaling that works in GL Compatibility (both fullscreen & windowed)
+	win.content_scale_mode = Window.CONTENT_SCALE_MODE_VIEWPORT
+	win.content_scale_aspect = Window.CONTENT_SCALE_ASPECT_EXPAND
+	win.content_scale_size = resolution
+	win.content_scale_factor = float(resolution.y) / 720.0
+
+	if win.is_embedded():
+		return
+
 	if fullscreen:
-		if not win.is_embedded():
-			DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_FULLSCREEN)
-		if screen_sz.y > 0:
-			get_viewport().scaling_3d_scale = clampf(float(resolution.y) / float(screen_sz.y), 0.25, 1.0)
+		win.mode = Window.MODE_FULLSCREEN
 	else:
-		get_viewport().scaling_3d_scale = 1.0
-		if not win.is_embedded():
-			var was_fullscreen: bool = DisplayServer.window_get_mode() == DisplayServer.WINDOW_MODE_FULLSCREEN
-			DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_WINDOWED)
-			if was_fullscreen:
-				call_deferred("_apply_windowed_bounds")
-			else:
-				_apply_windowed_bounds()
+		var was_not_windowed: bool = (win.mode != Window.MODE_WINDOWED)
+		win.mode = Window.MODE_WINDOWED
+		if was_not_windowed:
+			call_deferred("_apply_windowed_size")
+		else:
+			_apply_windowed_size()
 
 
-func _apply_windowed_bounds() -> void:
+func _apply_windowed_size() -> void:
 	var win: Window = get_window()
 	if win == null or win.is_embedded() or fullscreen:
 		return
+	if win.mode != Window.MODE_WINDOWED:
+		win.mode = Window.MODE_WINDOWED
 	var usable: Rect2i = DisplayServer.screen_get_usable_rect()
 	var target: Vector2i = resolution
 	if usable.size.x > 0 and usable.size.y > 0:
 		target.x = mini(target.x, usable.size.x)
 		target.y = mini(target.y, usable.size.y)
-	DisplayServer.window_set_size(target)
-	if usable.size.x > 0 and usable.size.y > 0:
-		var centered: Vector2i = usable.position + (usable.size - target) / 2
-		DisplayServer.window_set_position(centered)
+	win.size = target
 
 
 func _apply_bus(bus_name: String, vol: float, muted: bool) -> void:
