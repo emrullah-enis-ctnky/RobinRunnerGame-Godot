@@ -47,6 +47,7 @@ const PICKUP_SPAWN_CHANCE: float = 0.35
 
 # Track & World Generation
 const CHUNK_LENGTH: float = 30.0
+const TRACK_START_OFFSET_Z: float = 12.0
 const INITIAL_CHUNKS_COUNT: int = 6
 const CHUNK_DESPAWN_DISTANCE_BEHIND: float = 40.0
 

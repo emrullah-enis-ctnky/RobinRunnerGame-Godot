@@ -49,6 +49,8 @@ func _generate() -> void:
 	var previous_free_lane: int = _NO_LANE
 
 	for row_z in rows:
+		if _chunk.global_position.z + row_z > -10.0:
+			continue
 		var blocked: Array[int] = []
 		if _rng.randf() < double_row_chance:
 			var free_lane: int = _pick_free_lane(previous_free_lane)

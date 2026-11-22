@@ -174,7 +174,7 @@ func _test_track_reset() -> void:
 
 	spawner.reset_track()
 	_assert(spawner.active_chunks.size() == 0, "active_chunks must be empty after reset_track().")
-	_assert(spawner.next_spawn_z == 0.0, "next_spawn_z must reset to 0.0.")
+	_assert(spawner.next_spawn_z == GameConfig.TRACK_START_OFFSET_Z, "next_spawn_z must reset to TRACK_START_OFFSET_Z.")
 
 	spawner.spawn_initial_track()
 	_assert(spawner.active_chunks.size() == GameConfig.INITIAL_CHUNKS_COUNT,

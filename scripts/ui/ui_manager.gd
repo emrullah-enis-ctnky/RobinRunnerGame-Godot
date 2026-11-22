@@ -8,8 +8,10 @@ const NotebookCardScript = preload("res://scripts/ui/notebook_card.gd")
 const DEATH_FADE_WAIT: float = 1.25
 const SLIDE_DURATION: float = 0.45
 
+enum BackdropMode { MENU, PAUSE, GAME_OVER }
+
 var _backdrop: Control
-var _backdrop_tint: Color = Color(0.06, 0.16, 0.10, 0.42)
+var _backdrop_mode: int = BackdropMode.MENU
 var _main_menu: Control
 var _controls_panel: Control
 var _pause_menu: Control
@@ -69,11 +71,11 @@ func _unhandled_input(event: InputEvent) -> void:
 		get_viewport().set_input_as_handled()
 
 
-## Shows the Main Menu floating over a soft forest-tinted live 3D backdrop.
+## Shows the Main Menu over a dedicated stylized forest backdrop.
 func show_main_menu() -> void:
 	_cancel_sequences()
 	_hide_all()
-	_backdrop_tint = Color(0.06, 0.16, 0.10, 0.45)
+	_backdrop_mode = BackdropMode.MENU
 	_backdrop.visible = true
 	_backdrop.queue_redraw()
 	if _best_label != null and has_node("/root/GameManager"):
@@ -86,7 +88,7 @@ func show_main_menu() -> void:
 ## Shows the Pause Menu over the paused 3D world.
 func show_pause_menu() -> void:
 	_hide_all()
-	_backdrop_tint = Color(0.04, 0.08, 0.06, 0.58)
+	_backdrop_mode = BackdropMode.PAUSE
 	_backdrop.visible = true
 	_backdrop.queue_redraw()
 	_pause_menu.visible = true
@@ -113,7 +115,7 @@ func show_game_over(final_score: int, distance_traveled: float, immediate: bool 
 
 	var target_pos: Vector2 = _centered_pos(_game_over_panel.size)
 	if immediate:
-		_backdrop_tint = Color(0.02, 0.02, 0.03, 0.50)
+		_backdrop_mode = BackdropMode.GAME_OVER
 		_backdrop.visible = true
 		_backdrop.queue_redraw()
 		_game_over_panel.position = target_pos
@@ -130,7 +132,7 @@ func show_game_over(final_score: int, distance_traveled: float, immediate: bool 
 	_gameover_tween = create_tween()
 	_gameover_tween.tween_interval(DEATH_FADE_WAIT)
 	_gameover_tween.tween_callback(func() -> void:
-		_backdrop_tint = Color(0.02, 0.02, 0.03, 0.35)
+		_backdrop_mode = BackdropMode.GAME_OVER
 		_backdrop.visible = true
 		_backdrop.queue_redraw()
 		_game_over_panel.visible = true
@@ -221,7 +223,7 @@ func _on_menu_pressed() -> void:
 func _on_controls_pressed(from_pause: bool) -> void:
 	_return_to_pause = from_pause
 	_hide_all()
-	_backdrop_tint = Color(0.04, 0.08, 0.06, 0.58) if from_pause else Color(0.06, 0.16, 0.10, 0.45)
+	_backdrop_mode = BackdropMode.PAUSE if from_pause else BackdropMode.MENU
 	_backdrop.visible = true
 	_backdrop.queue_redraw()
 	_controls_panel.visible = true
@@ -311,12 +313,85 @@ func _build_ui() -> void:
 	root.add_child(_countdown_label)
 
 
-## Draws a soft atmospheric vignette so the 3D forest feels inviting behind the menu.
+## Draws either the opaque stylized forest vista (Main Menu) or a soft dim overlay.
 func _draw_backdrop() -> void:
 	var s: Vector2 = _backdrop.size
-	_backdrop.draw_rect(Rect2(Vector2.ZERO, s), _backdrop_tint, true)
-	# Warm radial glow behind the centered notebook card
-	_backdrop.draw_circle(s * 0.5, minf(s.x, s.y) * 0.42, Color(0.95, 0.85, 0.55, 0.12))
+	if _backdrop_mode == BackdropMode.PAUSE:
+		_backdrop.draw_rect(Rect2(Vector2.ZERO, s), Color(0.04, 0.08, 0.06, 0.58), true)
+		return
+	if _backdrop_mode == BackdropMode.GAME_OVER:
+		_backdrop.draw_rect(Rect2(Vector2.ZERO, s), Color(0.02, 0.02, 0.03, 0.38), true)
+		return
+
+	# Opaque Main Menu forest sky-to-meadow gradient
+	var bands: int = 12
+	var top_col := Color(0.11, 0.31, 0.36)
+	var mid_col := Color(0.26, 0.54, 0.44)
+	var bot_col := Color(0.54, 0.74, 0.46)
+	for i in range(bands):
+		var t: float = float(i) / float(bands - 1)
+		var col: Color = top_col.lerp(mid_col, t * 2.0) if t < 0.5 else mid_col.lerp(bot_col, (t - 0.5) * 2.0)
+		var y0: float = s.y * float(i) / float(bands)
+		var bh: float = s.y / float(bands) + 2.0
+		_backdrop.draw_rect(Rect2(0.0, y0, s.x, bh), col, true)
+
+	# Warm sunlit glow behind center card
+	_backdrop.draw_circle(Vector2(s.x * 0.5, s.y * 0.48), minf(s.x, s.y) * 0.48, Color(1.0, 0.92, 0.62, 0.14))
+	_backdrop.draw_circle(Vector2(s.x * 0.5, s.y * 0.48), minf(s.x, s.y) * 0.28, Color(1.0, 0.95, 0.75, 0.12))
+
+	# Layered forest hills
+	_draw_hill_layer(s, 0.64, 0.06, Color(0.17, 0.39, 0.33))
+	_draw_hill_layer(s, 0.74, 0.05, Color(0.12, 0.31, 0.25))
+	_draw_hill_layer(s, 0.85, 0.04, Color(0.08, 0.22, 0.17))
+
+	# Stylized low-poly pine trees flanking left & right sides
+	var pine_spots: Array[Array] = [
+		[0.06, 0.86, 1.15, Color(0.09, 0.26, 0.20)],
+		[0.14, 0.82, 0.85, Color(0.11, 0.31, 0.24)],
+		[0.22, 0.88, 0.70, Color(0.08, 0.22, 0.17)],
+		[0.78, 0.87, 0.75, Color(0.08, 0.22, 0.17)],
+		[0.86, 0.83, 0.95, Color(0.11, 0.31, 0.24)],
+		[0.94, 0.86, 1.20, Color(0.09, 0.26, 0.20)],
+	]
+	for p in pine_spots:
+		_draw_pine(Vector2(s.x * p[0], s.y * p[1]), s.y * 0.18 * p[2], p[3])
+
+	# Soft floating firefly / golden pollen dots
+	var sparks: Array[Vector2] = [
+		Vector2(0.16, 0.32), Vector2(0.24, 0.54), Vector2(0.12, 0.62),
+		Vector2(0.84, 0.28), Vector2(0.76, 0.48), Vector2(0.88, 0.60),
+		Vector2(0.32, 0.22), Vector2(0.68, 0.20),
+	]
+	for sp in sparks:
+		var pos := Vector2(s.x * sp.x, s.y * sp.y)
+		_backdrop.draw_circle(pos, 7.0, Color(1.0, 0.90, 0.45, 0.16))
+		_backdrop.draw_circle(pos, 2.8, Color(1.0, 0.95, 0.70, 0.55))
+
+
+func _draw_hill_layer(s: Vector2, base_y_ratio: float, wave_amp: float, color: Color) -> void:
+	var pts := PackedVector2Array()
+	var steps: int = 24
+	for i in range(steps + 1):
+		var t: float = float(i) / float(steps)
+		var y: float = s.y * (base_y_ratio + sin(t * PI * 2.2 + base_y_ratio * 8.0) * wave_amp)
+		pts.append(Vector2(s.x * t, y))
+	pts.append(Vector2(s.x, s.y))
+	pts.append(Vector2(0.0, s.y))
+	_backdrop.draw_colored_polygon(pts, color)
+
+
+func _draw_pine(base: Vector2, height: float, color: Color) -> void:
+	var w: float = height * 0.45
+	for tier in range(3):
+		var y_bot: float = base.y - height * (0.18 + float(tier) * 0.24)
+		var y_top: float = y_bot - height * 0.42
+		var tier_w: float = w * (1.0 - float(tier) * 0.22)
+		var tri := PackedVector2Array([
+			Vector2(base.x, y_top),
+			Vector2(base.x + tier_w, y_bot),
+			Vector2(base.x - tier_w, y_bot),
+		])
+		_backdrop.draw_colored_polygon(tri, color)
 
 
 func _create_card(node_name: String, title: String, card_size: Vector2, inset: bool, close_tab: bool) -> Control:
