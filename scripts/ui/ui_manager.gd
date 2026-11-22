@@ -10,10 +10,10 @@ const BACKDROP_PAUSE: Color = Color(0.04, 0.08, 0.06, 0.56)
 const BACKDROP_GAMEOVER: Color = Color(0.03, 0.03, 0.04, 0.48)
 
 var _backdrop: ColorRect
-var _main_menu: NotebookCard
-var _controls_panel: NotebookCard
-var _pause_menu: NotebookCard
-var _game_over_panel: NotebookCard
+var _main_menu: Control
+var _controls_panel: Control
+var _pause_menu: Control
+var _game_over_panel: Control
 
 var _best_label: Label
 var _go_score_value: Label
@@ -212,8 +212,8 @@ func _build_ui() -> void:
 	_populate_game_over(_game_over_panel)
 
 
-func _create_card(node_name: String, title: String, card_size: Vector2, inset: bool, close_tab: bool) -> NotebookCard:
-	var card: NotebookCard = NotebookCardScript.new()
+func _create_card(node_name: String, title: String, card_size: Vector2, inset: bool, close_tab: bool) -> Control:
+	var card: Control = NotebookCardScript.new()
 	card.name = node_name
 	card.title_text = title
 	card.show_inset = inset
@@ -227,7 +227,7 @@ func _create_card(node_name: String, title: String, card_size: Vector2, inset: b
 	return card
 
 
-func _populate_main_menu(card: NotebookCard) -> void:
+func _populate_main_menu(card: Control) -> void:
 	var vbox := VBoxContainer.new()
 	vbox.position = Vector2(40.0, 96.0)
 	vbox.size = Vector2(card.size.x - 80.0, card.size.y - 120.0)
@@ -259,7 +259,7 @@ func _populate_main_menu(card: NotebookCard) -> void:
 		vbox.add_child(quit_btn)
 
 
-func _populate_controls(card: NotebookCard) -> void:
+func _populate_controls(card: Control) -> void:
 	var vbox := VBoxContainer.new()
 	vbox.position = Vector2(44.0, 108.0)
 	vbox.size = Vector2(card.size.x - 88.0, card.size.y - 134.0)
@@ -297,7 +297,7 @@ func _populate_controls(card: NotebookCard) -> void:
 	vbox.add_child(back_btn)
 
 
-func _populate_pause_menu(card: NotebookCard) -> void:
+func _populate_pause_menu(card: Control) -> void:
 	var vbox := VBoxContainer.new()
 	vbox.position = Vector2(40.0, 98.0)
 	vbox.size = Vector2(card.size.x - 80.0, card.size.y - 122.0)
@@ -322,7 +322,7 @@ func _populate_pause_menu(card: NotebookCard) -> void:
 	vbox.add_child(menu_btn)
 
 
-func _populate_game_over(card: NotebookCard) -> void:
+func _populate_game_over(card: Control) -> void:
 	var vbox := VBoxContainer.new()
 	vbox.position = Vector2(44.0, 102.0)
 	vbox.size = Vector2(card.size.x - 88.0, card.size.y - 126.0)
