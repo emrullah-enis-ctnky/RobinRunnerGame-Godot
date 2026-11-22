@@ -55,6 +55,8 @@ func generate_now() -> void:
 	for row_z in rows:
 		if placed >= target_groups:
 			break
+		if _chunk.global_position.z + row_z > -4.0:
+			continue
 		if _try_place_group_at(row_z, hazards):
 			placed += 1
 

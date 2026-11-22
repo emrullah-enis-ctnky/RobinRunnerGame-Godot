@@ -47,6 +47,7 @@ const PICKUP_SPAWN_CHANCE: float = 0.35
 
 # Track & World Generation
 const CHUNK_LENGTH: float = 30.0
+const TRACK_START_OFFSET_Z: float = 12.0
 const INITIAL_CHUNKS_COUNT: int = 6
 const CHUNK_DESPAWN_DISTANCE_BEHIND: float = 40.0
 
@@ -74,9 +75,10 @@ const COIN_COLLECT_TIME: float = 0.16
 const COIN_SCORE_VALUE: int = 10
 const SCORE_PER_METER: float = 1.0
 const COMBO_WINDOW_SECONDS: float = 2.5
-const COMBO_STEP_COINS: int = 5
-const COMBO_MULTIPLIER_STEP: float = 0.25
-const COMBO_MAX_MULTIPLIER: float = 2.5
+const COMBO_STEP_COINS: int = 10
+const COMBO_MULTIPLIER_STEP: float = 0.10
+const COMBO_MAX_MULTIPLIER: float = 2.0
+const STUMBLE_SCORE_PENALTY_FACTOR: float = 0.80
 
 
 ## Returns the 3D X coordinate for a specific lane index.

@@ -29,6 +29,7 @@ signal distance_updated(distance_meters: float)
 signal collectible_picked(collectible_type: String, value: int)
 signal coins_updated(coin_count: int)
 signal combo_updated(combo_count: int, multiplier: float)
+signal score_popup(amount: int, source: String)
 
 
 ## Resets all signals and listeners when switching runs.

@@ -10,6 +10,7 @@ const ROW_GAP: float = 6.0
 const ICON_COLOR_NORMAL: Color = Color(0.82, 0.62, 0.34)
 const ICON_COLOR_FLAME: Color = Color(1.0, 0.5, 0.12)
 
+@onready var _root: Control = $Root
 @onready var _entries_root: Control = $Root/Entries
 
 var _order: Array = [GameConfig.ARROW_TYPE_NORMAL, GameConfig.ARROW_TYPE_FLAME]
@@ -24,6 +25,11 @@ func _ready() -> void:
 	if has_node("/root/EventBus"):
 		var bus: Node = get_node("/root/EventBus")
 		bus.arrow_ammo_updated.connect(_on_ammo_updated)
+		bus.game_started.connect(_refresh_visibility)
+		bus.game_restarted.connect(_refresh_visibility)
+		bus.game_paused.connect(_refresh_visibility)
+		bus.game_resumed.connect(_refresh_visibility)
+		bus.game_over.connect(func(_s: int, _d: float) -> void: _refresh_visibility())
 
 	var normal: int = 0
 	var flame: int = 0
@@ -32,6 +38,15 @@ func _ready() -> void:
 		normal = ability.get_ammo(GameConfig.ARROW_TYPE_NORMAL)
 		flame = ability.get_ammo(GameConfig.ARROW_TYPE_FLAME)
 	_on_ammo_updated(normal, flame)
+	_refresh_visibility()
+
+
+## Shows the quiver HUD only during active gameplay or pause.
+func _refresh_visibility() -> void:
+	if _root == null or not has_node("/root/GameManager"):
+		return
+	var gm: Node = get_node("/root/GameManager")
+	_root.visible = (gm.current_state == gm.GameState.PLAYING or gm.current_state == gm.GameState.PAUSED)
 
 
 ## Instantiates and pre-hides the two arrow rows.

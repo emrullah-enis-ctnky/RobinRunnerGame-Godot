@@ -2,6 +2,7 @@ class_name ArrowCounterEntry
 extends Control
 ## One row in the arrow counter HUD: a drawn arrow icon plus its count.
 
+const ThemeRef = preload("res://scripts/ui/notebook_ui_theme.gd")
 const SLIDE_TIME: float = 0.25
 const PULSE_SCALE: Vector2 = Vector2(1.3, 1.3)
 const PULSE_GAIN_COLOR: Color = Color(0.35, 1.0, 0.4)
@@ -21,6 +22,7 @@ var _tween: Tween
 func _ready() -> void:
 	pivot_offset = size * 0.5
 	resized.connect(_on_resized)
+	ThemeRef.style_label(_label, 26, ThemeRef.TEXT_WHITE, 4)
 	queue_redraw()
 
 
@@ -30,10 +32,11 @@ func _on_resized() -> void:
 	queue_redraw()
 
 
-## Draws the arrow icon on the left of the row.
+## Draws the unified HUD pill frame and arrow icon on the left of the row.
 func _draw() -> void:
+	ThemeRef.draw_hud_pill(self, size)
 	var mid: float = size.y * 0.5
-	var x: float = 2.0
+	var x: float = 12.0
 	draw_line(Vector2(x, mid), Vector2(x + 18.0, mid), icon_color, 3.0)
 	draw_colored_polygon(PackedVector2Array([
 		Vector2(x + 30.0, mid),

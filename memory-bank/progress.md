@@ -1,9 +1,9 @@
 # Progress & Kanban Roadmap: RobinRunner
 
 ## Project Status Overview
-- **Current Phase**: Phase 8: Pickups, Collectibles & Scoring (Complete — Steps 8.1–8.6 verified on `feature/collectibles-scoring`, awaiting merge approval)
-- **Active Branch**: `feature/collectibles-scoring`
-- **Next Phase**: Merge `feature/collectibles-scoring` into `main` on user approval; then Phase 9 (UI & HUD) or Phase 6 leftovers (6.5–6.7)
+- **Current Phase**: Phase 9: User Interface & HUD (Complete — Steps 9.1–9.6 verified on `feature/ui-hud`, awaiting merge approval)
+- **Active Branch**: `feature/ui-hud`
+- **Next Phase**: Merge `feature/ui-hud` into `main` on user approval; then Phase 10 (Audio & Visual Polish) or Phase 6 leftovers (6.5–6.7)
 - **Overall Health**: Green (All six automated suites pass per documented runs: core, player, camera, world 5/5, obstacles 9/9, combat 13/13)
 
 ---
@@ -124,15 +124,15 @@
 
 ---
 
-### [ ] Phase 9: User Interface & HUD
+### [x] Phase 9: User Interface & HUD
 - **Branch**: `feature/ui-hud`
-- **Objective**: Deliver a clean, stylized user interface covering gameplay HUD, menus, and game-over loops.
-- [ ] Step 9.1: Build In-Game HUD (Real-time Score, Distance Counter; Ability Gauge Bar dropped in favor of the quiver-based `ArrowCounterHUD` already implemented in Step 7.6c).
-- [ ] Step 9.2: Build Main Menu screen (Game Title, Play Button, Controls Guide).
-- [ ] Step 9.3: Build Pause Menu overlay (Resume, Restart, Quit/Menu).
-- [ ] Step 9.4: Build Game Over screen (Final Score, High Score display, Instant Retry button).
-- [ ] Step 9.5: Bind all UI events to `EventBus` and `GameManager` signals.
-- [ ] Step 9.6: UI responsiveness, readability, and visual inspection (User Manual Test).
+- **Objective**: Deliver a clean, stylized user interface covering gameplay HUD, menus, and game-over loops with consistent notebook-theme framing across every screen.
+- [x] Step 9.1: Build In-Game HUD (`ScoreDistanceHUD` at `scenes/ui/score_distance_hud.tscn` + `scripts/ui/score_distance_hud.gd` displaying live Score, Distance, clean `%10`/`%20` combo bonus or `-%20` stumble penalty, and animated floating `+score` popups below the score panel for both archery targets and coins) and unify `CoinCounterHUD` (with an animated `ComboBadge` beneath the coin pill when combo >= 2) + `ArrowCounterHUD` / `ArrowCounterEntry` onto the shared `NotebookUITheme` pill frame and outlined typography; all three HUDs auto-hide in `READY` and `GAME_OVER`. `ScoreManager` now steps `+10%` every 10 consecutive coins and applies a `-20%` score modifier (`0.8x`) during the stumble/damage window.
+- [x] Step 9.2: Build Main Menu screen inside `UIManager` (`scripts/ui/ui_manager.gd` + `scenes/ui/ui_manager.tscn`, `layer = 110` above `DamageOverlay`) using the stylized `NotebookCard` (`scripts/ui/notebook_card.gd`: soft drop-shadowed parchment page, stacked back pages, 3D-shaded spiral rings, curved Bezier forest leaves, crimson bookmark ribbon, golden header banner, glossy circular green Play button, soft-beveled orange Controls/Quit buttons) floating over a forest-tinted live 3D backdrop in `READY` state, with a big centered 3-2-1 countdown before starting/restarting.
+- [x] Step 9.3: Build Pause Menu overlay (`PAUSED` `NotebookCard` with Resume, Restart, Controls, and Main Menu buttons; `Esc`/`P` toggles `get_tree().paused` via `PROCESS_MODE_ALWAYS`).
+- [x] Step 9.4: Build Game Over screen (`GAME OVER` `NotebookCard` waiting 1.25s for `DamageOverlay`'s death fade to finish, then sliding up smoothly from the bottom of the screen to display Final Score, High Score with `NEW BEST!` badge, Distance, and Coins, plus Play Again and Main Menu buttons).
+- [x] Step 9.5: Bind all UI events to `EventBus` and `GameManager` signals, add `SettingsManager` (`scripts/managers/settings_manager.gd`, autoload) + `SettingsPanels` (`scripts/ui/settings_panels.gd`: music/SFX sliders + mute icons, multi-key rebindable Controls with Reset Defaults, and EN/TR/DE flag Language selector integrated inside Settings), and add automated unit tests in `tests/unit/test_ui_hud.gd` + `.tscn` (3 suites).
+- [x] Step 9.6: UI responsiveness, readability, and visual inspection (User Manual Test — verified stylized forest backdrop, notebook cards, 3-2-1 countdown, Game Over slide-up after death fade, score popups, `%10`/`-%20` indicators, coin combo badge, instant-saving Settings with Display/Controls/EN-TR-DE flags, and track/camera reset on restart).
 
 ---
 
