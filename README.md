@@ -5,7 +5,7 @@
 [![Platform](https://img.shields.io/badge/Platform-Desktop%20%7C%20Web-orange)](https://godotengine.org)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-**RobinRunner** is an action-packed, stylized 3D endless runner game developed in **Godot Engine 4**. Players guide an archer through a procedurally generated, obstacle-filled forest. Unlike passive runners where the player only dodges, RobinRunner introduces an active combat element: charge your ability gauge through running and collecting energy, and unleash powerful arrow shots to destroy obstacles and strike archery targets on the sprint.
+**RobinRunner** is an action-packed, stylized 3D endless runner game developed in **Godot Engine 4**. Players guide an archer through a procedurally generated, obstacle-filled forest. Unlike passive runners where the player only dodges, RobinRunner introduces an active combat element: collect normal and flame arrows into a quiver, and fire tactical shots on the sprint to topple barriers, burn trees, and strike archery targets.
 
 ---
 
@@ -27,7 +27,7 @@
 - **Responsive 3-Lane Movement**: Snappy and fluid lateral lane transitions (Left, Center, Right) and responsive jump arcs.
 - **Layered Environmental Hazards**: Rock piles, fallen logs, fences and solid trees block the lanes, while hanging arches demand a duck or a lane switch. Every hazard carries an explicit collider sized from the asset's real bounding box.
 - **Graded Hit Rule**: Trees and the ladder barriers are lethal and end the run on a single contact, while fallen logs and low hazards (rocks, stones and fences) stagger the archer on the first hit (reduced speed plus a brief trip) and open a 5-second damage window rendered as a full-screen red pulse. A second forgiving contact inside that window ends the run, while surviving the window restores the archer to full and lets the next contact open a fresh window. On death the red pulse deepens to a solid black screen. Overhead arches read as a head bump as the runner passes beneath.
-- **Combat & Ability Mechanics**: Charge an ability gauge during runs; fire arrows to destroy wooden targets and clear barricades in your path.
+- **Combat & Ability Mechanics**: Collect arrows into a quiver and fire them on the run. Arrows embed in archery targets with distance-based ring accuracy (close shots land the bullseye, long shots scatter to the outer rings, and arrows that stack push each other apart) and knock ladder barricades over with a base-pivot topple.
 - **Infinite World Generation**: High-performance modular track chunk spawning with an object pooling system to ensure zero stutter. Every recycled chunk rebuilds a fair, varied hazard layout (2-4 rows, always leaving a reachable route) so the track never looks repeated.
 - **Lightweight & Cross-Platform**: Powered by Godot 4's **GL Compatibility** renderer for instant load times, consistent frame rates, and seamless compatibility across Desktop (Linux, Windows, macOS) and Web (HTML5/WebAssembly), with future Android deployment in mind.
 - **Modular Low-Poly Aesthetics**: Built using curated 3D assets in native GLB format from Kenney's Mini-Forest collection.
@@ -99,7 +99,7 @@ res://
 ├── scripts/
 │   ├── combat/             # Arrow trajectory and combat handlers
 │   ├── common/             # GameConfig constants and helper utilities
-│   ├── managers/           # EventBus and GameManager autoloads
+│   ├── managers/           # EventBus, GameManager, and AbilityManager autoloads
 │   ├── obstacles/          # Obstacle behavior and destructible logic
 │   ├── player/             # Player movement and input controllers
 │   ├── ui/                 # UI binders and HUD controllers
@@ -168,8 +168,8 @@ The project is developed in phased, modular Kanban increments:
 - [x] **Phase 3**: Camera System & Viewport
 - [x] **Phase 4**: World & Modular Track Generation
 - [x] **Phase 5**: Obstacles & Environmental Hazards
-- [ ] **Phase 6**: Animation System (Character & World Animations)
-- [ ] **Phase 7**: Combat & Ability System (Arrow Shooting)
+- [ ] **Phase 6**: Animation System (Character & World Animations) *(Steps 6.1–6.4, 6.8 complete; 6.5–6.7 open)*
+- [ ] **Phase 7**: Combat & Ability System (Arrows, Quiver & Arrow Types) *(Steps 7.1–7.6f implemented; Step 7.7 manual test pending)*
 - [ ] **Phase 8**: Pickups, Collectibles & Scoring
 - [ ] **Phase 9**: User Interface & HUD
 - [ ] **Phase 10**: Audio & Visual Polish

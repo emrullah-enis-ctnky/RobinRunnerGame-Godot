@@ -31,12 +31,18 @@ func receive_arrow(arrow_type: String) -> bool:
 	return true
 
 
+## A burned tree no longer catches arrows; a standing one sticks them like a dart.
+func can_stick_arrow() -> bool:
+	return not is_destroyed and super()
+
+
 ## Clears the lane and broadcasts the score reward for the burned tree.
 func destroy() -> void:
 	if is_destroyed:
 		return
 
 	is_destroyed = true
+	_clear_stuck_arrows()
 	set_deferred("collision_layer", 0)
 	hide()
 
@@ -48,5 +54,6 @@ func destroy() -> void:
 ## Re-enables the tree so recycled chunks can present it again.
 func restore() -> void:
 	is_destroyed = false
+	_clear_stuck_arrows()
 	set_deferred("collision_layer", _original_layer)
 	show()
