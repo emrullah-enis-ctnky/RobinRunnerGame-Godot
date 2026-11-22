@@ -19,15 +19,12 @@ var _music_lbl: Label
 var _sfx_lbl: Label
 var _controls_btn: Button
 var _language_btn: Button
-var _settings_back_btn: Button
 
 var _lang_buttons: Dictionary = {}
-var _lang_back_btn: Button
 
 var _controls_rows_root: VBoxContainer
 var _capture_banner: Label
 var _reset_btn: Button
-var _controls_back_btn: Button
 
 var _capturing_action: String = ""
 var _owner_node: Node
@@ -37,12 +34,12 @@ var _owner_node: Node
 func build(root: Control, owner: Node) -> void:
 	_owner_node = owner
 
-	settings_card = _make_card("SettingsPanel", _t("title_settings"), Vector2(360.0, 440.0))
+	settings_card = _make_card("SettingsPanel", _t("title_settings"), Vector2(360.0, 385.0))
 	settings_card.close_requested.connect(_on_close_settings)
 	root.add_child(settings_card)
 	_populate_settings(settings_card)
 
-	language_card = _make_card("LanguagePanel", _t("title_language"), Vector2(360.0, 410.0))
+	language_card = _make_card("LanguagePanel", _t("title_language"), Vector2(360.0, 345.0))
 	language_card.close_requested.connect(show_settings)
 	root.add_child(language_card)
 	_populate_language(language_card)
@@ -144,10 +141,7 @@ func refresh_texts() -> void:
 	_sfx_lbl.text = _t("lbl_sfx")
 	_controls_btn.text = _t("btn_controls")
 	_language_btn.text = _t("btn_language")
-	_settings_back_btn.text = _t("btn_back")
-	_lang_back_btn.text = _t("btn_back")
 	_reset_btn.text = _t("btn_reset_defaults")
-	_controls_back_btn.text = _t("btn_back")
 	_capture_banner.text = _t("lbl_press_key")
 	_refresh_language_selection()
 	_rebuild_controls_rows()
@@ -234,14 +228,6 @@ func _populate_settings(card: Control) -> void:
 	_language_btn.pressed.connect(show_language)
 	vbox.add_child(_language_btn)
 
-	var spacer := Control.new()
-	spacer.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	vbox.add_child(spacer)
-
-	_settings_back_btn = _make_button("SettingsBackButton", _t("btn_back"), true, 20)
-	_settings_back_btn.pressed.connect(_on_close_settings)
-	vbox.add_child(_settings_back_btn)
-
 
 func _populate_language(card: Control) -> void:
 	var vbox := VBoxContainer.new()
@@ -268,14 +254,6 @@ func _populate_language(card: Control) -> void:
 		_lang_buttons[code] = btn
 		vbox.add_child(btn)
 
-	var spacer := Control.new()
-	spacer.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	vbox.add_child(spacer)
-
-	_lang_back_btn = _make_button("LangBackButton", _t("btn_back"), true, 20)
-	_lang_back_btn.pressed.connect(show_settings)
-	vbox.add_child(_lang_back_btn)
-
 
 func _populate_controls(card: Control) -> void:
 	var vbox := VBoxContainer.new()
@@ -300,24 +278,13 @@ func _populate_controls(card: Control) -> void:
 	_controls_rows_root.add_theme_constant_override("separation", 8)
 	scroll.add_child(_controls_rows_root)
 
-	var footer := HBoxContainer.new()
-	footer.add_theme_constant_override("separation", 10)
-	vbox.add_child(footer)
-
-	_reset_btn = _make_button("ResetDefaultsButton", _t("btn_reset_defaults"), false, 16)
-	_reset_btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_reset_btn = _make_button("ResetDefaultsButton", _t("btn_reset_defaults"), false, 17)
 	_reset_btn.pressed.connect(func() -> void:
 		var sm: Node = _settings()
 		if sm != null:
 			sm.reset_controls_to_defaults()
-			sm.save_settings()
 	)
-	footer.add_child(_reset_btn)
-
-	_controls_back_btn = _make_button("ControlsBackButton", _t("btn_back"), true, 18)
-	_controls_back_btn.custom_minimum_size = Vector2(120.0, 46.0)
-	_controls_back_btn.pressed.connect(show_settings)
-	footer.add_child(_controls_back_btn)
+	vbox.add_child(_reset_btn)
 
 
 func _rebuild_controls_rows() -> void:
