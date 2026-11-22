@@ -94,6 +94,12 @@ func add_score(amount: int) -> void:
 	EventBus.score_updated.emit(score)
 
 
-## Banks the reward broadcast when a shootable target is destroyed.
+## Banks the reward broadcast when a shootable target is hit/destroyed and emits a score popup.
 func _on_target_destroyed(_target_name: String, score_reward: int) -> void:
-	add_score(score_reward)
+	var mult: float = 1.0
+	if has_node("/root/ScoreManager"):
+		mult = get_node("/root/ScoreManager").get_effective_multiplier()
+	var awarded: int = maxi(1, int(round(float(score_reward) * mult)))
+	add_score(awarded)
+	if has_node("/root/EventBus"):
+		get_node("/root/EventBus").score_popup.emit(awarded, "target")

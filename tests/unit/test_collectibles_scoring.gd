@@ -103,15 +103,16 @@ func _test_score_manager_distance_and_combo() -> void:
 	bus.distance_updated.emit(12.6)
 	_assert(gm.score == 12, "Distance 12.6m should add 12 distance points (got %d)" % gm.score)
 
-	# Collect 5 coins to step combo multiplier from 1.0x to 1.25x
-	for i in range(5):
+	# Collect 10 coins to step combo multiplier from 1.0x to 1.1x (+10%)
+	for i in range(10):
 		bus.collectible_picked.emit(GameConfig.COLLECTIBLE_TYPE_COIN, 10)
-	_assert(sm.coins_collected == 5, "Should track 5 collected coins")
-	_assert(is_equal_approx(sm.combo_multiplier, 1.25), "5-coin streak should reach 1.25x multiplier (got %.2f)" % sm.combo_multiplier)
+	_assert(sm.coins_collected == 10, "Should track 10 collected coins")
+	_assert(is_equal_approx(sm.combo_multiplier, 1.1), "10-coin streak should reach 1.1x (+10%%) multiplier (got %.2f)" % sm.combo_multiplier)
 
-	# Damage breaks combo
+	# Damage breaks combo and applies -20% stumble penalty (0.8x)
 	bus.player_damaged.emit(5.0)
-	_assert(sm.combo_count == 0 and is_equal_approx(sm.combo_multiplier, 1.0), "Hazard damage should reset coin combo")
+	_assert(sm.combo_count == 0 and is_equal_approx(sm.get_effective_multiplier(), 0.8),
+		"Hazard damage should reset coin combo and apply 0.8x (-20%%) penalty")
 
 	gm.restart_game()
 	_assert(sm.coins_collected == 0 and gm.score == 0, "Restart should reset ScoreManager")

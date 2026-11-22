@@ -83,10 +83,13 @@ func _test_score_distance_hud() -> void:
 
 	bus.score_updated.emit(420)
 	bus.distance_updated.emit(67.9)
-	bus.combo_updated.emit(10, 1.5)
+	bus.combo_updated.emit(10, 1.1)
 	_assert(hud._score_label.text == "420", "Score label should show 420")
 	_assert(hud._distance_label.text == "67m", "Distance label should show 67m")
-	_assert(hud._combo_label.visible and hud._combo_label.text == "x1.5", "Combo badge should show x1.5")
+	_assert(hud._combo_label.visible and hud._combo_label.text == "%10", "Combo badge should show %10")
+
+	bus.combo_updated.emit(0, 0.8)
+	_assert(hud._combo_label.visible and hud._combo_label.text == "-%20", "Penalty badge should show -%20")
 
 	gm.trigger_game_over()
 	await get_tree().process_frame
