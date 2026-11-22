@@ -20,8 +20,8 @@ var _combo_visible: bool = false
 
 ## Connects to EventBus coin, combo, and lifecycle signals and initializes display.
 func _ready() -> void:
-	ThemeRef.style_label(_count_label, 26, ThemeRef.TEXT_WHITE, 4)
-	ThemeRef.style_label(_combo_label, 20, ThemeRef.TEXT_GOLD, 4)
+	ThemeRef.style_label(_count_label, 26, ThemeRef.TEXT_WHITE, 5)
+	ThemeRef.style_label(_combo_label, 19, ThemeRef.TEXT_WHITE, 4)
 
 	if _panel != null:
 		_panel.draw.connect(_draw_panel)
@@ -144,7 +144,7 @@ func _draw_panel() -> void:
 
 
 func _draw_combo_badge() -> void:
-	ThemeRef.draw_hud_pill(_combo_badge, _combo_badge.size)
+	ThemeRef.draw_accent_pill(_combo_badge, _combo_badge.size)
 
 
 ## Draws a 5-point star inside the coin icon.

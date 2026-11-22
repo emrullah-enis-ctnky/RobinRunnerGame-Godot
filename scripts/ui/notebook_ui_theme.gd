@@ -85,9 +85,41 @@ static func style_label(label: Label, font_size: int, color: Color = TEXT_WHITE,
 	label.add_theme_constant_override("shadow_offset_y", 2)
 
 
-## Draws the shared dark-wood & warm-cream HUD pill frame inside a Control's _draw().
-static func draw_hud_pill(canvas: CanvasItem, size: Vector2) -> void:
-	var box := _make_hud_box()
+## Draws a miniature wooden-backed cream parchment HUD pill matching the Main Menu notebook theme.
+static func draw_hud_pill(canvas: CanvasItem, size: Vector2, accent_top: bool = false) -> void:
+	var outer := StyleBoxFlat.new()
+	outer.bg_color = WOOD_BACKING
+	outer.border_color = WOOD_BORDER
+	outer.border_width_bottom = 4
+	outer.border_width_left = 1
+	outer.border_width_right = 1
+	outer.border_width_top = 1
+	outer.set_corner_radius_all(16)
+	outer.shadow_color = Color(0.08, 0.04, 0.02, 0.34)
+	outer.shadow_size = 7
+	outer.shadow_offset = Vector2(0, 4)
+	outer.draw(canvas.get_canvas_item(), Rect2(Vector2.ZERO, size))
+
+	var inner := StyleBoxFlat.new()
+	inner.bg_color = PARCHMENT_BG
+	inner.border_color = Color(0.86, 0.74, 0.68)
+	inner.set_border_width_all(1)
+	inner.set_corner_radius_all(12)
+	inner.draw(canvas.get_canvas_item(), Rect2(Vector2(4.0, 4.0), size - Vector2(8.0, 10.0)))
+
+	if accent_top and size.y >= 54.0:
+		var banner := StyleBoxFlat.new()
+		banner.bg_color = BANNER_GOLD
+		banner.border_color = BANNER_ORANGE
+		banner.border_width_bottom = 3
+		banner.set_corner_radius_all(10)
+		banner.draw(canvas.get_canvas_item(), Rect2(Vector2(7.0, 6.0), Vector2(size.x - 14.0, 30.0)))
+
+
+## Draws a warm orange-amber beveled accent pill (used for combo badges).
+static func draw_accent_pill(canvas: CanvasItem, size: Vector2) -> void:
+	var box := _make_pill_box(ORANGE_FILL, ORANGE_LIP, 4, true)
+	box.set_corner_radius_all(14)
 	box.draw(canvas.get_canvas_item(), Rect2(Vector2.ZERO, size))
 
 

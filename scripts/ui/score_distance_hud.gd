@@ -149,4 +149,4 @@ func _refresh_visibility() -> void:
 
 
 func _draw_panel() -> void:
-	ThemeRef.draw_hud_pill(_panel, _panel.size)
+	ThemeRef.draw_hud_pill(_panel, _panel.size, true)
