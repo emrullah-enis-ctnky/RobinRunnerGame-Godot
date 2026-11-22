@@ -4,7 +4,6 @@ extends CanvasLayer
 
 const GOLD_COLOR: Color = Color(1.0, 0.78, 0.12)
 const GOLD_RIM_COLOR: Color = Color(0.85, 0.56, 0.04)
-const BG_COLOR: Color = Color(0.08, 0.1, 0.14, 0.68)
 const PULSE_COLOR: Color = Color(1.0, 0.92, 0.45)
 
 @onready var _panel: Control = $Root/Panel
@@ -53,11 +52,8 @@ func _set_count(coin_count: int, pulse: bool) -> void:
 	_pulse_tween.tween_property(_panel, "scale", Vector2.ONE, 0.18).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 
 
-## Draws the rounded dark pill background and stylized golden star coin icon.
+## Draws the stylized golden star coin icon with a transparent background.
 func _draw_panel() -> void:
-	var rect := Rect2(Vector2.ZERO, _panel.size)
-	_panel.draw_rect(rect, BG_COLOR, true)
-
 	var center := Vector2(24.0, _panel.size.y * 0.5)
 	_panel.draw_circle(center, 14.0, GOLD_RIM_COLOR)
 	_panel.draw_circle(center, 11.0, GOLD_COLOR)

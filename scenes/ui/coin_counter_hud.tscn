@@ -1,4 +1,4 @@
-[gd_scene format=3 uid="uid://ccoincounterhud"]
+[gd_scene format=3 uid="uid://b34mjwovslpr0"]
 
 [ext_resource type="Script" path="res://scripts/ui/coin_counter_hud.gd" id="1_coin_hud"]
 
