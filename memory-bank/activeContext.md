@@ -1,15 +1,14 @@
 # Active Context: RobinRunner
 
 ## Current Work Focus
-Phase 9 (User Interface & HUD) is complete on `feature/ui-hud` (Steps 9.1–9.6 verified by user). Awaiting explicit user approval to merge `feature/ui-hud` into `main`.
+World atmosphere, biome-matched chunk scenery, overhead framing/stream crossings, and curved-world horizon shader implemented on `feature/world-atmosphere`. Awaiting user visual inspection in Godot.
 
 ## Recent Changes
-- Built `NotebookUITheme` (`scripts/ui/notebook_ui_theme.gd`) and `NotebookCard` (`scripts/ui/notebook_card.gd`) for consistent parchment-notebook menus, curved leaves, 3D rings, golden banners, soft-beveled green/orange buttons, and dark-wood HUD pill frames.
-- Implemented `UIManager` (`scripts/ui/ui_manager.gd`, `layer = 110`) with a dedicated stylized forest Main Menu backdrop, 3-2-1 center countdown, Pause Menu (`Esc`/`P`), and bottom slide-up Game Over card after `DamageOverlay`'s death fade.
-- Implemented `SettingsManager` (`scripts/managers/settings_manager.gd`, autoload) + `SettingsPanels` (`scripts/ui/settings_panels.gd`) with instant auto-saving Music/SFX sliders & mute buttons, Display panel (windowed preset resolutions `1280x720` to monitor max + borderless fullscreen), multi-key rebindable Controls with Reset Defaults, and EN/TR/DE flag Language switcher.
-- Added `ScoreDistanceHUD` with floating `+score` popups (targets & coins), clean `%10`/`%20` combo steps (every 10 coins) and `-%20` stumble penalty, plus an animated combo badge under `CoinCounterHUD`.
-- Fixed track start offset (`TRACK_START_OFFSET_Z = 12.0`) and `TrackSpawner`/`RunnerCamera` reset on `EventBus.game_restarted`.
+- Added global shader parameters (`curve_origin`, `curve_strength`) in `project.godot`, created `shaders/curved_world.gdshader`, injected the same bend into `shaders/foliage_wind.gdshader`, and subdivided `TrackChunkBase` meshes (`subdivide_depth = 12`) for smooth curving.
+- Created `CurvedWorldController` (`scripts/world/curved_world_controller.gd`) to meander the trail gently left/right with subtle vertical horizon roll and apply the curved shader across chunks, biome props, hazards, coins, arrows, and horizon mountains.
+- Created `ChunkBiomeDecorator` (`scripts/world/chunk_biome_decorator.gd`) attached to `TrackChunkStraight`, `TrackChunkForest`, and `TrackChunkRocky`: builds flush flanking banks (zero gap), dense leaning canopies & undergrowth (`forest`), canyon cliffs & timber gateways (`rocky`), archer camp outposts (`straight`), and woodland stream-bridge crossings with wooden railings (50% of straight chunks past launch).
+- Streamlined `WorldScenery` to anchor the distant curved mountain ring and valley floor to the horizon, and expanded `tests/unit/test_world_atmosphere.gd` to 4 suites.
 
 ## Next Steps
-1. On explicit user approval, merge `feature/ui-hud` into `main`.
-2. Proceed to Phase 10 (Audio & Visual Polish) or finish Phase 6 leftovers (Steps 6.5–6.7).
+1. User visual inspection of the curved world, biome transitions (forest / canyon / camp / stream bridge), high overhead framing, and random day/night sky.
+2. On user approval, merge `feature/world-atmosphere` into `main` and continue Phase 10 (AudioManager, SFX, music, particles).

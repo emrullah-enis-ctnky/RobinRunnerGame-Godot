@@ -1,9 +1,9 @@
 # Progress & Kanban Roadmap: RobinRunner
 
 ## Project Status Overview
-- **Current Phase**: Phase 9: User Interface & HUD (Complete — Steps 9.1–9.6 verified on `feature/ui-hud`, awaiting merge approval)
-- **Active Branch**: `feature/ui-hud`
-- **Next Phase**: Merge `feature/ui-hud` into `main` on user approval; then Phase 10 (Audio & Visual Polish) or Phase 6 leftovers (6.5–6.7)
+- **Current Phase**: Phase 10 (Visual Atmosphere pass on `feature/world-atmosphere`: stylized sky shader, 24h day-night cycle with random start hour, and flanking 3D forest/mountain backdrop)
+- **Active Branch**: `feature/world-atmosphere`
+- **Next Phase**: Visual inspection of sky/day-night cycle & world scenery, merge `feature/world-atmosphere` on approval, then remaining Phase 10 audio/particles
 - **Overall Health**: Green (All six automated suites pass per documented runs: core, player, camera, world 5/5, obstacles 9/9, combat 13/13)
 
 ---
@@ -137,8 +137,9 @@
 ---
 
 ### [ ] Phase 10: Audio & Visual Polish
-- **Branch**: `feature/audio-visual-polish`
-- **Objective**: Elevate game feel with sound effects, ambient music, and stylized particle systems.
+- **Branch**: `feature/world-atmosphere` (visual atmosphere pass) / `feature/audio-visual-polish`
+- **Objective**: Elevate game feel with sound effects, ambient music, atmospheric world scenery/day-night cycle, and stylized particle systems.
+- [x] Step 10.0: Stylized Sky, 24-Hour Day/Night Cycle, Biome-Matched Chunk Scenery, Overhead Framing/Stream Crossings & Curved World (`shaders/stylized_sky.gdshader`, `shaders/curved_world.gdshader`, `shaders/foliage_wind.gdshader`, `scripts/world/day_night_cycle.gd`, `scripts/world/curved_world_controller.gd`, `scripts/world/chunk_biome_decorator.gd`, `scripts/world/world_scenery.gd`, plus `tests/unit/test_world_atmosphere.gd` + `.tscn`). Every run starts at a random hour in `[0, 24)` with drifting clouds, sun/moon discs, twinkling stars, dynamic lighting, and depth fog. Each chunk variant renders flush biome scenery (`forest`: dense leaning canopies & undergrowth, `rocky`: canyon cliffs & timber gateway, `straight`: archer camp/watchtower clearing or shimmering woodland stream-bridge crossing with wooden railings) while `CurvedWorldController` gently bends the subdivided track, biome props, hazards, coins, arrows, and wind foliage along a meandering horizon trail.
 - [ ] Step 10.1: Implement `AudioManager` and integrate sound effects (Footsteps, Jump, Bow Fire, Target Shatter, Collect).
 - [ ] Step 10.2: Integrate adaptive background music loop with smooth pause ducking.
 - [ ] Step 10.3: Add stylized particle systems (Player run dust puffs, target splinter explosion, ability-ready shimmer).

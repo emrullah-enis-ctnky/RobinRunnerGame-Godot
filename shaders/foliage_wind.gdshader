@@ -1,6 +1,9 @@
 shader_type spatial;
 render_mode cull_back;
 
+global uniform vec3 curve_origin;
+global uniform vec2 curve_strength;
+
 // Shared wind field: every plant keeps the same dominant direction.
 uniform vec3 wind_direction = vec3(0.85, 0.0, 0.53);
 uniform float wind_speed : hint_range(0.0, 5.0, 0.01) = 1.0;
@@ -54,7 +57,13 @@ void vertex() {
 	float offset_amount = sway * gust * height_factor * sway_amplitude;
 	vec3 offset = vec3(direction.x, 0.0, direction.y) * offset_amount;
 
-	VERTEX = (inverse(MODEL_MATRIX) * vec4(world_position + offset, 1.0)).xyz;
+	vec3 bent_world = world_position + offset;
+	float dz = max(0.0, curve_origin.z - bent_world.z);
+	float d2 = dz * dz;
+	bent_world.x += d2 * curve_strength.x;
+	bent_world.y -= d2 * curve_strength.y;
+
+	VERTEX = (inverse(MODEL_MATRIX) * vec4(bent_world, 1.0)).xyz;
 }
 
 void fragment() {

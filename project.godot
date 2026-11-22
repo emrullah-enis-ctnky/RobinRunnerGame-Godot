@@ -84,3 +84,14 @@ move_down={
 rendering_device/driver.windows="d3d12"
 renderer/rendering_method="gl_compatibility"
 renderer/rendering_method.mobile="gl_compatibility"
+
+[shader_globals]
+
+curve_origin={
+"type": "vec3",
+"value": Vector3(0, 0, 0)
+}
+curve_strength={
+"type": "vec2",
+"value": Vector2(0, 0)
+}

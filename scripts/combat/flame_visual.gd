@@ -3,8 +3,9 @@ extends RefCounted
 ## Builds the shared emissive head and particle fire used by flame arrows and pickups.
 
 const DEFAULT_OFFSET: Vector3 = Vector3(0.0, 0.0, -0.6)
-
 const OUTER_SIZE: Vector2 = Vector2(0.2, 0.34)
+const FLAME_SHADER: Shader = preload("res://shaders/curved_flame_particle.gdshader")
+const CurvedWorld = preload("res://scripts/world/curved_world_controller.gd")
 
 
 ## Adds a glowing head and a hidden fire emitter to a parent node.
@@ -12,6 +13,7 @@ const OUTER_SIZE: Vector2 = Vector2(0.2, 0.34)
 static func build(parent: Node3D, offset: Vector3 = DEFAULT_OFFSET, local_coords: bool = true) -> Dictionary:
 	var head := _build_head(offset)
 	parent.add_child(head)
+	CurvedWorld.apply_to_tree(head)
 
 	var fx := GPUParticles3D.new()
 	fx.amount = 28
@@ -20,7 +22,7 @@ static func build(parent: Node3D, offset: Vector3 = DEFAULT_OFFSET, local_coords
 	fx.position = offset
 	fx.process_material = _fire_process()
 	fx.draw_pass_1 = _flame_quad(OUTER_SIZE, _flame_texture())
-	fx.visibility_aabb = AABB(Vector3(-1.0, -1.0, -2.0), Vector3(2.0, 2.0, 4.0))
+	fx.visibility_aabb = AABB(Vector3(-12.0, -8.0, -12.0), Vector3(24.0, 16.0, 24.0))
 	fx.emitting = false
 	parent.add_child(fx)
 
@@ -100,16 +102,11 @@ static func _color_ramp() -> GradientTexture1D:
 	return texture
 
 
-## Builds one additive, camera-facing flame quad of the requested size.
+## Builds one additive, camera-facing curved flame quad of the requested size.
 static func _flame_quad(size: Vector2, texture: Texture2D) -> QuadMesh:
-	var material := StandardMaterial3D.new()
-	material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	material.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
-	material.billboard_mode = BaseMaterial3D.BILLBOARD_ENABLED
-	material.cull_mode = BaseMaterial3D.CULL_DISABLED
-	material.albedo_texture = texture
-	material.vertex_color_use_as_albedo = true
+	var material := ShaderMaterial.new()
+	material.shader = FLAME_SHADER
+	material.set_shader_parameter("albedo_texture", texture)
 
 	var quad := QuadMesh.new()
 	quad.size = size

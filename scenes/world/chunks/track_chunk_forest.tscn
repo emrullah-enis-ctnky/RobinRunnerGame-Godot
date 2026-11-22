@@ -7,12 +7,17 @@
 [ext_resource type="PackedScene" path="res://scenes/obstacles/target_archery.tscn" id="5_target"]
 [ext_resource type="PackedScene" path="res://scenes/obstacles/obstacle_tree_tall.tscn" id="6_tree_tall"]
 [ext_resource type="PackedScene" path="res://scenes/combat/arrow_pickup_flame.tscn" id="7_pickup_flame"]
+[ext_resource type="Script" path="res://scripts/world/chunk_biome_decorator.gd" id="8_biome"]
 
 [node name="TrackChunkForest" instance=ExtResource("1_base")]
 
 [node name="ChunkHazards" type="Node3D" parent="."]
 script = ExtResource("2_generator")
 hazard_scenes = Array[PackedScene]([ExtResource("3_tree"), ExtResource("4_arch"), ExtResource("5_target"), ExtResource("6_tree_tall")])
+
+[node name="BiomeDecorator" type="Node3D" parent="."]
+script = ExtResource("8_biome")
+biome = "forest"
 
 [node name="FlameArrowCenter" parent="Pickups" index="0" instance=ExtResource("7_pickup_flame")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -4)
