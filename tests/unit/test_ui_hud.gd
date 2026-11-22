@@ -18,6 +18,7 @@ func _ready() -> void:
 func _run_all_tests() -> void:
 	await _test_ui_manager_lifecycle()
 	await _test_score_distance_hud()
+	await _test_settings_manager()
 
 
 ## Verifies UIManager shows Main Menu in READY, hides during PLAYING, shows Pause/GameOver, and resets cleanly.
@@ -99,6 +100,33 @@ func _test_score_distance_hud() -> void:
 	gm.reset_game()
 	await get_tree().process_frame
 	_end_test("ScoreDistanceHUD Updates")
+
+
+## Verifies SettingsManager language switching, audio mute/volume, and multi-key rebinding + reset.
+func _test_settings_manager() -> void:
+	_start_test("SettingsManager Audio, Language & Controls")
+	var sm: Node = get_node("/root/SettingsManager")
+
+	sm.set_language("tr")
+	_assert(sm.t("title_settings") == "AYARLAR", "Turkish translation should return AYARLAR")
+	sm.set_language("de")
+	_assert(sm.t("title_settings") == "EINSTELLUNGEN", "German translation should return EINSTELLUNGEN")
+	sm.set_language("en")
+	_assert(sm.t("title_settings") == "SETTINGS", "English translation should return SETTINGS")
+
+	sm.set_music_volume(0.4)
+	sm.set_music_muted(true)
+	_assert(is_equal_approx(sm.music_volume, 0.4) and sm.music_muted, "Music volume and mute should update")
+
+	var before_count: int = InputMap.action_get_events("jump").size()
+	var extra := InputEventKey.new()
+	extra.keycode = KEY_K
+	_assert(sm.add_action_event("jump", extra), "Should allow adding an extra key to an action")
+	_assert(InputMap.action_get_events("jump").size() == before_count + 1, "Action should hold multiple keys")
+
+	sm.reset_controls_to_defaults()
+	_assert(InputMap.action_get_events("jump").size() == before_count, "Reset defaults should restore original bindings")
+	_end_test("SettingsManager Audio, Language & Controls")
 
 
 func _start_test(test_name: String) -> void:

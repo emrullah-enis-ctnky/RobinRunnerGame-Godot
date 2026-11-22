@@ -37,6 +37,10 @@ const ORANGE_LIP: Color = Color(0.73, 0.34, 0.0)
 const HUD_PILL_BG: Color = Color(0.24, 0.16, 0.13, 0.82)
 const HUD_PILL_BORDER: Color = Color(0.95, 0.82, 0.64, 0.88)
 
+const SLIDER_TRACK: Color = Color(0.29, 0.22, 0.32)
+const SLIDER_FILL: Color = Color(0.18, 0.66, 1.0)
+const SLIDER_FILL_HI: Color = Color(0.32, 0.78, 1.0)
+
 const TEXT_WHITE: Color = Color(1.0, 0.985, 0.96)
 const TEXT_DARK: Color = Color(0.28, 0.16, 0.10)
 const TEXT_GOLD: Color = Color(1.0, 0.86, 0.28)
@@ -85,6 +89,34 @@ static func style_label(label: Label, font_size: int, color: Color = TEXT_WHITE,
 static func draw_hud_pill(canvas: CanvasItem, size: Vector2) -> void:
 	var box := _make_hud_box()
 	box.draw(canvas.get_canvas_item(), Rect2(Vector2.ZERO, size))
+
+
+## Applies the template's rounded dark track and vibrant blue fill styling to an HSlider.
+static func style_slider(slider: HSlider) -> void:
+	if slider == null:
+		return
+	var track := StyleBoxFlat.new()
+	track.bg_color = SLIDER_TRACK
+	track.set_corner_radius_all(8)
+	track.content_margin_top = 7
+	track.content_margin_bottom = 7
+
+	var fill := StyleBoxFlat.new()
+	fill.bg_color = SLIDER_FILL
+	fill.set_corner_radius_all(8)
+	fill.content_margin_top = 7
+	fill.content_margin_bottom = 7
+
+	var fill_hi := StyleBoxFlat.new()
+	fill_hi.bg_color = SLIDER_FILL_HI
+	fill_hi.set_corner_radius_all(8)
+	fill_hi.content_margin_top = 7
+	fill_hi.content_margin_bottom = 7
+
+	slider.add_theme_stylebox_override("slider", track)
+	slider.add_theme_stylebox_override("grabber_area", fill)
+	slider.add_theme_stylebox_override("grabber_area_highlight", fill_hi)
+	slider.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
 
 
 ## Builds a soft, rounded 3D-beveled pill StyleBoxFlat for buttons.

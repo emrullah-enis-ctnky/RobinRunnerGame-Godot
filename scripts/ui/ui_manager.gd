@@ -1,9 +1,10 @@
 class_name UIManager
 extends CanvasLayer
-## Coordinates Main Menu, Controls, 3-2-1 Countdown, Pause, and Game Over screens.
+## Coordinates Main Menu, Settings (Audio/Controls/Language), 3-2-1 Countdown, Pause, and Game Over.
 
 const ThemeRef = preload("res://scripts/ui/notebook_ui_theme.gd")
 const NotebookCardScript = preload("res://scripts/ui/notebook_card.gd")
+const SettingsPanelsScript = preload("res://scripts/ui/settings_panels.gd")
 
 const DEATH_FADE_WAIT: float = 1.25
 const SLIDE_DURATION: float = 0.45
@@ -13,17 +14,29 @@ enum BackdropMode { MENU, PAUSE, GAME_OVER }
 var _backdrop: Control
 var _backdrop_mode: int = BackdropMode.MENU
 var _main_menu: Control
-var _controls_panel: Control
 var _pause_menu: Control
 var _game_over_panel: Control
 var _countdown_label: Label
+var _settings_panels
 
 var _best_label: Label
+var _main_settings_btn: Button
+var _main_quit_btn: Button
+var _pause_resume_btn: Button
+var _pause_restart_btn: Button
+var _pause_settings_btn: Button
+var _pause_menu_btn: Button
+var _go_score_name: Label
+var _go_best_name: Label
+var _go_dist_name: Label
+var _go_coins_name: Label
 var _go_score_value: Label
 var _go_best_value: Label
 var _go_new_best_label: Label
 var _go_distance_value: Label
 var _go_coins_value: Label
+var _go_retry_btn: Button
+var _go_menu_btn: Button
 
 var _return_to_pause: bool = false
 var _last_high_score: int = 0
@@ -32,7 +45,7 @@ var _gameover_tween: Tween
 var _is_counting_down: bool = false
 
 
-## Builds all menu cards, countdown label, binds EventBus signals, and shows Main Menu.
+## Builds all menu cards, settings sub-panels, countdown label, and connects signals.
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	layer = 110
@@ -46,14 +59,29 @@ func _ready() -> void:
 		bus.game_resumed.connect(_on_game_resumed)
 		bus.game_over.connect(_on_game_over)
 
+	if has_node("/root/SettingsManager"):
+		get_node("/root/SettingsManager").language_changed.connect(func(_l: String) -> void: _refresh_translations())
+
 	if has_node("/root/GameManager"):
 		_last_high_score = get_node("/root/GameManager").high_score
+	_refresh_translations()
 	show_main_menu()
+
+
+## Captures keybinds when Controls is listening, before anything else consumes the key.
+func _input(event: InputEvent) -> void:
+	if _settings_panels != null and _settings_panels.is_capturing_key():
+		if _settings_panels.handle_input(event):
+			get_viewport().set_input_as_handled()
 
 
 ## Handles Esc / P pause toggling during active gameplay or pause.
 func _unhandled_input(event: InputEvent) -> void:
 	if _is_counting_down or not event.is_action_pressed("pause"):
+		return
+	if _settings_panels != null and _settings_panels.is_any_visible():
+		_on_settings_closed()
+		get_viewport().set_input_as_handled()
 		return
 	if not has_node("/root/GameManager"):
 		return
@@ -63,11 +91,8 @@ func _unhandled_input(event: InputEvent) -> void:
 		gm.pause_game()
 		get_viewport().set_input_as_handled()
 	elif gm.current_state == gm.GameState.PAUSED:
-		if _controls_panel != null and _controls_panel.visible:
-			_close_controls()
-		else:
-			get_tree().paused = false
-			gm.resume_game()
+		get_tree().paused = false
+		gm.resume_game()
 		get_viewport().set_input_as_handled()
 
 
@@ -81,7 +106,7 @@ func show_main_menu() -> void:
 	if _best_label != null and has_node("/root/GameManager"):
 		var hs: int = get_node("/root/GameManager").high_score
 		_best_label.visible = hs > 0
-		_best_label.text = "BEST: %d" % hs
+		_best_label.text = "%s: %d" % [_t("lbl_best"), hs]
 	_main_menu.visible = true
 
 
@@ -217,16 +242,16 @@ func _on_menu_pressed() -> void:
 	show_main_menu()
 
 
-func _on_controls_pressed(from_pause: bool) -> void:
+func _on_settings_pressed(from_pause: bool) -> void:
 	_return_to_pause = from_pause
 	_hide_all()
 	_backdrop_mode = BackdropMode.PAUSE if from_pause else BackdropMode.MENU
 	_backdrop.visible = true
 	_backdrop.queue_redraw()
-	_controls_panel.visible = true
+	_settings_panels.show_settings()
 
 
-func _close_controls() -> void:
+func _on_settings_closed() -> void:
 	if _return_to_pause:
 		show_pause_menu()
 	else:
@@ -235,6 +260,32 @@ func _close_controls() -> void:
 
 func _on_quit_pressed() -> void:
 	get_tree().quit()
+
+
+func _refresh_translations() -> void:
+	_main_menu.title_text = _t("title_main")
+	_pause_menu.title_text = _t("title_paused")
+	_game_over_panel.title_text = _t("title_gameover")
+
+	if _main_settings_btn != null:
+		_main_settings_btn.text = _t("btn_settings")
+	if _main_quit_btn != null:
+		_main_quit_btn.text = _t("btn_quit")
+	if _best_label != null and has_node("/root/GameManager"):
+		_best_label.text = "%s: %d" % [_t("lbl_best"), get_node("/root/GameManager").high_score]
+
+	_pause_resume_btn.text = _t("btn_resume")
+	_pause_restart_btn.text = _t("btn_restart")
+	_pause_settings_btn.text = _t("btn_settings")
+	_pause_menu_btn.text = _t("btn_main_menu")
+
+	_go_new_best_label.text = _t("lbl_new_best")
+	_go_score_name.text = _t("lbl_score")
+	_go_best_name.text = _t("lbl_best")
+	_go_dist_name.text = _t("lbl_distance")
+	_go_coins_name.text = _t("lbl_coins")
+	_go_retry_btn.text = _t("btn_play_again")
+	_go_menu_btn.text = _t("btn_main_menu")
 
 
 func _cancel_sequences() -> void:
@@ -250,9 +301,10 @@ func _cancel_sequences() -> void:
 func _hide_all() -> void:
 	_backdrop.visible = false
 	_main_menu.visible = false
-	_controls_panel.visible = false
 	_pause_menu.visible = false
 	_game_over_panel.visible = false
+	if _settings_panels != null:
+		_settings_panels.hide_all()
 	if _countdown_label != null and not _is_counting_down:
 		_countdown_label.visible = false
 
@@ -264,7 +316,7 @@ func _centered_pos(card_size: Vector2) -> Vector2:
 	return (vp - card_size) * 0.5
 
 
-## Builds the atmospheric forest backdrop, countdown label, and four notebook cards.
+## Builds the backdrop, menu cards, settings panels, and countdown label.
 func _build_ui() -> void:
 	var root := Control.new()
 	root.name = "Root"
@@ -278,22 +330,21 @@ func _build_ui() -> void:
 	_backdrop.draw.connect(_draw_backdrop)
 	root.add_child(_backdrop)
 
-	_main_menu = _create_card("MainMenu", "ROBIN RUNNER", Vector2(330.0, 400.0), false, false)
+	_main_menu = _create_card("MainMenu", _t("title_main"), Vector2(330.0, 400.0), false, false)
 	root.add_child(_main_menu)
 	_populate_main_menu(_main_menu)
 
-	_controls_panel = _create_card("ControlsPanel", "CONTROLS", Vector2(370.0, 410.0), true, true)
-	_controls_panel.close_requested.connect(_close_controls)
-	root.add_child(_controls_panel)
-	_populate_controls(_controls_panel)
-
-	_pause_menu = _create_card("PauseMenu", "PAUSED", Vector2(330.0, 390.0), false, false)
+	_pause_menu = _create_card("PauseMenu", _t("title_paused"), Vector2(330.0, 390.0), false, false)
 	root.add_child(_pause_menu)
 	_populate_pause_menu(_pause_menu)
 
-	_game_over_panel = _create_card("GameOverPanel", "GAME OVER", Vector2(350.0, 420.0), true, false)
+	_game_over_panel = _create_card("GameOverPanel", _t("title_gameover"), Vector2(350.0, 420.0), true, false)
 	root.add_child(_game_over_panel)
 	_populate_game_over(_game_over_panel)
+
+	_settings_panels = SettingsPanelsScript.new()
+	_settings_panels.build(root, self)
+	_settings_panels.closed.connect(_on_settings_closed)
 
 	_countdown_label = Label.new()
 	_countdown_label.name = "CountdownLabel"
@@ -320,7 +371,6 @@ func _draw_backdrop() -> void:
 		_backdrop.draw_rect(Rect2(Vector2.ZERO, s), Color(0.02, 0.02, 0.03, 0.38), true)
 		return
 
-	# Opaque Main Menu forest sky-to-meadow gradient
 	var bands: int = 12
 	var top_col := Color(0.11, 0.31, 0.36)
 	var mid_col := Color(0.26, 0.54, 0.44)
@@ -332,16 +382,13 @@ func _draw_backdrop() -> void:
 		var bh: float = s.y / float(bands) + 2.0
 		_backdrop.draw_rect(Rect2(0.0, y0, s.x, bh), col, true)
 
-	# Warm sunlit glow behind center card
 	_backdrop.draw_circle(Vector2(s.x * 0.5, s.y * 0.48), minf(s.x, s.y) * 0.48, Color(1.0, 0.92, 0.62, 0.14))
 	_backdrop.draw_circle(Vector2(s.x * 0.5, s.y * 0.48), minf(s.x, s.y) * 0.28, Color(1.0, 0.95, 0.75, 0.12))
 
-	# Layered forest hills
 	_draw_hill_layer(s, 0.64, 0.06, Color(0.17, 0.39, 0.33))
 	_draw_hill_layer(s, 0.74, 0.05, Color(0.12, 0.31, 0.25))
 	_draw_hill_layer(s, 0.85, 0.04, Color(0.08, 0.22, 0.17))
 
-	# Stylized low-poly pine trees flanking left & right sides
 	var pine_spots: Array[Array] = [
 		[0.06, 0.86, 1.15, Color(0.09, 0.26, 0.20)],
 		[0.14, 0.82, 0.85, Color(0.11, 0.31, 0.24)],
@@ -353,7 +400,6 @@ func _draw_backdrop() -> void:
 	for p in pine_spots:
 		_draw_pine(Vector2(s.x * p[0], s.y * p[1]), s.y * 0.18 * p[2], p[3])
 
-	# Soft floating firefly / golden pollen dots
 	var sparks: Array[Vector2] = [
 		Vector2(0.16, 0.32), Vector2(0.24, 0.54), Vector2(0.12, 0.62),
 		Vector2(0.84, 0.28), Vector2(0.76, 0.48), Vector2(0.88, 0.60),
@@ -428,52 +474,14 @@ func _populate_main_menu(card: Control) -> void:
 	_best_label.visible = false
 	vbox.add_child(_best_label)
 
-	var controls_btn := _make_button("ControlsButton", "CONTROLS", false)
-	controls_btn.pressed.connect(func() -> void: _on_controls_pressed(false))
-	vbox.add_child(controls_btn)
+	_main_settings_btn = _make_button("SettingsButton", _t("btn_settings"), false)
+	_main_settings_btn.pressed.connect(func() -> void: _on_settings_pressed(false))
+	vbox.add_child(_main_settings_btn)
 
 	if not OS.has_feature("web"):
-		var quit_btn := _make_button("QuitButton", "QUIT", false)
-		quit_btn.pressed.connect(_on_quit_pressed)
-		vbox.add_child(quit_btn)
-
-
-func _populate_controls(card: Control) -> void:
-	var vbox := VBoxContainer.new()
-	vbox.position = Vector2(46.0, 112.0)
-	vbox.size = Vector2(card.size.x - 92.0, card.size.y - 138.0)
-	vbox.add_theme_constant_override("separation", 12)
-	card.add_child(vbox)
-
-	var rows: Array[Array] = [
-		["Move", "A / D  or  Arrows"],
-		["Jump", "Space / W / Up"],
-		["Duck / Slide", "S / Down"],
-		["Shoot Arrow", "F / Left Click"],
-		["Pause", "Esc / P"],
-	]
-	for pair in rows:
-		var hbox := HBoxContainer.new()
-		vbox.add_child(hbox)
-		var action_lbl := Label.new()
-		action_lbl.text = pair[0]
-		action_lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		ThemeRef.style_label(action_lbl, 17, ThemeRef.TEXT_WHITE, 3)
-		hbox.add_child(action_lbl)
-
-		var key_lbl := Label.new()
-		key_lbl.text = pair[1]
-		key_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-		ThemeRef.style_label(key_lbl, 16, ThemeRef.TEXT_GOLD, 3)
-		hbox.add_child(key_lbl)
-
-	var spacer := Control.new()
-	spacer.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	vbox.add_child(spacer)
-
-	var back_btn := _make_button("BackButton", "BACK", true)
-	back_btn.pressed.connect(_close_controls)
-	vbox.add_child(back_btn)
+		_main_quit_btn = _make_button("QuitButton", _t("btn_quit"), false)
+		_main_quit_btn.pressed.connect(_on_quit_pressed)
+		vbox.add_child(_main_quit_btn)
 
 
 func _populate_pause_menu(card: Control) -> void:
@@ -484,21 +492,21 @@ func _populate_pause_menu(card: Control) -> void:
 	vbox.alignment = BoxContainer.ALIGNMENT_CENTER
 	card.add_child(vbox)
 
-	var resume_btn := _make_button("ResumeButton", "RESUME", true)
-	resume_btn.pressed.connect(_on_resume_pressed)
-	vbox.add_child(resume_btn)
+	_pause_resume_btn = _make_button("ResumeButton", _t("btn_resume"), true)
+	_pause_resume_btn.pressed.connect(_on_resume_pressed)
+	vbox.add_child(_pause_resume_btn)
 
-	var restart_btn := _make_button("RestartButton", "RESTART", false)
-	restart_btn.pressed.connect(_on_restart_pressed)
-	vbox.add_child(restart_btn)
+	_pause_restart_btn = _make_button("RestartButton", _t("btn_restart"), false)
+	_pause_restart_btn.pressed.connect(_on_restart_pressed)
+	vbox.add_child(_pause_restart_btn)
 
-	var controls_btn := _make_button("PauseControlsButton", "CONTROLS", false)
-	controls_btn.pressed.connect(func() -> void: _on_controls_pressed(true))
-	vbox.add_child(controls_btn)
+	_pause_settings_btn = _make_button("PauseSettingsButton", _t("btn_settings"), false)
+	_pause_settings_btn.pressed.connect(func() -> void: _on_settings_pressed(true))
+	vbox.add_child(_pause_settings_btn)
 
-	var menu_btn := _make_button("PauseMenuButton", "MAIN MENU", false)
-	menu_btn.pressed.connect(_on_menu_pressed)
-	vbox.add_child(menu_btn)
+	_pause_menu_btn = _make_button("PauseMenuButton", _t("btn_main_menu"), false)
+	_pause_menu_btn.pressed.connect(_on_menu_pressed)
+	vbox.add_child(_pause_menu_btn)
 
 
 func _populate_game_over(card: Control) -> void:
@@ -509,31 +517,39 @@ func _populate_game_over(card: Control) -> void:
 	card.add_child(vbox)
 
 	_go_new_best_label = Label.new()
-	_go_new_best_label.text = "NEW HIGH SCORE!"
+	_go_new_best_label.text = _t("lbl_new_best")
 	_go_new_best_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	ThemeRef.style_label(_go_new_best_label, 18, ThemeRef.TEXT_GOLD, 4)
 	_go_new_best_label.visible = false
 	vbox.add_child(_go_new_best_label)
 
-	_go_score_value = _add_stat_row(vbox, "SCORE")
-	_go_best_value = _add_stat_row(vbox, "BEST")
-	_go_distance_value = _add_stat_row(vbox, "DISTANCE")
-	_go_coins_value = _add_stat_row(vbox, "COINS")
+	var score_pair: Array[Label] = _add_stat_row(vbox, _t("lbl_score"))
+	_go_score_name = score_pair[0]
+	_go_score_value = score_pair[1]
+	var best_pair: Array[Label] = _add_stat_row(vbox, _t("lbl_best"))
+	_go_best_name = best_pair[0]
+	_go_best_value = best_pair[1]
+	var dist_pair: Array[Label] = _add_stat_row(vbox, _t("lbl_distance"))
+	_go_dist_name = dist_pair[0]
+	_go_distance_value = dist_pair[1]
+	var coin_pair: Array[Label] = _add_stat_row(vbox, _t("lbl_coins"))
+	_go_coins_name = coin_pair[0]
+	_go_coins_value = coin_pair[1]
 
 	var spacer := Control.new()
 	spacer.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	vbox.add_child(spacer)
 
-	var retry_btn := _make_button("RetryButton", "PLAY AGAIN", true)
-	retry_btn.pressed.connect(_on_restart_pressed)
-	vbox.add_child(retry_btn)
+	_go_retry_btn = _make_button("RetryButton", _t("btn_play_again"), true)
+	_go_retry_btn.pressed.connect(_on_restart_pressed)
+	vbox.add_child(_go_retry_btn)
 
-	var menu_btn := _make_button("GameOverMenuButton", "MAIN MENU", false)
-	menu_btn.pressed.connect(_on_menu_pressed)
-	vbox.add_child(menu_btn)
+	_go_menu_btn = _make_button("GameOverMenuButton", _t("btn_main_menu"), false)
+	_go_menu_btn.pressed.connect(_on_menu_pressed)
+	vbox.add_child(_go_menu_btn)
 
 
-func _add_stat_row(parent: VBoxContainer, label_text: String) -> Label:
+func _add_stat_row(parent: VBoxContainer, label_text: String) -> Array[Label]:
 	var hbox := HBoxContainer.new()
 	parent.add_child(hbox)
 
@@ -548,7 +564,7 @@ func _add_stat_row(parent: VBoxContainer, label_text: String) -> Label:
 	val_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	ThemeRef.style_label(val_lbl, 22, ThemeRef.TEXT_GOLD, 4)
 	hbox.add_child(val_lbl)
-	return val_lbl
+	return [name_lbl, val_lbl]
 
 
 func _make_button(btn_name: String, label: String, is_primary: bool) -> Button:
@@ -572,7 +588,6 @@ func _create_play_circle_button() -> BaseButton:
 		var fill: Color = ThemeRef.GREEN_HOVER if btn.is_hovered() else ThemeRef.GREEN_FILL
 		if btn.button_pressed:
 			fill = ThemeRef.GREEN_PRESSED
-		# Soft drop shadow + 3D bottom lip
 		btn.draw_circle(center + Vector2(0.0, 7.0), r + 1.0, Color(0.12, 0.06, 0.02, 0.28))
 		btn.draw_circle(center + Vector2(0.0, 5.0), r, ThemeRef.GREEN_LIP)
 		btn.draw_circle(center, r, fill)
@@ -585,3 +600,9 @@ func _create_play_circle_button() -> BaseButton:
 		btn.draw_colored_polygon(tri, ThemeRef.TEXT_WHITE)
 	)
 	return btn
+
+
+func _t(key: String) -> String:
+	if has_node("/root/SettingsManager"):
+		return get_node("/root/SettingsManager").t(key)
+	return key
