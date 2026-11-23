@@ -1,24 +1,22 @@
-# Audio Assets Drop-In Guide
+# Audio Assets Guide
 
-Place `.ogg`, `.wav`, or `.mp3` files into `music/` and `sfx/` using these exact base filenames. `AudioManager` loads them automatically on startup (missing files are silently skipped):
+Active `.mp3` files loaded automatically by `AudioManager`:
 
-## `assets/audio/music/`
-- `menu_theme` — Background music for Main Menu
-- `gameplay_theme` — Looping background music while running (auto-ducks on Pause)
+## `assets/audio/music/` (auto-looping)
+- `menu_theme.mp3` — Background music for Main Menu
+- `gameplay_theme.mp3` — Looping background music while running (auto-ducks on Pause)
 
 ## `assets/audio/sfx/`
-- `jump` — Player jump
-- `land` — Player landing
-- `lane_switch` — Lateral lane change
-- `duck` — Duck / slide
-- `footstep` — Footstep tick
-- `bow_draw` — Bow draw
-- `bow_shoot` — Arrow release
-- `arrow_hit` — Arrow hitting archery target / ladder / tree
-- `coin_pickup` — Star coin collected (auto pitch-scales with combo)
-- `arrow_pickup` — Ground arrow collected
-- `stumble` — Non-fatal obstacle stumble / damage
-- `death` — Fatal impact / game over
-- `ui_click` — Menu button press
-- `countdown_tick` — 3-2-1 countdown beep
-- `countdown_go` — Countdown launch cue
+- `jump.mp3` — Player jump
+- `land.mp3` — Player landing
+- `duck.mp3` — Duck / slide
+- `footstep.mp3` — Ground sprint footsteps (suppressed during jump, duck, and stumble)
+- `bow_shoot.mp3` — Arrow release swish
+- `arrow_hit.mp3` — Arrow impact/sticking twang (archery targets, barriers, tall obstacles)
+- `coin_pickup.mp3` — Star coin collected (auto pitch-scales with combo)
+- `arrow_pickup.mp3` — Ground arrow collected
+- `stumble.mp3` — Non-fatal obstacle stumble / damage
+- `death.mp3` — Fatal impact / game over
+- `ui_click.mp3` — Menu button press
+- `countdown_tick.mp3` — 3-2-1 countdown beep
+- `countdown_go.mp3` — Countdown launch cue

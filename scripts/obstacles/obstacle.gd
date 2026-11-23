@@ -44,6 +44,8 @@ func stick_arrow(arrow: Node3D, hit_position: Vector3) -> bool:
 		arrow.embed_at(to_global(point))
 	arrow.reparent(self, true)
 	_stuck_arrows.append(arrow)
+	if has_node("/root/AudioManager"):
+		get_node("/root/AudioManager").play_sfx("arrow_hit", 1.0, -1.0, 0.06)
 	return true
 
 

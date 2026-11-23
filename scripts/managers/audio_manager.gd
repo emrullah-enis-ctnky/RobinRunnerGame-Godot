@@ -22,9 +22,7 @@ const SFX_PATHS: Dictionary = {
 	"footstep": "res://assets/audio/sfx/footstep",
 	"jump": "res://assets/audio/sfx/jump",
 	"land": "res://assets/audio/sfx/land",
-	"lane_switch": "res://assets/audio/sfx/lane_switch",
 	"duck": "res://assets/audio/sfx/duck",
-	"bow_draw": "res://assets/audio/sfx/bow_draw",
 	"bow_shoot": "res://assets/audio/sfx/bow_shoot",
 	"arrow_hit": "res://assets/audio/sfx/arrow_hit",
 	"coin_pickup": "res://assets/audio/sfx/coin_pickup",
@@ -68,6 +66,7 @@ func reload_audio_library() -> void:
 	for track_name in MUSIC_PATHS.keys():
 		var stream: AudioStream = _load_audio_by_base(MUSIC_PATHS[track_name])
 		if stream != null:
+			_enable_loop(stream)
 			_music_streams[track_name] = stream
 	for sfx_name in SFX_PATHS.keys():
 		var stream: AudioStream = _load_audio_by_base(SFX_PATHS[sfx_name])
@@ -183,7 +182,6 @@ func _connect_signals() -> void:
 	bus.game_paused.connect(func() -> void: set_music_ducked(true))
 	bus.game_resumed.connect(func() -> void: set_music_ducked(false))
 	bus.game_over.connect(_on_game_over)
-	bus.player_lane_changed.connect(func(_l: int, _x: float) -> void: play_sfx("lane_switch", 1.0, -3.0, 0.06))
 	bus.player_jumped.connect(func() -> void: play_sfx("jump", 1.0, -2.0, 0.05))
 	bus.player_landed.connect(func() -> void: play_sfx("land", 1.0, -5.0, 0.08))
 	bus.player_damaged.connect(func(_w: float) -> void: play_sfx("stumble", 1.0, 0.0, 0.04))
@@ -258,6 +256,13 @@ func _load_audio_by_base(base_path: String) -> AudioStream:
 			if res is AudioStream:
 				return res as AudioStream
 	return null
+
+
+func _enable_loop(stream: AudioStream) -> void:
+	if stream is AudioStreamMP3:
+		(stream as AudioStreamMP3).loop = true
+	elif stream is AudioStreamOggVorbis:
+		(stream as AudioStreamOggVorbis).loop = true
 
 
 func _kill_music_tween() -> void:
