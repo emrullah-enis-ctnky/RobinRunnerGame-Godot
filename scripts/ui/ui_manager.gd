@@ -187,6 +187,8 @@ func _start_countdown(is_restart: bool) -> void:
 			_countdown_label.pivot_offset = _countdown_label.size * 0.5
 			_countdown_label.scale = Vector2(1.45, 1.45)
 			_countdown_label.modulate.a = 1.0
+			if has_node("/root/AudioManager"):
+				get_node("/root/AudioManager").play_sfx("countdown_tick")
 		)
 		_countdown_tween.tween_property(_countdown_label, "scale", Vector2.ONE, 0.35).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 		_countdown_tween.tween_interval(0.50)
@@ -195,6 +197,8 @@ func _start_countdown(is_restart: bool) -> void:
 	_countdown_tween.tween_callback(func() -> void:
 		_is_counting_down = false
 		_countdown_label.visible = false
+		if has_node("/root/AudioManager"):
+			get_node("/root/AudioManager").play_sfx("countdown_go")
 		if has_node("/root/GameManager"):
 			get_node("/root/GameManager").start_game()
 	)
@@ -574,6 +578,10 @@ func _make_button(btn_name: String, label: String, is_primary: bool) -> Button:
 	btn.text = label
 	btn.custom_minimum_size = Vector2(0.0, 48.0)
 	ThemeRef.style_button(btn, is_primary, 20)
+	btn.pressed.connect(func() -> void:
+		if has_node("/root/AudioManager"):
+			get_node("/root/AudioManager").play_ui_click()
+	)
 	return btn
 
 

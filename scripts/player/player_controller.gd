@@ -241,6 +241,8 @@ func duck() -> bool:
 	is_ducking = true
 	duck_timer = duck_duration
 	_apply_stance(true)
+	if has_node("/root/AudioManager"):
+		get_node("/root/AudioManager").play_sfx("duck", 1.0, -2.0, 0.05)
 
 	return true
 
@@ -293,6 +295,8 @@ func _start_shoot_animation() -> void:
 	is_shooting = true
 	shoot_released = false
 	shoot_timer = shoot_draw_time + shoot_release_time
+	if has_node("/root/AudioManager"):
+		get_node("/root/AudioManager").play_sfx("bow_draw", 1.0, -3.0, 0.05)
 
 
 ## Advances the shooting window and releases the arrow at the shot moment.

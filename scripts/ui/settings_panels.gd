@@ -624,6 +624,10 @@ func _make_button(btn_name: String, label: String, is_primary: bool, font_size: 
 	btn.text = label
 	btn.custom_minimum_size = Vector2(0.0, 44.0)
 	ThemeRef.style_button(btn, is_primary, font_size)
+	btn.pressed.connect(func() -> void:
+		if _owner_node != null and _owner_node.has_node("/root/AudioManager"):
+			_owner_node.get_node("/root/AudioManager").play_ui_click()
+	)
 	return btn
 
 

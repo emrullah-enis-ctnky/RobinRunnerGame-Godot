@@ -157,6 +157,7 @@ godot --headless res://tests/unit/test_combat.tscn
 godot --headless res://tests/unit/test_collectibles_scoring.tscn
 godot --headless res://tests/unit/test_ui_hud.tscn
 godot --headless res://tests/unit/test_world_atmosphere.tscn
+godot --headless res://tests/unit/test_audio_manager.tscn
 ```
 
 ---
