@@ -236,6 +236,16 @@ func _test_hazard_lethality_profiles() -> void:
 			"%s must stay forgiving and stagger on the first contact." % path)
 		obstacle.queue_free()
 
+	# Archery target is lethal head-on, but forgiving (stumble) when feet graze the top during a jump
+	var target: StaticBody3D = load("res://scenes/obstacles/target_archery.tscn").instantiate() as StaticBody3D
+	add_child(target)
+	target.global_position = Vector3.ZERO
+	_assert(target.is_lethal_for_player(Vector3(0.0, 0.0, 0.0)),
+		"ArcheryTarget must be lethal on head-on ground contact.")
+	_assert(not target.is_lethal_for_player(Vector3(0.0, 0.9, 0.0)),
+		"ArcheryTarget must only stumble when player feet graze the top during a jump.")
+	target.queue_free()
+
 	_end_test("Hazard Lethality Profiles")
 
 
