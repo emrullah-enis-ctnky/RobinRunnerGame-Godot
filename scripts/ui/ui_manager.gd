@@ -20,6 +20,7 @@ var _countdown_label: Label
 var _settings_panels
 
 var _best_label: Label
+var _play_btn: BaseButton
 var _main_settings_btn: Button
 var _main_quit_btn: Button
 var _pause_resume_btn: Button
@@ -43,6 +44,7 @@ var _last_high_score: int = 0
 var _countdown_tween: Tween
 var _gameover_tween: Tween
 var _is_counting_down: bool = false
+var _suppress_focus_sfx: bool = false
 
 
 ## Builds all menu cards, settings sub-panels, countdown label, and connects signals.
@@ -64,6 +66,7 @@ func _ready() -> void:
 
 	if has_node("/root/GameManager"):
 		_last_high_score = get_node("/root/GameManager").high_score
+	get_viewport().gui_focus_changed.connect(_on_gui_focus_changed)
 	_refresh_translations()
 	show_main_menu()
 
@@ -75,25 +78,68 @@ func _input(event: InputEvent) -> void:
 			get_viewport().set_input_as_handled()
 
 
-## Handles Esc / P pause toggling during active gameplay or pause.
+## Handles Esc/P pause or back navigation, plus WASD directional focus inside open menus.
 func _unhandled_input(event: InputEvent) -> void:
-	if _is_counting_down or not event.is_action_pressed("pause"):
+	if _is_counting_down:
 		return
-	if _settings_panels != null and _settings_panels.is_any_visible():
-		_on_settings_closed()
-		get_viewport().set_input_as_handled()
+
+	if event.is_action_pressed("pause") or event.is_action_pressed("ui_cancel"):
+		if _settings_panels != null and _settings_panels.navigate_back():
+			get_viewport().set_input_as_handled()
+			return
+		if not has_node("/root/GameManager"):
+			return
+		var gm: Node = get_node("/root/GameManager")
+		if gm.current_state == gm.GameState.PLAYING:
+			get_tree().paused = true
+			gm.pause_game()
+			get_viewport().set_input_as_handled()
+		elif gm.current_state == gm.GameState.PAUSED:
+			get_tree().paused = false
+			gm.resume_game()
+			get_viewport().set_input_as_handled()
 		return
-	if not has_node("/root/GameManager"):
+
+	# Allow WASD in addition to Arrow keys when navigating menus with the keyboard
+	if _is_menu_open() and event is InputEventKey:
+		var k: InputEventKey = event as InputEventKey
+		if k.pressed and not k.echo:
+			var ui_action: String = ""
+			match k.keycode:
+				KEY_W: ui_action = "ui_up"
+				KEY_S: ui_action = "ui_down"
+				KEY_A: ui_action = "ui_left"
+				KEY_D: ui_action = "ui_right"
+			if not ui_action.is_empty():
+				var synth := InputEventAction.new()
+				synth.action = ui_action
+				synth.pressed = true
+				Input.parse_input_event(synth)
+				get_viewport().set_input_as_handled()
+
+
+func _is_menu_open() -> bool:
+	return _main_menu.visible or _pause_menu.visible or _game_over_panel.visible \
+		or (_settings_panels != null and _settings_panels.is_any_visible())
+
+
+func _on_gui_focus_changed(_control: Control) -> void:
+	if _suppress_focus_sfx or not _is_menu_open():
 		return
-	var gm: Node = get_node("/root/GameManager")
-	if gm.current_state == gm.GameState.PLAYING:
-		get_tree().paused = true
-		gm.pause_game()
-		get_viewport().set_input_as_handled()
-	elif gm.current_state == gm.GameState.PAUSED:
-		get_tree().paused = false
-		gm.resume_game()
-		get_viewport().set_input_as_handled()
+	if has_node("/root/AudioManager"):
+		get_node("/root/AudioManager").play_sfx("ui_click", 1.22, -5.0, 0.03)
+
+
+func _focus_silently(ctrl: Control) -> void:
+	if ctrl == null:
+		return
+	_suppress_focus_sfx = true
+	ctrl.call_deferred("grab_focus")
+	call_deferred("_clear_focus_suppress")
+
+
+func _clear_focus_suppress() -> void:
+	_suppress_focus_sfx = false
 
 
 ## Shows the Main Menu over a dedicated stylized forest backdrop.
@@ -108,6 +154,7 @@ func show_main_menu() -> void:
 		_best_label.visible = hs > 0
 		_best_label.text = "%s: %d" % [_t("lbl_best"), hs]
 	_main_menu.visible = true
+	_focus_silently(_play_btn)
 
 
 ## Shows the Pause Menu over the paused 3D world.
@@ -117,6 +164,7 @@ func show_pause_menu() -> void:
 	_backdrop.visible = true
 	_backdrop.queue_redraw()
 	_pause_menu.visible = true
+	_focus_silently(_pause_resume_btn)
 
 
 ## Shows the Game Over summary card, sliding up from the bottom after death fade completes.
@@ -146,6 +194,7 @@ func show_game_over(final_score: int, distance_traveled: float, immediate: bool 
 		_game_over_panel.position = target_pos
 		_game_over_panel.modulate.a = 1.0
 		_game_over_panel.visible = true
+		_focus_silently(_go_retry_btn)
 		return
 
 	var vp_h: float = get_viewport().get_visible_rect().size.y
@@ -161,6 +210,7 @@ func show_game_over(final_score: int, distance_traveled: float, immediate: bool 
 		_backdrop.visible = true
 		_backdrop.queue_redraw()
 		_game_over_panel.visible = true
+		_focus_silently(_go_retry_btn)
 	)
 	_gameover_tween.tween_property(_game_over_panel, "position:y", target_pos.y, SLIDE_DURATION).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 	_gameover_tween.parallel().tween_property(_game_over_panel, "modulate:a", 1.0, SLIDE_DURATION * 0.6)
@@ -476,14 +526,14 @@ func _populate_main_menu(card: Control) -> void:
 
 	var play_wrap := CenterContainer.new()
 	vbox.add_child(play_wrap)
-	var play_btn := _create_play_circle_button()
-	play_btn.name = "PlayButton"
-	play_btn.pressed.connect(func() -> void:
+	_play_btn = _create_play_circle_button()
+	_play_btn.name = "PlayButton"
+	_play_btn.pressed.connect(func() -> void:
 		if has_node("/root/AudioManager"):
 			get_node("/root/AudioManager").play_ui_click()
 		_on_play_pressed()
 	)
-	play_wrap.add_child(play_btn)
+	play_wrap.add_child(_play_btn)
 
 	_best_label = Label.new()
 	_best_label.name = "BestLabel"
@@ -603,13 +653,18 @@ func _create_play_circle_button() -> BaseButton:
 	var btn := Button.new()
 	btn.custom_minimum_size = Vector2(96.0, 96.0)
 	btn.flat = true
+	btn.focus_mode = Control.FOCUS_ALL
 	btn.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
+	btn.focus_entered.connect(btn.queue_redraw)
+	btn.focus_exited.connect(btn.queue_redraw)
 	btn.draw.connect(func() -> void:
 		var center := btn.size * 0.5
 		var r: float = 42.0
-		var fill: Color = ThemeRef.GREEN_HOVER if btn.is_hovered() else ThemeRef.GREEN_FILL
+		var fill: Color = ThemeRef.GREEN_HOVER if (btn.is_hovered() or btn.has_focus()) else ThemeRef.GREEN_FILL
 		if btn.button_pressed:
 			fill = ThemeRef.GREEN_PRESSED
+		if btn.has_focus():
+			btn.draw_arc(center, r + 4.5, 0.0, TAU, 32, Color(1.0, 0.94, 0.45), 4.0, true)
 		btn.draw_circle(center + Vector2(0.0, 7.0), r + 1.0, Color(0.12, 0.06, 0.02, 0.28))
 		btn.draw_circle(center + Vector2(0.0, 5.0), r, ThemeRef.GREEN_LIP)
 		btn.draw_circle(center, r, fill)

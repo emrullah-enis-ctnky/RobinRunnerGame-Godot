@@ -33,6 +33,9 @@ func _test_ui_manager_lifecycle() -> void:
 
 	_assert(ui._main_menu.visible and not ui._pause_menu.visible and not ui._game_over_panel.visible,
 		"Main Menu should be visible in READY state")
+	await get_tree().process_frame
+	_assert(ui._play_btn != null and ui._play_btn.has_focus(),
+		"Main Menu should automatically focus Play button for keyboard navigation")
 
 	ui._on_play_pressed()
 	_assert(ui._is_counting_down and ui._countdown_label.visible and not ui._main_menu.visible,

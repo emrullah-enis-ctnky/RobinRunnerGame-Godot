@@ -60,15 +60,16 @@ static func style_button(button: Button, is_primary: bool = false, font_size: in
 	button.add_theme_stylebox_override("normal", _make_pill_box(fill, lip, 6, true))
 	button.add_theme_stylebox_override("hover", _make_pill_box(hover, lip, 6, true))
 	button.add_theme_stylebox_override("pressed", _make_pill_box(pressed, lip, 3, false))
-	button.add_theme_stylebox_override("focus", _make_pill_box(hover, lip, 6, true))
+	button.add_theme_stylebox_override("focus", _make_focus_box(hover))
 
 	button.add_theme_color_override("font_color", TEXT_WHITE)
 	button.add_theme_color_override("font_hover_color", TEXT_WHITE)
 	button.add_theme_color_override("font_pressed_color", TEXT_WHITE)
-	button.add_theme_color_override("font_focus_color", TEXT_WHITE)
+	button.add_theme_color_override("font_focus_color", TEXT_GOLD)
 	button.add_theme_color_override("font_outline_color", OUTLINE_COLOR)
 	button.add_theme_constant_override("outline_size", 4)
 	button.add_theme_font_size_override("font_size", font_size)
+	button.focus_mode = Control.FOCUS_ALL
 	button.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
 
 
@@ -148,7 +149,26 @@ static func style_slider(slider: HSlider) -> void:
 	slider.add_theme_stylebox_override("slider", track)
 	slider.add_theme_stylebox_override("grabber_area", fill)
 	slider.add_theme_stylebox_override("grabber_area_highlight", fill_hi)
+	slider.focus_mode = Control.FOCUS_ALL
 	slider.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
+
+
+## Builds a glowing golden-rimmed StyleBoxFlat for keyboard-focused buttons.
+static func _make_focus_box(fill: Color) -> StyleBoxFlat:
+	var box := StyleBoxFlat.new()
+	box.bg_color = fill
+	box.border_color = Color(1.0, 0.94, 0.45)
+	box.set_border_width_all(3)
+	box.border_width_bottom = 6
+	box.set_corner_radius_all(18)
+	box.content_margin_left = 20
+	box.content_margin_right = 20
+	box.content_margin_top = 10
+	box.content_margin_bottom = 10
+	box.shadow_color = Color(1.0, 0.88, 0.30, 0.45)
+	box.shadow_size = 8
+	box.shadow_offset = Vector2(0, 2)
+	return box
 
 
 ## Builds a soft, rounded 3D-beveled pill StyleBoxFlat for buttons.
