@@ -2,8 +2,6 @@ class_name ArcheryTarget
 extends Destructible
 ## Archery target that keeps every arrow embedded instead of being destroyed.
 
-const VFXSpawner = preload("res://scripts/vfx/vfx_spawner.gd")
-
 # Shot distance that always lands the bullseye, and the distance where accuracy is worst.
 const NEAR_DISTANCE: float = 4.0
 const FAR_DISTANCE: float = 35.0
