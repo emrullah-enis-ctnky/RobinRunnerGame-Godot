@@ -172,6 +172,11 @@ func _start_countdown(is_restart: bool) -> void:
 	get_tree().paused = false
 	_hide_all()
 
+	if has_node("/root/AudioManager"):
+		var am: Node = get_node("/root/AudioManager")
+		am.set_music_ducked(false)
+		am.play_music("gameplay")
+
 	if is_restart and has_node("/root/GameManager"):
 		get_node("/root/GameManager").reset_game()
 	if is_restart and has_node("/root/EventBus"):
@@ -187,6 +192,8 @@ func _start_countdown(is_restart: bool) -> void:
 			_countdown_label.pivot_offset = _countdown_label.size * 0.5
 			_countdown_label.scale = Vector2(1.45, 1.45)
 			_countdown_label.modulate.a = 1.0
+			if has_node("/root/AudioManager"):
+				get_node("/root/AudioManager").play_sfx("countdown_tick", 1.0, 8.0)
 		)
 		_countdown_tween.tween_property(_countdown_label, "scale", Vector2.ONE, 0.35).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 		_countdown_tween.tween_interval(0.50)
@@ -195,6 +202,8 @@ func _start_countdown(is_restart: bool) -> void:
 	_countdown_tween.tween_callback(func() -> void:
 		_is_counting_down = false
 		_countdown_label.visible = false
+		if has_node("/root/AudioManager"):
+			get_node("/root/AudioManager").play_sfx("countdown_go", 1.0, 2.0)
 		if has_node("/root/GameManager"):
 			get_node("/root/GameManager").start_game()
 	)
@@ -239,6 +248,10 @@ func _on_menu_pressed() -> void:
 		get_node("/root/GameManager").reset_game()
 	if has_node("/root/EventBus"):
 		get_node("/root/EventBus").game_restarted.emit()
+	if has_node("/root/AudioManager"):
+		var am: Node = get_node("/root/AudioManager")
+		am.set_music_ducked(false)
+		am.play_music("menu")
 	show_main_menu()
 
 
@@ -465,7 +478,11 @@ func _populate_main_menu(card: Control) -> void:
 	vbox.add_child(play_wrap)
 	var play_btn := _create_play_circle_button()
 	play_btn.name = "PlayButton"
-	play_btn.pressed.connect(_on_play_pressed)
+	play_btn.pressed.connect(func() -> void:
+		if has_node("/root/AudioManager"):
+			get_node("/root/AudioManager").play_ui_click()
+		_on_play_pressed()
+	)
 	play_wrap.add_child(play_btn)
 
 	_best_label = Label.new()
@@ -574,6 +591,10 @@ func _make_button(btn_name: String, label: String, is_primary: bool) -> Button:
 	btn.text = label
 	btn.custom_minimum_size = Vector2(0.0, 48.0)
 	ThemeRef.style_button(btn, is_primary, 20)
+	btn.pressed.connect(func() -> void:
+		if has_node("/root/AudioManager"):
+			get_node("/root/AudioManager").play_ui_click()
+	)
 	return btn
 
 

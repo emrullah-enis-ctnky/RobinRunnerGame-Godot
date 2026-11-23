@@ -22,6 +22,8 @@ func destroy() -> void:
 
 	is_destroyed = true
 	_apply_destroyed_state()
+	if has_node("/root/AudioManager"):
+		get_node("/root/AudioManager").play_sfx_at_world_pos("arrow_hit", global_position)
 
 	if has_node("/root/EventBus"):
 		var bus: Node = get_node("/root/EventBus")

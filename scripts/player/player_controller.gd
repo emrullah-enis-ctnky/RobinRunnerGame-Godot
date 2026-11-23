@@ -76,6 +76,7 @@ var _standing_hitbox_center_y: float = 0.775
 
 var current_animation: String = ""
 var stumble_animates: bool = false
+var _footstep_timer: float = 0.0
 
 
 ## Initializes the player state and connects to global lifecycle signals.
@@ -180,6 +181,7 @@ func _physics_process(delta: float) -> void:
 
 	move_and_slide()
 	_check_landing()
+	_update_footsteps(delta, forward_speed)
 	_update_animation()
 
 
@@ -241,6 +243,8 @@ func duck() -> bool:
 	is_ducking = true
 	duck_timer = duck_duration
 	_apply_stance(true)
+	if has_node("/root/AudioManager"):
+		get_node("/root/AudioManager").play_sfx("duck", 1.0, -2.0, 0.05)
 
 	return true
 
@@ -357,9 +361,24 @@ func _apply_vertical_physics(delta: float) -> void:
 
 
 ## Detects ground contact to reset jump state and dispatch landing signal.
+## Plays speed-paced footstep sounds strictly when running upright on the ground.
+func _update_footsteps(delta: float, forward_speed: float) -> void:
+	if not is_on_floor() or is_jumping or is_ducking or is_stumbling:
+		_footstep_timer = 0.0
+		return
+
+	var interval: float = clampf(4.6 / maxf(forward_speed, 1.0), 0.22, 0.42)
+	_footstep_timer += delta
+	if _footstep_timer >= interval:
+		_footstep_timer -= interval
+		if has_node("/root/AudioManager"):
+			get_node("/root/AudioManager").play_sfx("footstep", 1.0, -7.0, 0.08)
+
+
 func _check_landing() -> void:
 	if is_jumping and is_on_floor():
 		is_jumping = false
+		_footstep_timer = 0.0
 		if has_node("/root/EventBus"):
 			var bus: Node = get_node("/root/EventBus")
 			bus.player_landed.emit()
@@ -487,6 +506,7 @@ func reset_player() -> void:
 	is_shooting = false
 	shoot_timer = 0.0
 	shoot_released = false
+	_footstep_timer = 0.0
 	can_control = true
 	if visual_model:
 		visual_model.scale = Vector3.ONE

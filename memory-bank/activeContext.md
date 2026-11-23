@@ -1,14 +1,14 @@
 # Active Context: RobinRunner
 
 ## Current Work Focus
-World atmosphere, biome-matched chunk scenery, overhead framing/stream crossings, and curved-world horizon shader implemented on `feature/world-atmosphere`. Awaiting user visual inspection in Godot.
+Phase 10 (Audio & Visual Polish) audio infrastructure is implemented on `feature/audio-visual-polish`. `default_bus_layout.tres` (`Music` & `SFX` buses), `AudioManager` autoload, UI/Player/EventBus audio hooks, drop-in folders (`assets/audio/music/`, `assets/audio/sfx/`), and `tests/unit/test_audio_manager.gd` are ready for the user's Kenney audio files.
 
 ## Recent Changes
-- Added global shader parameters (`curve_origin`, `curve_strength`) in `project.godot`, created `shaders/curved_world.gdshader`, injected the same bend into `shaders/foliage_wind.gdshader`, and subdivided `TrackChunkBase` meshes (`subdivide_depth = 12`) for smooth curving.
-- Created `CurvedWorldController` (`scripts/world/curved_world_controller.gd`) to meander the trail gently left/right with subtle vertical horizon roll and apply the curved shader across chunks, biome props, hazards, coins, arrows, and horizon mountains.
-- Created `ChunkBiomeDecorator` (`scripts/world/chunk_biome_decorator.gd`) attached to `TrackChunkStraight`, `TrackChunkForest`, and `TrackChunkRocky`: builds flush flanking banks (zero gap), dense leaning canopies & undergrowth (`forest`), canyon cliffs & timber gateways (`rocky`), archer camp outposts (`straight`), and woodland stream-bridge crossings with wooden railings (50% of straight chunks past launch).
-- Streamlined `WorldScenery` to anchor the distant curved mountain ring and valley floor to the horizon, and expanded `tests/unit/test_world_atmosphere.gd` to 4 suites.
+- Created `default_bus_layout.tres` defining `Music` and `SFX` buses so `SettingsManager` volume sliders and mute buttons control real Godot audio buses.
+- Implemented `AudioManager` (`scripts/managers/audio_manager.gd`, registered as autoload in `project.godot`) with 8 pooled SFX `AudioStreamPlayer`s, combo-scaled coin pitch, smooth `menu`/`gameplay` music crossfading, `-10 dB` pause ducking, and auto-loading `.ogg`/`.wav`/`.mp3` files by slot name with safe no-ops for missing files.
+- Connected `AudioManager` to `EventBus` gameplay events, `UIManager`/`SettingsPanels` button clicks & 3-2-1 countdown cues, and `PlayerController` duck & bow-draw cues.
+- Added `assets/audio/README.md`, `assets/audio/music/.gitkeep`, `assets/audio/sfx/.gitkeep`, and `tests/unit/test_audio_manager.gd` + `.tscn`.
 
 ## Next Steps
-1. User visual inspection of the curved world, biome transitions (forest / canyon / camp / stream bridge), high overhead framing, and random day/night sky.
-2. On user approval, merge `feature/world-atmosphere` into `main` and continue Phase 10 (AudioManager, SFX, music, particles).
+1. Integrate the user's Kenney music and SFX files into `assets/audio/music/` and `assets/audio/sfx/`.
+2. Complete Step 10.3 (stylized particles) and Step 10.4 (audio balance & game feel inspection), then merge `feature/audio-visual-polish` into `main` on approval.

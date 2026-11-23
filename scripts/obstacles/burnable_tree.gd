@@ -45,6 +45,8 @@ func destroy() -> void:
 	_clear_stuck_arrows()
 	set_deferred("collision_layer", 0)
 	hide()
+	if has_node("/root/AudioManager"):
+		get_node("/root/AudioManager").play_sfx_at_world_pos("tree_burn", global_position, 55.0, 2.0)
 
 	if has_node("/root/EventBus"):
 		var bus: Node = get_node("/root/EventBus")

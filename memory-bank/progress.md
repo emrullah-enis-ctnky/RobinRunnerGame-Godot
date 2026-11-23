@@ -1,9 +1,9 @@
 # Progress & Kanban Roadmap: RobinRunner
 
 ## Project Status Overview
-- **Current Phase**: Phase 10 (Visual Atmosphere pass on `feature/world-atmosphere`: stylized sky shader, 24h day-night cycle with random start hour, and flanking 3D forest/mountain backdrop)
-- **Active Branch**: `feature/world-atmosphere`
-- **Next Phase**: Visual inspection of sky/day-night cycle & world scenery, merge `feature/world-atmosphere` on approval, then remaining Phase 10 audio/particles
+- **Current Phase**: Phase 10: Audio & Visual Polish (Audio infrastructure complete on `feature/audio-visual-polish`: `default_bus_layout.tres`, `AudioManager` autoload, `EventBus`/UI/Player hooks, drop-in asset folders, and unit tests; awaiting Kenney audio files & particles)
+- **Active Branch**: `feature/audio-visual-polish`
+- **Next Phase**: Drop in Kenney music/SFX assets, complete Step 10.3 particles and Step 10.4 manual test, then merge on approval
 - **Overall Health**: Green (All six automated suites pass per documented runs: core, player, camera, world 5/5, obstacles 9/9, combat 13/13)
 
 ---
@@ -140,8 +140,8 @@
 - **Branch**: `feature/world-atmosphere` (visual atmosphere pass) / `feature/audio-visual-polish`
 - **Objective**: Elevate game feel with sound effects, ambient music, atmospheric world scenery/day-night cycle, and stylized particle systems.
 - [x] Step 10.0: Stylized Sky, 24-Hour Day/Night Cycle, Biome-Matched Chunk Scenery, Overhead Framing/Stream Crossings & Curved World (`shaders/stylized_sky.gdshader`, `shaders/curved_world.gdshader`, `shaders/foliage_wind.gdshader`, `scripts/world/day_night_cycle.gd`, `scripts/world/curved_world_controller.gd`, `scripts/world/chunk_biome_decorator.gd`, `scripts/world/world_scenery.gd`, plus `tests/unit/test_world_atmosphere.gd` + `.tscn`). Every run starts at a random hour in `[0, 24)` with drifting clouds, sun/moon discs, twinkling stars, dynamic lighting, and depth fog. Each chunk variant renders flush biome scenery (`forest`: dense leaning canopies & undergrowth, `rocky`: canyon cliffs & timber gateway, `straight`: archer camp/watchtower clearing or shimmering woodland stream-bridge crossing with wooden railings) while `CurvedWorldController` gently bends the subdivided track, biome props, hazards, coins, arrows, and wind foliage along a meandering horizon trail.
-- [ ] Step 10.1: Implement `AudioManager` and integrate sound effects (Footsteps, Jump, Bow Fire, Target Shatter, Collect).
-- [ ] Step 10.2: Integrate adaptive background music loop with smooth pause ducking.
+- [x] Step 10.1: Implement `AudioManager` (`scripts/managers/audio_manager.gd`, autoload) + `default_bus_layout.tres` (`Music` and `SFX` buses linked directly to `SettingsManager` sliders/mutes), 8-voice pooled SFX playback with combo pitch scaling, and integrated all 13 SFX `.mp3` assets (`jump`, `land`, `duck`, speed-paced ground-only `footstep`, `bow_shoot` swish, `arrow_hit` twang on targets/barriers/tall obstacles, `coin_pickup`, `arrow_pickup`, `stumble`, `death`, `ui_click`, `countdown_tick`, `countdown_go`; `lane_switch` and `bow_draw` intentionally excluded). Includes `tests/unit/test_audio_manager.gd` + `.tscn`.
+- [x] Step 10.2: Integrate adaptive looping background music in `AudioManager` (`assets/audio/music/menu_theme.mp3` & `gameplay_theme.mp3` with auto-loop enabled, crossfades, and smooth `-10 dB` pause ducking via `PROCESS_MODE_ALWAYS`).
 - [ ] Step 10.3: Add stylized particle systems (Player run dust puffs, target splinter explosion, ability-ready shimmer).
 - [ ] Step 10.4: End-to-end game feel and audio balance inspection (User Manual Test).
 
