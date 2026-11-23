@@ -455,6 +455,7 @@ func _rebuild_controls_rows() -> void:
 			var idx: int = i
 			var act: String = action
 			chip.pressed.connect(func() -> void:
+				_play_click()
 				sm.remove_action_event(act, idx)
 				sm.save_settings()
 			)
@@ -465,7 +466,10 @@ func _rebuild_controls_rows() -> void:
 		add_btn.custom_minimum_size = Vector2(36.0, 34.0)
 		ThemeRef.style_button(add_btn, true, 18)
 		var cap_act: String = action
-		add_btn.pressed.connect(func() -> void: _start_capture(cap_act))
+		add_btn.pressed.connect(func() -> void:
+			_play_click()
+			_start_capture(cap_act)
+		)
 		row.add_child(add_btn)
 
 
@@ -516,6 +520,7 @@ func _create_audio_icon_button(is_music: bool) -> Button:
 	btn.custom_minimum_size = Vector2(44.0, 44.0)
 	btn.flat = true
 	btn.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
+	btn.pressed.connect(_play_click)
 	btn.draw.connect(func() -> void:
 		var sm: Node = _settings()
 		var muted: bool = false
@@ -557,6 +562,7 @@ func _create_flag_language_button(lang_code: String, display_name: String) -> Bu
 	btn.alignment = HORIZONTAL_ALIGNMENT_LEFT
 	btn.custom_minimum_size = Vector2(0.0, 52.0)
 	ThemeRef.style_button(btn, false, 20)
+	btn.pressed.connect(_play_click)
 	btn.draw.connect(func() -> void:
 		var flag_rect := Rect2(16.0, (btn.size.y - 26.0) * 0.5 - 2.0, 40.0, 26.0)
 		_draw_flag(btn, flag_rect, lang_code)
@@ -629,6 +635,11 @@ func _make_button(btn_name: String, label: String, is_primary: bool, font_size: 
 			_owner_node.get_node("/root/AudioManager").play_ui_click()
 	)
 	return btn
+
+
+func _play_click() -> void:
+	if _owner_node != null and _owner_node.has_node("/root/AudioManager"):
+		_owner_node.get_node("/root/AudioManager").play_ui_click()
 
 
 func _settings() -> Node:

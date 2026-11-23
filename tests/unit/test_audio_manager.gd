@@ -42,6 +42,12 @@ func _test_pooled_sfx_and_music_ducking() -> void:
 	var p2: AudioStreamPlayer = am.play_sfx("test_beep", 1.2)
 	_assert(p1 != null and p2 != null and p1 != p2, "Consecutive SFX calls should rotate across pooled players")
 
+	var near_p: AudioStreamPlayer = am.play_sfx_at_distance("test_beep", 5.0, 45.0)
+	var far_p: AudioStreamPlayer = am.play_sfx_at_distance("test_beep", 35.0, 45.0)
+	var silent_p: AudioStreamPlayer = am.play_sfx_at_distance("test_beep", 50.0, 45.0)
+	_assert(near_p != null and far_p != null and far_p.volume_db < near_p.volume_db, "Farther hits should attenuate volume")
+	_assert(silent_p == null, "Hits beyond max_distance should stay silent")
+
 	am.register_music("test_track", dummy)
 	am.play_music("test_track", 0.0)
 	_assert(am._current_track == "test_track", "play_music should set active track name")

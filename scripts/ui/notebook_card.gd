@@ -49,7 +49,11 @@ func _ready() -> void:
 	_close_btn.add_theme_color_override("font_outline_color", ThemeRef.OUTLINE_COLOR)
 	_close_btn.add_theme_constant_override("outline_size", 4)
 	_close_btn.add_theme_font_size_override("font_size", 18)
-	_close_btn.pressed.connect(func() -> void: close_requested.emit())
+	_close_btn.pressed.connect(func() -> void:
+		if has_node("/root/AudioManager"):
+			get_node("/root/AudioManager").play_ui_click()
+		close_requested.emit()
+	)
 	add_child(_close_btn)
 
 	resized.connect(_layout_chrome)

@@ -118,9 +118,39 @@ func play_sfx(sfx_name: String, pitch_scale: float = 1.0, volume_db: float = 0.0
 	return player
 
 
+## Plays a distance-attenuated SFX; stays silent when distance >= max_distance.
+func play_sfx_at_distance(
+	sfx_name: String,
+	distance: float,
+	max_distance: float = 45.0,
+	base_db: float = 0.0,
+	pitch_jitter: float = 0.06
+) -> AudioStreamPlayer:
+	if distance >= max_distance:
+		return null
+	var t: float = clampf(distance / maxf(max_distance, 0.01), 0.0, 1.0)
+	var falloff_db: float = lerpf(0.0, -28.0, t * t)
+	return play_sfx(sfx_name, 1.0, base_db + falloff_db, pitch_jitter)
+
+
+## Plays a distance-attenuated SFX measured from the player to world_pos.
+func play_sfx_at_world_pos(
+	sfx_name: String,
+	world_pos: Vector3,
+	max_distance: float = 45.0,
+	base_db: float = 0.0,
+	pitch_jitter: float = 0.06
+) -> AudioStreamPlayer:
+	var player: Node = get_tree().get_first_node_in_group("player")
+	var dist: float = 0.0
+	if player is Node3D:
+		dist = (player as Node3D).global_position.distance_to(world_pos)
+	return play_sfx_at_distance(sfx_name, dist, max_distance, base_db, pitch_jitter)
+
+
 ## Convenience helper for UI button clicks.
 func play_ui_click() -> void:
-	play_sfx("ui_click", 1.0, -2.0, 0.04)
+	play_sfx("ui_click", 1.0, 1.0, 0.04)
 
 
 ## Smoothly fades in or crossfades to a named music track. If already playing that track,
@@ -221,7 +251,6 @@ func _connect_signals() -> void:
 	bus.player_damaged.connect(func(_w: float) -> void: play_sfx("stumble", 1.0, 0.0, 0.04))
 	bus.player_died.connect(func() -> void: play_sfx("death", 1.0, 0.0, 0.0))
 	bus.arrow_fired.connect(func(_p: Vector3, _d: Vector3, _t: String) -> void: play_sfx("bow_shoot", 1.0, -1.0, 0.06))
-	bus.target_destroyed.connect(func(_n: String, _r: int) -> void: play_sfx("arrow_hit", 1.0, -1.0, 0.05))
 	bus.collectible_picked.connect(_on_collectible_picked)
 
 

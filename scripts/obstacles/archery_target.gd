@@ -52,6 +52,8 @@ func stick_arrow(arrow: Node3D, hit_position: Vector3) -> bool:
 
 	_stuck.append({"arrow": arrow, "point": impact})
 	_separate_overlapping(arrow, impact)
+	if has_node("/root/AudioManager"):
+		get_node("/root/AudioManager").play_sfx_at_world_pos("arrow_hit", to_global(impact))
 	if has_node("/root/EventBus"):
 		get_node("/root/EventBus").target_destroyed.emit("target_archery", score_for_impact(impact))
 	return true
