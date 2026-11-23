@@ -653,6 +653,7 @@ func _create_play_circle_button() -> BaseButton:
 	var btn := Button.new()
 	btn.custom_minimum_size = Vector2(96.0, 96.0)
 	btn.flat = true
+	btn.add_theme_stylebox_override("focus", StyleBoxEmpty.new())
 	btn.focus_mode = Control.FOCUS_ALL
 	btn.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
 	btn.focus_entered.connect(btn.queue_redraw)

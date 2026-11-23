@@ -42,6 +42,7 @@ func _ready() -> void:
 	_close_btn = Button.new()
 	_close_btn.text = "X"
 	_close_btn.flat = true
+	_close_btn.add_theme_stylebox_override("focus", StyleBoxEmpty.new())
 	_close_btn.visible = show_close_tab
 	_close_btn.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
 	_close_btn.add_theme_color_override("font_color", ThemeRef.TEXT_WHITE)
