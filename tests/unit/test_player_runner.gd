@@ -134,23 +134,27 @@ func _test_jumping_mechanics() -> bool:
 	return true
 
 
-## Tests hazard staggering, the fatal follow-up hit, and player reset.
+## Tests the damage window: a stagger on the first hit, a fatal follow-up hit inside the
+## window, healing once the window expires, and player reset.
 func _test_hazard_collision_and_reset() -> bool:
-	print("[TEST] Hazard Stumble, Death & Reset...")
+	print("[TEST] Hazard Damage Window, Death & Reset...")
 	var player: CharacterBody3D = PlayerScene.instantiate() as CharacterBody3D
 	add_child(player)
 
 	var signals_received: Dictionary = {
 		"hit": false,
+		"damaged": false,
+		"damage_duration": 0.0,
 		"died": false
 	}
 
 	if has_node("/root/EventBus"):
 		var bus: Node = get_node("/root/EventBus")
 		bus.player_hit_hazard.connect(func(_hazard: String) -> void: signals_received["hit"] = true)
+		bus.player_damaged.connect(_capture_damage.bind(signals_received))
 		bus.player_died.connect(func() -> void: signals_received["died"] = true)
 
-	# The first contact must only stagger the player, never end the run
+	# The first contact must stagger the player and open the damage window
 	player.take_hit("test_rock")
 	if not signals_received["hit"]:
 		printerr("FAIL: First hit must emit player_hit_hazard")
@@ -160,28 +164,38 @@ func _test_hazard_collision_and_reset() -> bool:
 		printerr("FAIL: First hit must stagger the player instead of killing it")
 		player.queue_free()
 		return false
+	if not player.is_vulnerable:
+		printerr("FAIL: First hit must open the damage window")
+		player.queue_free()
+		return false
+	if not signals_received["damaged"] or not is_equal_approx(signals_received["damage_duration"], GameConfig.DAMAGE_WINDOW_DURATION):
+		printerr("FAIL: First hit must emit player_damaged with the window duration")
+		player.queue_free()
+		return false
 	if not player.can_control:
 		printerr("FAIL: Player must keep running while staggering")
 		player.queue_free()
 		return false
 
-	# A second contact inside the stagger window must be ignored
-	player.take_hit("test_rock")
-	if signals_received["died"]:
-		printerr("FAIL: Contact inside the stagger window must be ignored")
-		player.queue_free()
-		return false
-
-	# Once the stagger expires the next contact becomes fatal
-	player._update_stumble(player.stumble_duration)
-	if player.is_stumbling:
-		printerr("FAIL: Stagger window should expire after its duration")
-		player.queue_free()
-		return false
-
+	# A second contact inside the damage window must be fatal
 	player.take_hit("test_rock")
 	if not signals_received["died"] or player.can_control:
-		printerr("FAIL: Follow-up hit must end the run and disable control")
+		printerr("FAIL: A follow-up hit inside the damage window must end the run")
+		player.queue_free()
+		return false
+
+	# Surviving the window heals the player so the next contact only staggers again
+	player.reset_player()
+	signals_received["died"] = false
+	player.take_hit("test_rock")
+	player._update_vulnerability(player.vulnerability_duration)
+	if player.is_vulnerable:
+		printerr("FAIL: Damage window should expire after its duration")
+		player.queue_free()
+		return false
+	player.take_hit("test_rock")
+	if signals_received["died"] or not player.can_control:
+		printerr("FAIL: A hit after the damage window must only stagger")
 		player.queue_free()
 		return false
 
@@ -191,11 +205,17 @@ func _test_hazard_collision_and_reset() -> bool:
 		printerr("FAIL: Player reset failed to restore control, lane, or position")
 		player.queue_free()
 		return false
-	if player.stumbles_remaining != GameConfig.MAX_STUMBLES_PER_RUN:
-		printerr("FAIL: Player reset failed to restore the stumble allowance")
+	if player.is_vulnerable:
+		printerr("FAIL: Player reset failed to clear the damage window")
 		player.queue_free()
 		return false
 
 	player.queue_free()
-	print("  -> Hazard Stumble, Death & Reset passed.")
+	print("  -> Hazard Damage Window, Death & Reset passed.")
 	return true
+
+
+## Records the damage window duration emitted by the player into a shared store.
+func _capture_damage(window_duration: float, store: Dictionary) -> void:
+	store["damaged"] = true
+	store["damage_duration"] = window_duration

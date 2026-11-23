@@ -1,0 +1,18 @@
+[gd_scene format=3 uid="uid://bdtdep1e7lftr"]
+
+[ext_resource type="Script" uid="uid://tsy68igum1xt" path="res://scripts/combat/arrow_pickup.gd" id="1_pickup"]
+[ext_resource type="PackedScene" uid="uid://b6q6cxvfoodau" path="res://assets/models/weapon-arrow.glb" id="2_mesh"]
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_pickup"]
+radius = 0.6
+
+[node name="ArrowPickupNormal" type="Area3D" unique_id=1674629610 groups=["pickup"]]
+collision_layer = 32
+script = ExtResource("1_pickup")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=277723965]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.22606209)
+shape = SubResource("SphereShape3D_pickup")
+
+[node name="Mesh" parent="." unique_id=1552488438 instance=ExtResource("2_mesh")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.22606209)

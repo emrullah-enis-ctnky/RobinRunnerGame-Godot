@@ -1,9 +1,10 @@
-[gd_scene load_steps=9 format=3 uid="uid://coverheadarch"]
+[gd_scene load_steps=10 format=3 uid="uid://coverheadarch"]
 
 [ext_resource type="PackedScene" path="res://assets/models/building-structure.glb" id="1_structure"]
 [ext_resource type="PackedScene" path="res://assets/models/building-roof.glb" id="2_roof"]
 [ext_resource type="PackedScene" path="res://assets/models/flag.glb" id="3_flag"]
 [ext_resource type="Script" path="res://scripts/obstacles/obstacle.gd" id="4_obstacle"]
+[ext_resource type="Script" path="res://scripts/world/wind_foliage.gd" id="5_wind"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_beam"]
 albedo_color = Color(0.38, 0.22, 0.12, 1)
@@ -33,7 +34,10 @@ transform = Transform3D(1.95, 0, 0, 0, 2.3, 0, 0, 0, 0.8, 0, 0, 0)
 [node name="Roof" parent="." instance=ExtResource("2_roof")]
 transform = Transform3D(1.5, 0, 0, 0, 0.8, 0, 0, 0, 0.8, 0, 2.3, 0)
 
-[node name="Flag" parent="." instance=ExtResource("3_flag")]
+[node name="WindFoliage" type="Node3D" parent="."]
+script = ExtResource("5_wind")
+
+[node name="Flag" parent="WindFoliage" instance=ExtResource("3_flag")]
 transform = Transform3D(0.9, 0, 0, 0, 0.9, 0, 0, 0, 0.9, 0, 3.1, 0)
 
 [node name="HangingBeam" type="MeshInstance3D" parent="."]

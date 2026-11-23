@@ -1,0 +1,6 @@
+[gd_scene format=3 uid="uid://dguwqn2bcwf8i"]
+
+[ext_resource type="Script" path="res://tests/unit/test_collectibles_scoring.gd" id="1_test"]
+
+[node name="TestCollectiblesScoring" type="Node"]
+script = ExtResource("1_test")

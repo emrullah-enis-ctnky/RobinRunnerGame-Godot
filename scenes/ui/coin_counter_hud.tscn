@@ -1,0 +1,44 @@
+[gd_scene format=3 uid="uid://ccoincounterhud"]
+
+[ext_resource type="Script" path="res://scripts/ui/coin_counter_hud.gd" id="1_coin_hud"]
+
+[node name="CoinCounterHUD" type="CanvasLayer"]
+layer = 5
+script = ExtResource("1_coin_hud")
+
+[node name="Root" type="Control" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+
+[node name="Panel" type="Control" parent="Root"]
+offset_left = 16.0
+offset_top = 16.0
+offset_right = 144.0
+offset_bottom = 64.0
+mouse_filter = 2
+
+[node name="Count" type="Label" parent="Root/Panel"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 44.0
+offset_right = -12.0
+theme_override_font_sizes/font_size = 28
+text = "0"
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="ComboBadge" type="Control" parent="Root"]
+visible = false
+offset_left = 16.0
+offset_top = 72.0
+offset_right = 112.0
+offset_bottom = 108.0
+mouse_filter = 2
+
+[node name="ComboCount" type="Label" parent="Root/ComboBadge"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+text = "2x"
+horizontal_alignment = 1
+vertical_alignment = 1

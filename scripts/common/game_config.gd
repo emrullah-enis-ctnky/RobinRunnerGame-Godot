@@ -23,14 +23,31 @@ const JUMP_VELOCITY: float = 7.5
 const GRAVITY: float = 22.0
 
 # Ability & Combat Constants
-const MAX_ABILITY_GAUGE: float = 100.0
-const ABILITY_CHARGE_PER_METER: float = 0.4
-const ABILITY_CHARGE_PER_COIN: float = 10.0
+const ARROW_TYPE_NORMAL: String = "normal"
+const ARROW_TYPE_FLAME: String = "flame"
+const START_AMMO_NORMAL: int = 3
+const START_AMMO_FLAME: int = 1
 const ARROW_SPEED: float = 40.0
 const ARROW_LIFETIME: float = 3.0
+const ARROW_SCAN_RANGE: float = 45.0
+const ARROW_MUZZLE_HEIGHT: float = 1.0
+const SHOOT_DRAW_TIME: float = 0.12
+const SHOOT_RELEASE_TIME: float = 0.28
+const ARROW_MODEL_LENGTH: float = 0.9
+const ARROW_CROSS_SECTION_SCALE: float = 0.4
+const BOW_MODEL_LENGTH: float = 0.55
+const PICKUP_COLLECT_TIME: float = 0.35
+
+# Grounded Pickup Pose
+const PICKUP_TILT_DEGREES: float = 50.0
+const PICKUP_TILT_RANGE_DEGREES: float = 15.0
+const PICKUP_YAW_RANGE_DEGREES: float = 25.0
+const PICKUP_BURY_DEPTH: float = 0.06
+const PICKUP_SPAWN_CHANCE: float = 0.35
 
 # Track & World Generation
 const CHUNK_LENGTH: float = 30.0
+const TRACK_START_OFFSET_Z: float = 12.0
 const INITIAL_CHUNKS_COUNT: int = 6
 const CHUNK_DESPAWN_DISTANCE_BEHIND: float = 40.0
 
@@ -43,9 +60,25 @@ const LAYER_PROJECTILE: int = 1 << 4
 const LAYER_PICKUP: int = 1 << 5
 
 # Hazard Resolution
-const MAX_STUMBLES_PER_RUN: int = 1
 const STUMBLE_DURATION: float = 0.6
 const STUMBLE_SPEED_FACTOR: float = 0.45
+const DAMAGE_WINDOW_DURATION: float = 5.0
+
+# Collectibles & Scoring Constants
+const COLLECTIBLE_TYPE_COIN: String = "coin"
+const COIN_MODEL_DIAMETER: float = 0.42
+const COIN_HOVER_HEIGHT: float = 0.75
+const COIN_SPIN_SPEED_DEG: float = 200.0
+const COIN_BOB_AMPLITUDE: float = 0.08
+const COIN_BOB_SPEED: float = 3.2
+const COIN_COLLECT_TIME: float = 0.16
+const COIN_SCORE_VALUE: int = 10
+const SCORE_PER_METER: float = 1.0
+const COMBO_WINDOW_SECONDS: float = 2.5
+const COMBO_STEP_COINS: int = 10
+const COMBO_MULTIPLIER_STEP: float = 0.10
+const COMBO_MAX_MULTIPLIER: float = 2.0
+const STUMBLE_SCORE_PENALTY_FACTOR: float = 0.80
 
 
 ## Returns the 3D X coordinate for a specific lane index.

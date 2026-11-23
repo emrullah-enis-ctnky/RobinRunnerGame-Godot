@@ -16,7 +16,7 @@ const TrackChunk = preload("res://scripts/world/track_chunk.gd")
 var _chunk_pools: Dictionary = {}
 var _chunk_by_pool: Dictionary = {} # Maps TrackChunk instance to its ObjectPool
 var active_chunks: Array[TrackChunk] = []
-var next_spawn_z: float = 0.0
+var next_spawn_z: float = GameConfig.TRACK_START_OFFSET_Z
 
 var _rng: RandomNumberGenerator = RandomNumberGenerator.new()
 
@@ -26,6 +26,8 @@ func _ready() -> void:
 	_load_default_chunk_scenes()
 	_initialize_pools()
 	spawn_initial_track()
+	if has_node("/root/EventBus"):
+		get_node("/root/EventBus").game_restarted.connect(spawn_initial_track)
 
 
 func _physics_process(_delta: float) -> void:
@@ -52,7 +54,7 @@ func reset_track() -> void:
 		var chunk: TrackChunk = active_chunks.pop_back()
 		_recycle_chunk_instance(chunk)
 
-	next_spawn_z = 0.0
+	next_spawn_z = GameConfig.TRACK_START_OFFSET_Z
 
 
 ## Spawns the next track chunk and advances the spawn Z coordinate.

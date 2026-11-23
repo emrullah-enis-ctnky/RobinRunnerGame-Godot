@@ -19,10 +19,16 @@ config/icon="res://icon.svg"
 
 EventBus="*res://scripts/managers/event_bus.gd"
 GameManager="*res://scripts/managers/game_manager.gd"
+AbilityManager="*res://scripts/managers/ability_manager.gd"
+ScoreManager="*res://scripts/managers/score_manager.gd"
+SettingsManager="*res://scripts/managers/settings_manager.gd"
+AudioManager="*res://scripts/managers/audio_manager.gd"
 MCPRuntimeServer="*res://addons/godot_mcp_toolkit/runtime/mcp_runtime_server.gd"
 
 [display]
 
+window/size/viewport_width=1280
+window/size/viewport_height=720
 window/stretch/mode="canvas_items"
 window/stretch/aspect="expand"
 
@@ -79,3 +85,14 @@ move_down={
 rendering_device/driver.windows="d3d12"
 renderer/rendering_method="gl_compatibility"
 renderer/rendering_method.mobile="gl_compatibility"
+
+[shader_globals]
+
+curve_origin={
+"type": "vec3",
+"value": Vector3(0, 0, 0)
+}
+curve_strength={
+"type": "vec2",
+"value": Vector2(0, 0)
+}

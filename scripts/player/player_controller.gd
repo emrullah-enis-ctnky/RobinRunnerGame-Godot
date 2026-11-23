@@ -3,11 +3,30 @@ extends CharacterBody3D
 ## Controls the player character in RobinRunner (3-lane movement, jumping, and state).
 
 const GameConfig = preload("res://scripts/common/game_config.gd")
+const VFXSpawner = preload("res://scripts/vfx/vfx_spawner.gd")
+const BOW_SCENE: PackedScene = preload("res://assets/models/weapon-bow.glb")
+const BOW_BONE: String = "hand-left"
 
 # Hazard labels and the posture each type imprints on a non-fatal contact
 const HAZARD_OVERHEAD_BARRIER: String = "overhead_barrier"
 const STUMBLE_TILT_FORWARD: float = -0.35
-const HEAD_BUMP_TILT_BACK: float = 0.3
+const HEAD_BUMP_TILT_BACK: float = 0.6
+
+# Animation clip names baked into the archer model
+const ANIM_IDLE: String = "idle"
+const ANIM_RUN: String = "sprint"
+const ANIM_JUMP: String = "jump"
+const ANIM_FALL: String = "fall"
+const ANIM_CROUCH: String = "crouch"
+const ANIM_DUCK: String = "duck"
+const ANIM_DEATH: String = "die"
+const ANIM_STUMBLE: String = "trip"
+const ANIM_STUMBLE_LEGACY: String = "hit"
+const ANIM_AIM: String = "holding-both"
+const ANIM_AIM_LEGACY: String = "holding-right"
+const ANIM_SHOOT: String = "holding-both-shoot"
+const ANIM_SHOOT_LEGACY: String = "holding-right-shoot"
+const ANIM_BLEND_TIME: float = 0.15
 
 @export var lane_switch_speed: float = GameConfig.LANE_SWITCH_SPEED
 @export var jump_velocity: float = GameConfig.JUMP_VELOCITY
@@ -16,8 +35,15 @@ const HEAD_BUMP_TILT_BACK: float = 0.3
 @export var duck_duration: float = 0.65
 @export var stumble_duration: float = GameConfig.STUMBLE_DURATION
 @export var stumble_speed_factor: float = GameConfig.STUMBLE_SPEED_FACTOR
+@export var vulnerability_duration: float = GameConfig.DAMAGE_WINDOW_DURATION
 @export var duck_hitbox_radius: float = 0.3
 @export var duck_hitbox_height: float = 0.7
+@export var shoot_draw_time: float = GameConfig.SHOOT_DRAW_TIME
+@export var shoot_release_time: float = GameConfig.SHOOT_RELEASE_TIME
+@export var arrow_scan_range: float = GameConfig.ARROW_SCAN_RANGE
+@export var bow_offset: Vector3 = Vector3(0.006, 0.012, 0.006)
+@export var bow_rotation_degrees: Vector3 = Vector3(-90.0, 0.0, 0.0)
+@export var bow_scale: float = 0.7
 
 var current_lane: int = GameConfig.LANE_CENTER
 var target_x: float = 0.0
@@ -26,8 +52,17 @@ var is_ducking: bool = false
 var duck_timer: float = 0.0
 var is_stumbling: bool = false
 var stumble_timer: float = 0.0
-var stumbles_remaining: int = GameConfig.MAX_STUMBLES_PER_RUN
+var is_vulnerable: bool = false
+var vulnerability_timer: float = 0.0
+var is_shooting: bool = false
+var shoot_timer: float = 0.0
+var shoot_released: bool = false
 var can_control: bool = true
+
+# Stored shot parameters released once the draw window completes
+var _shoot_origin: Vector3 = Vector3.ZERO
+var _shoot_forward: Vector3 = Vector3.FORWARD
+var _shoot_preferred: String = GameConfig.ARROW_TYPE_NORMAL
 
 # Stand-in shapes swapped on the detector; Jolt rejects non-uniform shape scaling
 var _standing_hitbox: Shape3D
@@ -38,11 +73,20 @@ var _standing_hitbox_center_y: float = 0.775
 @onready var collision_shape: CollisionShape3D = get_node_or_null("CollisionShape3D")
 @onready var hazard_detector: Area3D = get_node_or_null("HazardDetector")
 @onready var hazard_shape: CollisionShape3D = get_node_or_null("HazardDetector/CollisionShape3D")
+@onready var animation_player: AnimationPlayer = get_node_or_null("Model/ArcherModel/AnimationPlayer")
+
+var current_animation: String = ""
+var stumble_animates: bool = false
+var _footstep_timer: float = 0.0
+var _run_dust: GPUParticles3D
 
 
 ## Initializes the player state and connects to global lifecycle signals.
 func _ready() -> void:
 	_prepare_hitboxes()
+	_setup_animations()
+	_attach_bow()
+	_run_dust = VFXSpawner.build_run_dust(self)
 	reset_player()
 	if has_node("/root/EventBus"):
 		var bus: Node = get_node("/root/EventBus")
@@ -65,9 +109,44 @@ func _prepare_hitboxes() -> void:
 	_ducking_hitbox.height = duck_hitbox_height
 
 
+## Attaches the bow model to the archer's left-hand bone so it is held at all times.
+func _attach_bow() -> void:
+	var skeleton: Skeleton3D = _find_skeleton(visual_model)
+	if skeleton == null or skeleton.find_bone(BOW_BONE) < 0:
+		return
+
+	var attach := BoneAttachment3D.new()
+	attach.name = "HandAnchor"
+	attach.bone_name = BOW_BONE
+	skeleton.add_child(attach)
+
+	var bow: Node3D = BOW_SCENE.instantiate()
+	bow.name = "Bow"
+	MeshFit.fit_longest_axis(bow, GameConfig.BOW_MODEL_LENGTH)
+	bow.position = bow_offset
+	bow.rotation_degrees = bow_rotation_degrees
+	bow.scale *= bow_scale
+	attach.add_child(bow)
+
+
+## Returns the first Skeleton3D found under a node.
+func _find_skeleton(node: Node) -> Skeleton3D:
+	if node == null:
+		return null
+	for child in node.get_children():
+		if child is Skeleton3D:
+			return child
+		var found: Skeleton3D = _find_skeleton(child)
+		if found != null:
+			return found
+	return null
+
+
 ## Handles movement, lane interpolation, and jumping physics each frame.
 func _physics_process(delta: float) -> void:
 	if not can_control:
+		if _run_dust != null:
+			_run_dust.emitting = false
 		return
 
 	# Only move forward and process active runner logic during PLAYING state
@@ -77,13 +156,18 @@ func _physics_process(delta: float) -> void:
 		is_playing = (gm.current_state == gm.GameState.PLAYING)
 
 	if not is_playing:
+		if _run_dust != null:
+			_run_dust.emitting = false
 		# Apply simple gravity if falling while paused/ready
 		if not is_on_floor():
 			velocity.y -= gravity * delta
 			move_and_slide()
+		_update_animation()
 		return
 
 	_update_stumble(delta)
+	_update_vulnerability(delta)
+	_update_shoot(delta)
 
 	# Input is locked while staggering, but forward momentum keeps the run alive
 	if not is_stumbling:
@@ -104,24 +188,31 @@ func _physics_process(delta: float) -> void:
 
 	move_and_slide()
 	_check_landing()
+	_update_footsteps(delta, forward_speed)
+	if _run_dust != null:
+		_run_dust.emitting = (is_on_floor() and not is_jumping and not is_stumbling)
+	_update_animation()
 
 
 ## Captures discrete player inputs for lane switching, jumping, and ducking/sliding.
 func _handle_input() -> void:
-	if Input.is_action_just_pressed("move_left") or Input.is_key_pressed(KEY_A) and not Input.is_key_pressed(KEY_D):
+	if Input.is_action_just_pressed("move_left"):
 		change_lane(-1)
-	elif Input.is_action_just_pressed("move_right") or Input.is_key_pressed(KEY_D) and not Input.is_key_pressed(KEY_A):
+	elif Input.is_action_just_pressed("move_right"):
 		change_lane(1)
 
-	if (Input.is_action_just_pressed("jump") or Input.is_key_pressed(KEY_SPACE) or Input.is_key_pressed(KEY_W)) and is_on_floor():
+	if Input.is_action_just_pressed("jump") and is_on_floor():
 		jump()
 
-	if Input.is_action_just_pressed("move_down") or Input.is_key_pressed(KEY_S) or Input.is_key_pressed(KEY_DOWN):
+	if Input.is_action_just_pressed("move_down"):
 		if is_on_floor():
 			duck()
 		else:
 			# Fast fall downward if in mid-air
 			velocity.y = minf(velocity.y, -gravity * 0.9)
+
+	if Input.is_action_just_pressed("shoot") and not is_shooting:
+		try_shoot()
 
 
 ## Shifts the target lane by direction offset (-1 for left, +1 for right).
@@ -161,8 +252,79 @@ func duck() -> bool:
 	is_ducking = true
 	duck_timer = duck_duration
 	_apply_stance(true)
+	if has_node("/root/AudioManager"):
+		get_node("/root/AudioManager").play_sfx("duck", 1.0, -2.0, 0.05)
 
 	return true
+
+
+## Begins a shot: the arrow is released once the draw window completes.
+func try_shoot() -> bool:
+	if not has_node("/root/AbilityManager"):
+		return false
+	var ability: Node = get_node("/root/AbilityManager")
+	if not ability.can_fire():
+		return false
+
+	_shoot_origin = global_position + Vector3(0.0, GameConfig.ARROW_MUZZLE_HEIGHT, 0.0)
+	_shoot_forward = (-global_transform.basis.z).normalized()
+	_shoot_preferred = _preferred_arrow_type(_shoot_origin, _shoot_forward)
+	_start_shoot_animation()
+	return true
+
+
+## Scans the lane ahead and returns a usable arrow type for the first shootable found.
+func _preferred_arrow_type(origin: Vector3, forward: Vector3) -> String:
+	var hit: Dictionary = _scan_ahead(origin, forward)
+	if not hit.is_empty():
+		var body: Object = hit.get("collider")
+		if body != null and body.has_method("required_arrow_types"):
+			for arrow_type in body.required_arrow_types():
+				if _quiver_has(arrow_type):
+					return arrow_type
+	return GameConfig.ARROW_TYPE_NORMAL
+
+
+## Casts a ray through the current lane to find the first shootable surface.
+func _scan_ahead(origin: Vector3, forward: Vector3) -> Dictionary:
+	var space: PhysicsDirectSpaceState3D = get_world_3d().direct_space_state
+	var query := PhysicsRayQueryParameters3D.create(origin, origin + forward * arrow_scan_range)
+	query.collision_mask = GameConfig.LAYER_OBSTACLE | GameConfig.LAYER_TARGET
+	query.collide_with_areas = false
+	return space.intersect_ray(query)
+
+
+## Returns true when the quiver still holds an arrow of the given type.
+func _quiver_has(arrow_type: String) -> bool:
+	if not has_node("/root/AbilityManager"):
+		return false
+	return get_node("/root/AbilityManager").has_ammo(arrow_type)
+
+
+## Starts the short draw-and-release shooting window.
+func _start_shoot_animation() -> void:
+	is_shooting = true
+	shoot_released = false
+	shoot_timer = shoot_draw_time + shoot_release_time
+
+
+## Advances the shooting window and releases the arrow at the shot moment.
+func _update_shoot(delta: float) -> void:
+	if not is_shooting:
+		return
+
+	shoot_timer -= delta
+	if not shoot_released and shoot_timer <= shoot_release_time:
+		shoot_released = true
+		_release_arrow()
+	if shoot_timer <= 0.0:
+		is_shooting = false
+
+
+## Fires the stored shot through the ability manager.
+func _release_arrow() -> void:
+	if has_node("/root/AbilityManager"):
+		get_node("/root/AbilityManager").try_fire(_shoot_origin, _shoot_forward, _shoot_preferred)
 
 
 ## Updates duck/slide duration and restores standing posture.
@@ -208,9 +370,25 @@ func _apply_vertical_physics(delta: float) -> void:
 
 
 ## Detects ground contact to reset jump state and dispatch landing signal.
+## Plays speed-paced footstep sounds strictly when running upright on the ground.
+func _update_footsteps(delta: float, forward_speed: float) -> void:
+	if not is_on_floor() or is_jumping or is_ducking or is_stumbling:
+		_footstep_timer = 0.0
+		return
+
+	var interval: float = clampf(4.6 / maxf(forward_speed, 1.0), 0.22, 0.42)
+	_footstep_timer += delta
+	if _footstep_timer >= interval:
+		_footstep_timer -= interval
+		if has_node("/root/AudioManager"):
+			get_node("/root/AudioManager").play_sfx("footstep", 1.0, -7.0, 0.08)
+
+
 func _check_landing() -> void:
 	if is_jumping and is_on_floor():
 		is_jumping = false
+		_footstep_timer = 0.0
+		VFXSpawner.spawn_landing_dust(get_parent(), global_position)
 		if has_node("/root/EventBus"):
 			var bus: Node = get_node("/root/EventBus")
 			bus.player_landed.emit()
@@ -227,29 +405,28 @@ func _on_hazard_body_entered(body: Node3D) -> void:
 	take_hit(hazard_name, lethal)
 
 
-## Resolves a hazard impact: lethal hazards are always fatal, the rest stagger once.
+## Resolves a hazard impact: lethal hazards are always fatal, while a forgiving contact
+## staggers the runner and opens the damage window in which a second contact is fatal.
 func take_hit(hazard_name: String, lethal: bool = false) -> void:
 	if not can_control:
 		return
 
-	# Lethal hazards (trees, logs) ignore the stumbling immunity and end the run at once
+	# Lethal hazards (trees, fragile barriers) end the run at once
 	if lethal:
 		_emit_hazard_hit(hazard_name)
 		_die()
 		return
 
-	# A contact absorbed by the stagger window leaves the player unharmed
-	if is_stumbling:
+	# A second forgiving contact inside the damage window is fatal
+	if is_vulnerable:
+		_emit_hazard_hit(hazard_name)
+		_die()
 		return
 
+	# The first forgiving contact staggers the runner and opens the damage window
 	_emit_hazard_hit(hazard_name)
-
-	if stumbles_remaining > 0:
-		stumbles_remaining -= 1
-		_start_stumble(hazard_name)
-		return
-
-	_die()
+	_start_stumble(hazard_name)
+	_start_vulnerability()
 
 
 ## Broadcasts the hazard label so feedback systems (camera, HUD) can react.
@@ -259,17 +436,20 @@ func _emit_hazard_hit(hazard_name: String) -> void:
 		bus.player_hit_hazard.emit(hazard_name)
 
 
-## Starts the stagger window in which the player stays hazard-immune.
+## Starts the short stumble in which the runner is slowed and tips out of posture.
 ## Overhead arches read as a head bump while ground hazards tip the runner forward.
 func _start_stumble(hazard_name: String = "") -> void:
 	is_stumbling = true
 	stumble_timer = stumble_duration
-	if visual_model:
-		var overhead: bool = hazard_name == HAZARD_OVERHEAD_BARRIER
+	var overhead: bool = hazard_name == HAZARD_OVERHEAD_BARRIER
+	# Use the baked hit clip for ground hazards; the arch keeps a backward head bump.
+	stumble_animates = not overhead and animation_player != null and (
+		animation_player.has_animation(ANIM_STUMBLE) or animation_player.has_animation(ANIM_STUMBLE_LEGACY))
+	if visual_model and not stumble_animates:
 		visual_model.rotation.x = HEAD_BUMP_TILT_BACK if overhead else STUMBLE_TILT_FORWARD
 
 
-## Counts down the stagger window and restores posture when it expires.
+## Counts down the stumble window and restores posture when it expires.
 func _update_stumble(delta: float) -> void:
 	if not is_stumbling:
 		return
@@ -281,13 +461,34 @@ func _update_stumble(delta: float) -> void:
 			visual_model.rotation.x = 0.0
 
 
-## Ends the run once the player has no stumbles left.
+## Opens the damage window during which the next forgiving contact is fatal.
+func _start_vulnerability() -> void:
+	is_vulnerable = true
+	vulnerability_timer = vulnerability_duration
+	if has_node("/root/EventBus"):
+		var bus: Node = get_node("/root/EventBus")
+		bus.player_damaged.emit(vulnerability_duration)
+
+
+## Counts down the damage window and heals the runner once it expires.
+func _update_vulnerability(delta: float) -> void:
+	if not is_vulnerable:
+		return
+
+	vulnerability_timer -= delta
+	if vulnerability_timer <= 0.0:
+		is_vulnerable = false
+
+
+## Ends the run on a fatal hazard or a second contact inside the damage window.
 func _die() -> void:
 	can_control = false
 	is_stumbling = false
+	is_vulnerable = false
 	velocity = Vector3.ZERO
 	if visual_model:
 		visual_model.rotation = Vector3.ZERO
+	_play_animation(ANIM_DEATH, true)
 
 	if has_node("/root/EventBus"):
 		var bus: Node = get_node("/root/EventBus")
@@ -308,10 +509,93 @@ func reset_player() -> void:
 	is_ducking = false
 	duck_timer = 0.0
 	is_stumbling = false
+	stumble_animates = false
 	stumble_timer = 0.0
-	stumbles_remaining = GameConfig.MAX_STUMBLES_PER_RUN
+	is_vulnerable = false
+	vulnerability_timer = 0.0
+	is_shooting = false
+	shoot_timer = 0.0
+	shoot_released = false
+	_footstep_timer = 0.0
 	can_control = true
 	if visual_model:
 		visual_model.scale = Vector3.ONE
 		visual_model.rotation = Vector3.ZERO
 	_apply_stance(false)
+	_play_animation(ANIM_IDLE, true)
+
+
+## Enables linear looping on the clips that must cycle continuously.
+func _setup_animations() -> void:
+	if animation_player == null:
+		return
+	_set_animation_loop(ANIM_IDLE)
+	_set_animation_loop(ANIM_RUN)
+
+
+## Enables linear looping on a single clip when the model provides it.
+func _set_animation_loop(anim_name: String) -> void:
+	if animation_player.has_animation(anim_name):
+		animation_player.get_animation(anim_name).loop_mode = Animation.LOOP_LINEAR
+
+
+## Picks the clip matching the current gameplay state and blends to it.
+func _update_animation() -> void:
+	if animation_player == null:
+		return
+	var anim_name: String = _resolve_animation()
+	_play_animation(anim_name)
+	_apply_animation_speed(anim_name)
+
+
+## Maps movement, stance, and life state to an animation clip name.
+func _resolve_animation() -> String:
+	if not can_control:
+		return ANIM_DEATH
+	if is_stumbling and stumble_animates:
+		return _available_animation(ANIM_STUMBLE, ANIM_STUMBLE_LEGACY)
+	if is_shooting:
+		if shoot_released:
+			return _available_animation(ANIM_SHOOT, ANIM_SHOOT_LEGACY)
+		return _available_animation(ANIM_AIM, ANIM_AIM_LEGACY)
+	if is_ducking:
+		return _available_animation(ANIM_DUCK, ANIM_CROUCH)
+	if not is_on_floor():
+		return ANIM_JUMP if velocity.y > 0.0 else ANIM_FALL
+	if _is_game_playing():
+		return ANIM_RUN
+	return ANIM_IDLE
+
+
+## Returns true while the game manager reports the active run state.
+func _is_game_playing() -> bool:
+	if has_node("/root/GameManager"):
+		var gm: Node = get_node("/root/GameManager")
+		return gm.current_state == gm.GameState.PLAYING
+	return true
+
+
+## Returns the preferred clip when the model provides it, otherwise the fallback.
+func _available_animation(primary: String, fallback: String) -> String:
+	if animation_player != null and animation_player.has_animation(primary):
+		return primary
+	return fallback
+
+
+## Blends to a clip unless it is already the active one.
+func _play_animation(anim_name: String, force: bool = false) -> void:
+	if animation_player == null or not animation_player.has_animation(anim_name):
+		return
+	if not force and anim_name == current_animation:
+		return
+	current_animation = anim_name
+	animation_player.play(anim_name, ANIM_BLEND_TIME)
+
+
+## Scales run playback so the stride keeps pace with forward speed.
+func _apply_animation_speed(anim_name: String) -> void:
+	var target_scale: float = 1.0
+	if anim_name == ANIM_RUN and has_node("/root/GameManager"):
+		var gm: Node = get_node("/root/GameManager")
+		target_scale = clampf(gm.current_speed / GameConfig.INITIAL_FORWARD_SPEED, 1.0, 1.6)
+	animation_player.speed_scale = target_scale

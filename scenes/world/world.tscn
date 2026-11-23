@@ -1,9 +1,18 @@
-[gd_scene load_steps=7 format=3 uid="uid://bworldmain"]
+[gd_scene load_steps=17 format=3 uid="uid://bworldmain"]
 
 [ext_resource type="Script" path="res://scenes/world/world.gd" id="1_world"]
 [ext_resource type="PackedScene" uid="uid://c7m8x4w6laq1r" path="res://scenes/player/player.tscn" id="2_player"]
 [ext_resource type="PackedScene" uid="uid://dp7m2x9k4q1w8" path="res://scenes/camera/runner_camera.tscn" id="3_camera"]
 [ext_resource type="Script" path="res://scripts/world/track_spawner.gd" id="4_spawner"]
+[ext_resource type="PackedScene" uid="uid://c8n4v2x6bq7zp" path="res://scenes/ui/damage_overlay.tscn" id="5_overlay"]
+[ext_resource type="Script" path="res://scripts/combat/arrow_pool.gd" id="6_arrowpool"]
+[ext_resource type="PackedScene" path="res://scenes/ui/arrow_counter_hud.tscn" id="7_hud"]
+[ext_resource type="PackedScene" path="res://scenes/ui/coin_counter_hud.tscn" id="8_coin_hud"]
+[ext_resource type="PackedScene" path="res://scenes/ui/score_distance_hud.tscn" id="9_score_hud"]
+[ext_resource type="PackedScene" path="res://scenes/ui/ui_manager.tscn" id="10_ui_manager"]
+[ext_resource type="Script" path="res://scripts/world/day_night_cycle.gd" id="11_daynight"]
+[ext_resource type="Script" path="res://scripts/world/world_scenery.gd" id="12_scenery"]
+[ext_resource type="Script" path="res://scripts/world/curved_world_controller.gd" id="13_curved"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_world"]
 sky_top_color = Color(0.25, 0.52, 0.88, 1)
@@ -48,3 +57,25 @@ base_fov = 62.0
 
 [node name="TrackSpawner" type="Node3D" parent="."]
 script = ExtResource("4_spawner")
+
+[node name="DayNightCycle" type="Node" parent="."]
+script = ExtResource("11_daynight")
+
+[node name="WorldScenery" type="Node3D" parent="."]
+script = ExtResource("12_scenery")
+
+[node name="CurvedWorldController" type="Node" parent="."]
+script = ExtResource("13_curved")
+
+[node name="ArrowPool" type="Node3D" parent="."]
+script = ExtResource("6_arrowpool")
+
+[node name="DamageOverlay" parent="." instance=ExtResource("5_overlay")]
+
+[node name="ArrowCounterHUD" parent="." instance=ExtResource("7_hud")]
+
+[node name="CoinCounterHUD" parent="." instance=ExtResource("8_coin_hud")]
+
+[node name="ScoreDistanceHUD" parent="." instance=ExtResource("9_score_hud")]
+
+[node name="UIManager" parent="." instance=ExtResource("10_ui_manager")]

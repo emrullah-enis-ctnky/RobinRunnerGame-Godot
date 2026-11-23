@@ -1,0 +1,21 @@
+[gd_scene format=3 uid="uid://carrowcounterhud"]
+
+[ext_resource type="Script" path="res://scripts/ui/arrow_counter_hud.gd" id="1_hud"]
+
+[node name="ArrowCounterHUD" type="CanvasLayer"]
+layer = 5
+script = ExtResource("1_hud")
+
+[node name="Root" type="Control" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+
+[node name="Entries" type="Control" parent="Root"]
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -136.0
+offset_top = 16.0
+offset_right = -16.0
+offset_bottom = 16.0
+mouse_filter = 2

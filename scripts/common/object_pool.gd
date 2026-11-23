@@ -71,6 +71,11 @@ func release(instance: Node) -> void:
 		available_pool.append(instance)
 
 
+## Removes an active instance from pool management while leaving the node in the scene.
+func forget(instance: Node) -> void:
+	active_pool.erase(instance)
+
+
 ## Clears and frees all managed instances.
 func clear() -> void:
 	for node in active_pool:
