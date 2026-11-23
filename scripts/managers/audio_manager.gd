@@ -12,8 +12,8 @@ const MUSIC_BASE_DB: float = -12.0
 const PAUSE_DUCK_DB: float = -22.0
 const SILENT_DB: float = -45.0
 const DUCK_FADE_TIME: float = 0.55
-const MUSIC_FADE_IN_TIME: float = 1.8
-const MUSIC_CROSSFADE_TIME: float = 1.6
+const MUSIC_FADE_IN_TIME: float = 2.0
+const MUSIC_CROSSFADE_TIME: float = 3.2
 
 const AUDIO_EXTENSIONS: Array[String] = [".ogg", ".wav", ".mp3"]
 
@@ -260,7 +260,14 @@ func _on_game_started() -> void:
 
 
 func _on_game_over(_final_score: int, _distance: float) -> void:
-	set_music_ducked(true)
+	if _active_music == null or not _active_music.playing:
+		return
+	_is_ducked = false
+	_kill_music_tween()
+	_music_tween = create_tween()
+	_music_tween.tween_property(_active_music, "volume_db", PAUSE_DUCK_DB, 0.35).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+	_music_tween.tween_interval(1.0)
+	_music_tween.tween_property(_active_music, "volume_db", MUSIC_BASE_DB, 1.4).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 
 
 func _on_collectible_picked(collectible_type: String, _value: int) -> void:
