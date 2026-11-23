@@ -189,6 +189,7 @@ Detailed breakdown and active progress tracking are maintained in [`memory-bank/
 ## Credits & Asset Attribution
 
 - **3D Assets**: [Kenney Mini-Forest Pack](https://kenney.nl/assets/mini-forest) by Kenney ([CC0 1.0 Universal](https://creativecommons.org/publicdomain/zero/1.0/)), plus custom Blender-authored star coin (`coin-star.glb`)
+- **Audio & Sound Effects**: Selected audio assets via [Pixabay](https://pixabay.com/) ([Pixabay Content License](https://pixabay.com/service/license-summary/))
 - **Engine Tooling**: `godot-mcp-toolkit`
 
 ---
