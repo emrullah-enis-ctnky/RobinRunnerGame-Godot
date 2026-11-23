@@ -83,6 +83,8 @@ func _physics_process(delta: float) -> void:
 	if _angle >= MAX_FALL_ANGLE:
 		_falling = false
 		set_physics_process(false)
+		if has_node("/root/AudioManager"):
+			get_node("/root/AudioManager").play_sfx_at_world_pos("ladder_fall", global_position, 50.0, 1.0)
 
 
 ## Embeds a spent arrow in the barrier so it topples along with it.

@@ -17,7 +17,9 @@ Active `.mp3` files loaded automatically by `AudioManager`:
 - `coin_pickup.mp3` — Star coin collected (auto pitch-scales with combo)
 - `arrow_pickup.mp3` — Ground arrow collected
 - `stumble.mp3` — Non-fatal obstacle stumble / damage
-- `death.mp3` — Fatal impact / game over
+- `crash_impact.mp3` — Heavy obstacle collision thud layered with death scream
+- `death.mp3` — Fatal impact / game over scream
+- `ladder_fall.mp3` — Toppled ladder hitting the ground (distance-attenuated)
 - `ui_click.mp3` — Menu button press
 - `countdown_tick.mp3` — 3-2-1 countdown beep
 - `countdown_go.mp3` — Countdown launch cue
