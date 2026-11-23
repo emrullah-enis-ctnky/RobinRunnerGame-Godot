@@ -29,6 +29,7 @@ const SFX_PATHS: Dictionary = {
 	"duck": "res://assets/audio/sfx/duck",
 	"bow_shoot": "res://assets/audio/sfx/bow_shoot",
 	"arrow_hit": "res://assets/audio/sfx/arrow_hit",
+	"tree_burn": "res://assets/audio/sfx/tree_burn",
 	"coin_pickup": "res://assets/audio/sfx/coin_pickup",
 	"arrow_pickup": "res://assets/audio/sfx/arrow_pickup",
 	"stumble": "res://assets/audio/sfx/stumble",

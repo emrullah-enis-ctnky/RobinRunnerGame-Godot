@@ -13,6 +13,7 @@ Active `.mp3` files loaded automatically by `AudioManager`:
 - `footstep.mp3` — Ground sprint footsteps (suppressed during jump, duck, and stumble)
 - `bow_shoot.mp3` — Arrow release swish
 - `arrow_hit.mp3` — Arrow impact/sticking twang (archery targets, barriers, tall obstacles)
+- `tree_burn.mp3` — Flame arrow burning down a tree (distance-attenuated)
 - `coin_pickup.mp3` — Star coin collected (auto pitch-scales with combo)
 - `arrow_pickup.mp3` — Ground arrow collected
 - `stumble.mp3` — Non-fatal obstacle stumble / damage
