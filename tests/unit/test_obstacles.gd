@@ -236,6 +236,29 @@ func _test_hazard_lethality_profiles() -> void:
 			"%s must stay forgiving and stagger on the first contact." % path)
 		obstacle.queue_free()
 
+	# Archery target is lethal head-on, but forgiving (stumble) when feet graze the top during a jump
+	var target: StaticBody3D = load("res://scenes/obstacles/target_archery.tscn").instantiate() as StaticBody3D
+	add_child(target)
+	target.global_position = Vector3.ZERO
+	_assert(target.is_lethal_for_player(Vector3(0.0, 0.0, 0.0)),
+		"ArcheryTarget must be lethal on head-on ground contact.")
+	_assert(not target.is_lethal_for_player(Vector3(0.0, 0.9, 0.0)),
+		"ArcheryTarget must only stumble when player feet graze the top during a jump.")
+	target.queue_free()
+
+	# Ladder barrier is lethal head-on, but grazing the top stumbles the runner and rapidly topples it
+	var ladder: StaticBody3D = load("res://scenes/obstacles/barrier_fragile.tscn").instantiate() as StaticBody3D
+	add_child(ladder)
+	ladder.global_position = Vector3.ZERO
+	_assert(ladder.is_lethal_for_player(Vector3(0.0, 0.0, 0.0)),
+		"TopplingBarrier must be lethal on head-on ground contact.")
+	_assert(not ladder.is_lethal_for_player(Vector3(0.0, 0.95, 0.0)),
+		"TopplingBarrier must only stumble when player feet graze the top during a jump.")
+	ladder.on_player_graze()
+	_assert(ladder._falling and ladder._angular_speed >= 5.0 and ladder._collision_cleared,
+		"TopplingBarrier.on_player_graze() must rapidly topple the ladder and clear collision.")
+	ladder.queue_free()
+
 	_end_test("Hazard Lethality Profiles")
 
 

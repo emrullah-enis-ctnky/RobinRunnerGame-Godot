@@ -20,6 +20,8 @@ const BOARD_FACE_Z: float = 0.41
 # A new arrow landing this close to an embedded one pushes both apart.
 const STACK_RADIUS: float = 0.14
 const STACK_TILT_DEGREES: float = 22.0
+# Feet above this height relative to the target base count as a forgiving jump graze.
+const FOOT_GRAZE_MIN_Y: float = 0.65
 
 var _rng: RandomNumberGenerator = RandomNumberGenerator.new()
 var _stuck: Array[Dictionary] = []
@@ -29,6 +31,12 @@ var _stuck: Array[Dictionary] = []
 func _ready() -> void:
 	super()
 	_rng.randomize()
+
+
+## Head-on contact is lethal, while grazing the top rim with the feet while jumping only stumbles.
+func is_lethal_for_player(player_global_pos: Vector3) -> bool:
+	var relative_foot_y: float = player_global_pos.y - global_position.y
+	return relative_foot_y < FOOT_GRAZE_MIN_Y
 
 
 ## Every arrow type reports a hit so the projectile embeds instead of destroying it.

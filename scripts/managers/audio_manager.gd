@@ -33,7 +33,9 @@ const SFX_PATHS: Dictionary = {
 	"coin_pickup": "res://assets/audio/sfx/coin_pickup",
 	"arrow_pickup": "res://assets/audio/sfx/arrow_pickup",
 	"stumble": "res://assets/audio/sfx/stumble",
+	"crash_impact": "res://assets/audio/sfx/crash_impact",
 	"death": "res://assets/audio/sfx/death",
+	"ladder_fall": "res://assets/audio/sfx/ladder_fall",
 	"ui_click": "res://assets/audio/sfx/ui_click",
 	"countdown_tick": "res://assets/audio/sfx/countdown_tick",
 	"countdown_go": "res://assets/audio/sfx/countdown_go",
@@ -250,7 +252,10 @@ func _connect_signals() -> void:
 	bus.player_jumped.connect(func() -> void: play_sfx("jump", 1.0, -2.0, 0.05))
 	bus.player_landed.connect(func() -> void: play_sfx("land", 1.0, -5.0, 0.08))
 	bus.player_damaged.connect(func(_w: float) -> void: play_sfx("stumble", 1.0, 0.0, 0.04))
-	bus.player_died.connect(func() -> void: play_sfx("death", 1.0, 0.0, 0.0))
+	bus.player_died.connect(func() -> void:
+		play_sfx("crash_impact", 1.0, 2.0, 0.04)
+		play_sfx("death", 1.0, 0.0, 0.0)
+	)
 	bus.arrow_fired.connect(func(_p: Vector3, _d: Vector3, _t: String) -> void: play_sfx("bow_shoot", 1.0, -1.0, 0.06))
 	bus.collectible_picked.connect(_on_collectible_picked)
 

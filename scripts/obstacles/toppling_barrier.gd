@@ -8,6 +8,9 @@ const COLLISION_CLEAR_ANGLE: float = MAX_FALL_ANGLE - deg_to_rad(30.0)
 # A rod pivoting at its base accelerates at (3g / 2L) * sin(angle); GameConfig.GRAVITY
 # already runs hotter than real gravity, so the factor is tuned to a snappy fall.
 const GRAVITY_FACTOR: float = 3.5
+# Feet above this height relative to the ladder base count as a forgiving jump graze.
+const FOOT_GRAZE_MIN_Y: float = 0.75
+const GRAZE_INITIAL_SPEED: float = 6.5
 
 @export var fall_height: float = 1.6
 @export var start_tilt_degrees: float = 3.0
@@ -28,6 +31,27 @@ func _ready() -> void:
 	# The pivot is the model origin at the ladder's bottom centre, so a basis rotation
 	# around it reads as the whole ladder tipping over that point.
 	set_physics_process(false)
+
+
+## Head-on contact is lethal, while grazing the top with the feet while jumping only stumbles.
+func is_lethal_for_player(player_global_pos: Vector3) -> bool:
+	var relative_foot_y: float = player_global_pos.y - global_position.y
+	return relative_foot_y < FOOT_GRAZE_MIN_Y
+
+
+## Knocks the ladder down rapidly when a jumping runner's feet clip the top, without scoring.
+func on_player_graze() -> void:
+	if is_destroyed or _falling:
+		return
+	is_destroyed = true
+	_falling = true
+	_angle = deg_to_rad(14.0)
+	_angular_speed = GRAZE_INITIAL_SPEED
+	_collision_cleared = true
+	set_deferred("collision_layer", 0)
+	_fall_axis = Vector3.UP.cross(Vector3.FORWARD).normalized()
+	set_physics_process(true)
+	VFXSpawner.spawn_wood_splinters(get_parent(), global_position + Vector3(0.0, 1.3, 0.0))
 
 
 ## Starts the fall in place of the default hide-on-destroy behaviour.
@@ -59,6 +83,8 @@ func _physics_process(delta: float) -> void:
 	if _angle >= MAX_FALL_ANGLE:
 		_falling = false
 		set_physics_process(false)
+		if has_node("/root/AudioManager"):
+			get_node("/root/AudioManager").play_sfx_at_world_pos("ladder_fall", global_position, 50.0, 1.0)
 
 
 ## Embeds a spent arrow in the barrier so it topples along with it.

@@ -400,8 +400,12 @@ func _on_hazard_body_entered(body: Node3D) -> void:
 	var lethal: bool = false
 	if body.has_method("get_hazard_type"):
 		hazard_name = body.get_hazard_type()
-	if body.has_method("is_lethal_hazard"):
+	if body.has_method("is_lethal_for_player"):
+		lethal = body.is_lethal_for_player(global_position)
+	elif body.has_method("is_lethal_hazard"):
 		lethal = body.is_lethal_hazard()
+	if not lethal and body.has_method("on_player_graze"):
+		body.on_player_graze()
 	take_hit(hazard_name, lethal)
 
 
