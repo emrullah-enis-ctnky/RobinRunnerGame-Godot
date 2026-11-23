@@ -172,6 +172,11 @@ func _start_countdown(is_restart: bool) -> void:
 	get_tree().paused = false
 	_hide_all()
 
+	if has_node("/root/AudioManager"):
+		var am: Node = get_node("/root/AudioManager")
+		am.set_music_ducked(false)
+		am.play_music("gameplay")
+
 	if is_restart and has_node("/root/GameManager"):
 		get_node("/root/GameManager").reset_game()
 	if is_restart and has_node("/root/EventBus"):
@@ -243,6 +248,10 @@ func _on_menu_pressed() -> void:
 		get_node("/root/GameManager").reset_game()
 	if has_node("/root/EventBus"):
 		get_node("/root/EventBus").game_restarted.emit()
+	if has_node("/root/AudioManager"):
+		var am: Node = get_node("/root/AudioManager")
+		am.set_music_ducked(false)
+		am.play_music("menu")
 	show_main_menu()
 
 
