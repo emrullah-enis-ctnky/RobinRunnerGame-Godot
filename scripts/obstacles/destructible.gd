@@ -2,6 +2,8 @@ class_name Destructible
 extends Obstacle
 ## Shootable hazard that blocks a lane until a projectile destroys it.
 
+const VFXSpawner = preload("res://scripts/vfx/vfx_spawner.gd")
+
 @export var score_reward: int = 50
 @export var destroyed_by: PackedStringArray = ["normal"]
 
@@ -22,6 +24,7 @@ func destroy() -> void:
 
 	is_destroyed = true
 	_apply_destroyed_state()
+	VFXSpawner.spawn_wood_splinters(get_parent(), global_position + Vector3(0.0, 0.7, 0.0))
 	if has_node("/root/AudioManager"):
 		get_node("/root/AudioManager").play_sfx_at_world_pos("arrow_hit", global_position)
 

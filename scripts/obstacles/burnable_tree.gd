@@ -2,6 +2,8 @@ class_name BurnableTree
 extends Obstacle
 ## Lethal tree that can only be cleared from a lane by a flame arrow.
 
+const VFXSpawner = preload("res://scripts/vfx/vfx_spawner.gd")
+
 @export var score_reward: int = 75
 @export var destroyed_by: PackedStringArray = ["flame"]
 
@@ -45,6 +47,7 @@ func destroy() -> void:
 	_clear_stuck_arrows()
 	set_deferred("collision_layer", 0)
 	hide()
+	VFXSpawner.spawn_tree_burn(get_parent(), global_position)
 	if has_node("/root/AudioManager"):
 		get_node("/root/AudioManager").play_sfx_at_world_pos("tree_burn", global_position, 55.0, 2.0)
 
