@@ -203,7 +203,7 @@ func _start_countdown(is_restart: bool) -> void:
 		_is_counting_down = false
 		_countdown_label.visible = false
 		if has_node("/root/AudioManager"):
-			get_node("/root/AudioManager").play_sfx("countdown_go", 1.0, 8.0)
+			get_node("/root/AudioManager").play_sfx("countdown_go", 1.0, 2.0)
 		if has_node("/root/GameManager"):
 			get_node("/root/GameManager").start_game()
 	)
