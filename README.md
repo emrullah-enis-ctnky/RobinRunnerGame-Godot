@@ -161,6 +161,7 @@ godot --headless res://tests/unit/test_collectibles_scoring.tscn
 godot --headless res://tests/unit/test_ui_hud.tscn
 godot --headless res://tests/unit/test_world_atmosphere.tscn
 godot --headless res://tests/unit/test_audio_manager.tscn
+godot --headless res://tests/unit/test_vfx_particles.tscn
 ```
 
 ---
@@ -179,7 +180,7 @@ The project is developed in phased, modular Kanban increments:
 - [ ] **Phase 7**: Combat & Ability System (Arrows, Quiver & Arrow Types) *(Steps 7.1–7.6f implemented; Step 7.7 manual test pending)*
 - [x] **Phase 8**: Pickups, Collectibles & Scoring
 - [x] **Phase 9**: User Interface & HUD
-- [ ] **Phase 10**: Audio & Visual Polish *(Steps 10.0–10.2 complete; 10.3–10.4 open)*
+- [ ] **Phase 10**: Audio & Visual Polish *(Steps 10.0–10.3 complete; Step 10.4 manual test pending)*
 - [ ] **Phase 11**: Performance Optimization & Multi-Platform Export (Desktop, Web, Android)
 
 Detailed breakdown and active progress tracking are maintained in [`memory-bank/progress.md`](memory-bank/progress.md).

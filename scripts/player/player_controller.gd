@@ -3,6 +3,7 @@ extends CharacterBody3D
 ## Controls the player character in RobinRunner (3-lane movement, jumping, and state).
 
 const GameConfig = preload("res://scripts/common/game_config.gd")
+const VFXSpawner = preload("res://scripts/vfx/vfx_spawner.gd")
 const BOW_SCENE: PackedScene = preload("res://assets/models/weapon-bow.glb")
 const BOW_BONE: String = "hand-left"
 
@@ -77,6 +78,7 @@ var _standing_hitbox_center_y: float = 0.775
 var current_animation: String = ""
 var stumble_animates: bool = false
 var _footstep_timer: float = 0.0
+var _run_dust: GPUParticles3D
 
 
 ## Initializes the player state and connects to global lifecycle signals.
@@ -84,6 +86,7 @@ func _ready() -> void:
 	_prepare_hitboxes()
 	_setup_animations()
 	_attach_bow()
+	_run_dust = VFXSpawner.build_run_dust(self)
 	reset_player()
 	if has_node("/root/EventBus"):
 		var bus: Node = get_node("/root/EventBus")
@@ -142,6 +145,8 @@ func _find_skeleton(node: Node) -> Skeleton3D:
 ## Handles movement, lane interpolation, and jumping physics each frame.
 func _physics_process(delta: float) -> void:
 	if not can_control:
+		if _run_dust != null:
+			_run_dust.emitting = false
 		return
 
 	# Only move forward and process active runner logic during PLAYING state
@@ -151,6 +156,8 @@ func _physics_process(delta: float) -> void:
 		is_playing = (gm.current_state == gm.GameState.PLAYING)
 
 	if not is_playing:
+		if _run_dust != null:
+			_run_dust.emitting = false
 		# Apply simple gravity if falling while paused/ready
 		if not is_on_floor():
 			velocity.y -= gravity * delta
@@ -182,6 +189,8 @@ func _physics_process(delta: float) -> void:
 	move_and_slide()
 	_check_landing()
 	_update_footsteps(delta, forward_speed)
+	if _run_dust != null:
+		_run_dust.emitting = (is_on_floor() and not is_jumping and not is_stumbling)
 	_update_animation()
 
 
@@ -379,6 +388,7 @@ func _check_landing() -> void:
 	if is_jumping and is_on_floor():
 		is_jumping = false
 		_footstep_timer = 0.0
+		VFXSpawner.spawn_landing_dust(get_parent(), global_position)
 		if has_node("/root/EventBus"):
 			var bus: Node = get_node("/root/EventBus")
 			bus.player_landed.emit()
