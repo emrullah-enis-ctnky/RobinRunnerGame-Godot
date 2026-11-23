@@ -42,13 +42,16 @@ func _ready() -> void:
 	_close_btn = Button.new()
 	_close_btn.text = "X"
 	_close_btn.flat = true
+	_close_btn.add_theme_stylebox_override("focus", StyleBoxEmpty.new())
 	_close_btn.visible = show_close_tab
 	_close_btn.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
 	_close_btn.add_theme_color_override("font_color", ThemeRef.TEXT_WHITE)
 	_close_btn.add_theme_color_override("font_hover_color", ThemeRef.TEXT_GOLD)
+	_close_btn.add_theme_color_override("font_focus_color", ThemeRef.TEXT_GOLD)
 	_close_btn.add_theme_color_override("font_outline_color", ThemeRef.OUTLINE_COLOR)
 	_close_btn.add_theme_constant_override("outline_size", 4)
 	_close_btn.add_theme_font_size_override("font_size", 18)
+	_close_btn.focus_mode = Control.FOCUS_ALL
 	_close_btn.pressed.connect(func() -> void:
 		if has_node("/root/AudioManager"):
 			get_node("/root/AudioManager").play_ui_click()

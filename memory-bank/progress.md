@@ -1,9 +1,9 @@
 # Progress & Kanban Roadmap: RobinRunner
 
 ## Project Status Overview
-- **Current Phase**: Phase 10: Audio & Visual Polish (Audio infrastructure complete on `feature/audio-visual-polish`: `default_bus_layout.tres`, `AudioManager` autoload, `EventBus`/UI/Player hooks, drop-in asset folders, and unit tests; awaiting Kenney audio files & particles)
-- **Active Branch**: `feature/audio-visual-polish`
-- **Next Phase**: Drop in Kenney music/SFX assets, complete Step 10.3 particles and Step 10.4 manual test, then merge on approval
+- **Current Phase**: UI Keyboard Navigation pass (`feature/ui-keyboard-navigation`, branched from `main`)
+- **Active Branch**: `feature/ui-keyboard-navigation`
+- **Next Phase**: User test of keyboard UI navigation & focus audio, merge on approval, then Phase 10 Step 10.3 particles
 - **Overall Health**: Green (All six automated suites pass per documented runs: core, player, camera, world 5/5, obstacles 9/9, combat 13/13)
 
 ---
@@ -132,7 +132,7 @@
 - [x] Step 9.3: Build Pause Menu overlay (`PAUSED` `NotebookCard` with Resume, Restart, Controls, and Main Menu buttons; `Esc`/`P` toggles `get_tree().paused` via `PROCESS_MODE_ALWAYS`).
 - [x] Step 9.4: Build Game Over screen (`GAME OVER` `NotebookCard` waiting 1.25s for `DamageOverlay`'s death fade to finish, then sliding up smoothly from the bottom of the screen to display Final Score, High Score with `NEW BEST!` badge, Distance, and Coins, plus Play Again and Main Menu buttons).
 - [x] Step 9.5: Bind all UI events to `EventBus` and `GameManager` signals, add `SettingsManager` (`scripts/managers/settings_manager.gd`, autoload) + `SettingsPanels` (`scripts/ui/settings_panels.gd`: music/SFX sliders + mute icons, multi-key rebindable Controls with Reset Defaults, and EN/TR/DE flag Language selector integrated inside Settings), and add automated unit tests in `tests/unit/test_ui_hud.gd` + `.tscn` (3 suites).
-- [x] Step 9.6: UI responsiveness, readability, and visual inspection (User Manual Test — verified stylized forest backdrop, notebook cards, 3-2-1 countdown, Game Over slide-up after death fade, score popups, `%10`/`-%20` indicators, coin combo badge, instant-saving Settings with Display/Controls/EN-TR-DE flags, and track/camera reset on restart).
+- [x] Step 9.6: UI responsiveness, readability, and visual inspection (User Manual Test — verified stylized forest backdrop, notebook cards, 3-2-1 countdown, Game Over slide-up after death fade, score popups, `%10`/`-%20` indicators, coin combo badge, instant-saving Settings with Display/Controls/EN-TR-DE flags, and track/camera reset on restart). Full keyboard navigation (Arrow keys + WASD, Enter/Space accept, Esc step-back, golden focus rings on buttons/icons/sliders, auto-focus on every panel, and focus-move `ui_click` feedback) added on `feature/ui-keyboard-navigation`.
 
 ---
 

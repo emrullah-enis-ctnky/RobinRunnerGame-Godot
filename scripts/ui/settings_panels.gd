@@ -96,24 +96,47 @@ func show_settings() -> void:
 	_sync_audio_controls()
 	refresh_texts()
 	settings_card.visible = true
+	if _music_slider != null:
+		_music_slider.call_deferred("grab_focus")
 
 
 func show_display() -> void:
 	hide_all()
 	_refresh_display_controls()
 	display_card.visible = true
+	if _windowed_btn != null:
+		_windowed_btn.call_deferred("grab_focus")
 
 
 func show_language() -> void:
 	hide_all()
 	_refresh_language_selection()
 	language_card.visible = true
+	var sm: Node = _settings()
+	var active: String = sm.language if sm != null else "en"
+	if _lang_buttons.has(active):
+		(_lang_buttons[active] as Control).call_deferred("grab_focus")
 
 
 func show_controls() -> void:
 	hide_all()
 	_rebuild_controls_rows()
 	controls_card.visible = true
+	if _reset_btn != null:
+		_reset_btn.call_deferred("grab_focus")
+
+
+## Steps back one level on Esc/Cancel (sub-panel -> Settings -> close). Returns true if handled.
+func navigate_back() -> bool:
+	if display_card.visible or language_card.visible or controls_card.visible:
+		_play_click()
+		show_settings()
+		return true
+	if settings_card.visible:
+		_play_click()
+		_on_close_settings()
+		return true
+	return false
 
 
 ## Handles key/mouse capture when adding a new binding to an action. Returns true if consumed.
@@ -519,7 +542,11 @@ func _create_audio_icon_button(is_music: bool) -> Button:
 	var btn := Button.new()
 	btn.custom_minimum_size = Vector2(44.0, 44.0)
 	btn.flat = true
+	btn.add_theme_stylebox_override("focus", StyleBoxEmpty.new())
+	btn.focus_mode = Control.FOCUS_ALL
 	btn.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
+	btn.focus_entered.connect(btn.queue_redraw)
+	btn.focus_exited.connect(btn.queue_redraw)
 	btn.pressed.connect(_play_click)
 	btn.draw.connect(func() -> void:
 		var sm: Node = _settings()
@@ -530,6 +557,8 @@ func _create_audio_icon_button(is_music: bool) -> Button:
 		var r: float = 19.0
 		var fill: Color = Color(0.55, 0.45, 0.45) if muted else ThemeRef.BANNER_GOLD
 		var lip: Color = Color(0.35, 0.25, 0.25) if muted else ThemeRef.ORANGE_LIP
+		if btn.has_focus():
+			btn.draw_arc(c, r + 3.0, 0.0, TAU, 24, Color(1.0, 0.94, 0.45), 3.0, true)
 		btn.draw_circle(c + Vector2(0.0, 3.0), r, lip)
 		btn.draw_circle(c, r, fill)
 		if is_music:
