@@ -34,11 +34,14 @@ static var _mat_wood_bright: StandardMaterial3D
 var _chunk: TrackChunk
 var _decor_root: Node3D
 var _rng: RandomNumberGenerator = RandomNumberGenerator.new()
+var _built: bool = false
+var _is_web: bool = false
 
 
 ## Attaches BiomeDecor as a child of self (never parent during _ready) and hooks chunk activation.
 func _ready() -> void:
 	_rng.randomize()
+	_is_web = OS.has_feature("web")
 	_ensure_shared_materials()
 	_decor_root = Node3D.new()
 	_decor_root.name = "BiomeDecor"
@@ -46,14 +49,16 @@ func _ready() -> void:
 
 	_chunk = _find_chunk()
 	if _chunk != null:
-		_chunk.activated.connect(_rebuild_decor)
+		_chunk.activated.connect(_on_chunk_activated)
 
 
-## Rebuilds the chunk's biome-specific banks, dense props, framing arches, and stream crossings.
-func _rebuild_decor() -> void:
-	_clear()
+## Builds biome scenery once per pooled chunk to eliminate recycle stutter, and disables decor shadows.
+func _on_chunk_activated() -> void:
 	if _decor_root == null or _chunk == null:
 		return
+	if _built:
+		return
+	_built = true
 
 	var is_stream_bridge: bool = (biome == "straight" and _chunk.global_position.z < -20.0 and _rng.randf() < 0.45)
 	if is_stream_bridge:
@@ -65,29 +70,33 @@ func _rebuild_decor() -> void:
 	else:
 		_build_meadow_camp_biome()
 
+	_disable_shadows_recursive(_decor_root)
 	CurvedWorld.apply_to_tree(_chunk)
 
 
 ## Forest biome: lush mossy banks, dense multi-layer woods, trail-edge bushes, and leaning canopies.
 func _build_forest_biome() -> void:
 	_add_flank_banks(_mat_forest_bank, -0.05, 0.0, CHUNK_LEN)
+	var bush_count: int = 4 if _is_web else 9
+	var fg_count: int = 4 if _is_web else 8
+	var bg_count: int = 4 if _is_web else 9
 
 	for side in [-1.0, 1.0]:
-		# Dense trail-edge undergrowth & grass tufts hugging the path
-		for b in range(10):
+		# Trail-edge undergrowth & grass tufts hugging the path
+		for b in range(bush_count):
 			var p_scene: PackedScene = PLANT_SCENE if b % 3 != 0 else PATCH_GRASS_SCENE
 			var bush: Node3D = p_scene.instantiate() as Node3D
-			bush.position = Vector3(side * _rng.randf_range(3.35, 5.2), 0.0, -float(b) * 2.9 - _rng.randf_range(0.4, 2.2))
+			bush.position = Vector3(side * _rng.randf_range(3.35, 5.2), 0.0, -float(b) * (CHUNK_LEN / float(bush_count)) - _rng.randf_range(0.4, 2.0))
 			bush.scale = Vector3.ONE * _rng.randf_range(1.2, 2.2)
 			bush.rotation.y = _rng.randf_range(0.0, TAU)
 			_decor_root.add_child(bush)
 
 		# Foreground trees right along the forest trail corridor (some leaning overhead)
-		for f in range(8):
+		for f in range(fg_count):
 			var scene: PackedScene = TREE_HIGH_SCENE if f % 2 == 0 else TREE_SCENE
 			var tree: Node3D = scene.instantiate() as Node3D
 			var dist_x: float = _rng.randf_range(4.4, 8.8)
-			tree.position = Vector3(side * dist_x, -0.08, -float(f) * 3.6 - _rng.randf_range(0.5, 2.8))
+			tree.position = Vector3(side * dist_x, -0.08, -float(f) * (CHUNK_LEN / float(fg_count)) - _rng.randf_range(0.5, 2.4))
 			tree.scale = Vector3.ONE * _rng.randf_range(2.6, 4.2)
 			tree.rotation.y = _rng.randf_range(0.0, TAU)
 			if dist_x < 6.4 and f % 3 == 0:
@@ -96,7 +105,7 @@ func _build_forest_biome() -> void:
 			_decor_root.add_child(tree)
 
 		# Deep background forest wall filling out to 28m
-		for bg in range(10):
+		for bg in range(bg_count):
 			var bg_scene: PackedScene = TREE_HIGH_SCENE if _rng.randf() < 0.65 else TREE_SCENE
 			var bg_tree: Node3D = bg_scene.instantiate() as Node3D
 			bg_tree.position = Vector3(side * _rng.randf_range(9.5, 27.5), -0.1, -_rng.randf_range(1.0, CHUNK_LEN - 1.0))
@@ -111,19 +120,23 @@ func _build_forest_biome() -> void:
 ## Rocky biome: canyon earth banks, dense stacked rock cliffs, trailside stones, and canyon gate.
 func _build_rocky_biome() -> void:
 	_add_flank_banks(_mat_rocky_bank, -0.05, 0.0, CHUNK_LEN)
+	var cliff_count: int = 4 if _is_web else 8
+	var ridge_count: int = 2 if _is_web else 5
+	var stone_count: int = 3 if _is_web else 6
+	var pine_count: int = 2 if _is_web else 5
 
 	for side in [-1.0, 1.0]:
 		# Continuous canyon cliff walls close to the trail
-		for r in range(8):
+		for r in range(cliff_count):
 			var r_scene: PackedScene = ROCK_HIGH_SCENE if r % 2 == 0 else ROCK_RAMP_SCENE
 			var cliff: Node3D = r_scene.instantiate() as Node3D
-			cliff.position = Vector3(side * _rng.randf_range(5.0, 11.0), -0.15, -float(r) * 3.7 - _rng.randf_range(0.4, 2.2))
+			cliff.position = Vector3(side * _rng.randf_range(5.0, 11.0), -0.15, -float(r) * (CHUNK_LEN / float(cliff_count)) - _rng.randf_range(0.4, 2.0))
 			cliff.scale = Vector3(_rng.randf_range(2.8, 4.4), _rng.randf_range(3.4, 5.8), _rng.randf_range(2.8, 4.4))
 			cliff.rotation.y = _rng.randf_range(0.0, TAU)
 			_decor_root.add_child(cliff)
 
 		# Outer towering rocky ridges
-		for rr in range(6):
+		for rr in range(ridge_count):
 			var ridge: Node3D = ROCK_HIGH_SCENE.instantiate() as Node3D
 			ridge.position = Vector3(side * _rng.randf_range(12.5, 25.0), -0.2, -_rng.randf_range(1.5, CHUNK_LEN - 1.5))
 			ridge.scale = Vector3(_rng.randf_range(3.8, 5.6), _rng.randf_range(4.5, 7.2), _rng.randf_range(3.8, 5.6))
@@ -131,15 +144,15 @@ func _build_rocky_biome() -> void:
 			_decor_root.add_child(ridge)
 
 		# Trail-edge boulders, stones & hardy scrub
-		for s in range(7):
+		for s in range(stone_count):
 			var st: Node3D = (STONES_SCENE if s % 2 == 0 else ROCK_LOW_SCENE).instantiate() as Node3D
-			st.position = Vector3(side * _rng.randf_range(3.5, 5.6), 0.0, -float(s) * 4.1 - _rng.randf_range(0.5, 2.4))
+			st.position = Vector3(side * _rng.randf_range(3.5, 5.6), 0.0, -float(s) * (CHUNK_LEN / float(stone_count)) - _rng.randf_range(0.5, 2.0))
 			st.scale = Vector3.ONE * _rng.randf_range(1.3, 2.4)
 			st.rotation.y = _rng.randf_range(0.0, TAU)
 			_decor_root.add_child(st)
 
 		# Sparse alpine pines perched between canyon cliffs
-		for t in range(5):
+		for t in range(pine_count):
 			var pine: Node3D = TREE_HIGH_SCENE.instantiate() as Node3D
 			pine.position = Vector3(side * _rng.randf_range(10.0, 26.0), -0.1, -_rng.randf_range(1.5, CHUNK_LEN - 1.5))
 			pine.scale = Vector3.ONE * _rng.randf_range(2.8, 4.5)
@@ -152,6 +165,8 @@ func _build_rocky_biome() -> void:
 ## Straight clearing biome: lush meadow banks, archer camp tents, wooden outpost, fences & treeline.
 func _build_meadow_camp_biome() -> void:
 	_add_flank_banks(_mat_meadow_bank, -0.05, 0.0, CHUNK_LEN)
+	var bush_count: int = 3 if _is_web else 7
+	var tree_count: int = 5 if _is_web else 10
 
 	var camp_side: float = -1.0 if _rng.randf() < 0.5 else 1.0
 	# Archer camp tents on one side
@@ -183,15 +198,15 @@ func _build_meadow_camp_biome() -> void:
 			flag.scale = Vector3.ONE * 1.9
 			_decor_root.add_child(flag)
 
-		for p in range(8):
+		for p in range(bush_count):
 			var bush: Node3D = (PLANT_SCENE if p % 2 == 0 else PATCH_GRASS_SCENE).instantiate() as Node3D
-			bush.position = Vector3(side * _rng.randf_range(3.4, 7.5), -0.02, -float(p) * 3.6 - _rng.randf_range(0.3, 2.0))
+			bush.position = Vector3(side * _rng.randf_range(3.4, 7.5), -0.02, -float(p) * (CHUNK_LEN / float(bush_count)) - _rng.randf_range(0.3, 2.0))
 			bush.scale = Vector3.ONE * _rng.randf_range(1.1, 1.9)
 			bush.rotation.y = _rng.randf_range(0.0, TAU)
 			_decor_root.add_child(bush)
 
 		# Dense treeline wrapping behind the camp meadow
-		for t in range(11):
+		for t in range(tree_count):
 			var tree: Node3D = (TREE_SCENE if t % 2 == 0 else TREE_HIGH_SCENE).instantiate() as Node3D
 			tree.position = Vector3(side * _rng.randf_range(11.0, 27.5), -0.08, -_rng.randf_range(1.0, CHUNK_LEN - 1.0))
 			tree.scale = Vector3.ONE * _rng.randf_range(2.6, 4.6)
@@ -282,6 +297,13 @@ func _add_flank_banks(bank_mat: StandardMaterial3D, top_y: float, start_offset: 
 		bank.mesh = bank_mesh
 		bank.position = Vector3(side * 18.2, top_y - 1.4, center_z)
 		_decor_root.add_child(bank)
+
+
+func _disable_shadows_recursive(node: Node) -> void:
+	if node is GeometryInstance3D:
+		(node as GeometryInstance3D).cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	for child in node.get_children():
+		_disable_shadows_recursive(child)
 
 
 func _clear() -> void:

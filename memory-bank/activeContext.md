@@ -1,15 +1,15 @@
 # Active Context: RobinRunner
 
 ## Current Work Focus
-Phase 10 Step 10.3 (Stylized Particle Systems) is implemented on `feature/visual-particles` (branched from `main`). Awaiting user visual inspection (Step 10.4) before merging into `main`.
+Phase 11 Step 11.3 (Performance Optimization & 60 FPS / WebGL2 Export Pass) is implemented on `feature/optimization-export` (branched from `main` at `318f6d4`). Awaiting user HTML5 re-export and FPS verification before merging into `main`.
 
 ## Recent Changes
-- Created `shaders/curved_particle.gdshader` (curved alpha-blended billboard particle shader) and `scripts/vfx/vfx_spawner.gd` (`VFXSpawner`).
-- Attached ground-only `RunDust` puff emitter and landing dust ring (`spawn_landing_dust`) to `PlayerController`.
-- Wired dramatic rising flame + billowing charcoal ash/smoke burst (`spawn_tree_burn`) into `BurnableTree.destroy()`.
-- Wired wood splinter spray (`spawn_wood_splinters`) into `ArcheryTarget.stick_arrow()` and `Destructible.destroy()`.
-- Added `tests/unit/test_vfx_particles.gd` + `.tscn` (2 suites).
+- **`scripts/world/chunk_biome_decorator.gd`**: Built chunk biome scenery once per pooled chunk (`_built` guard) to eliminate main-thread GLB instantiation stutter on chunk recycle; disabled shadow casting on all flanking biome props (`_disable_shadows_recursive`); halved flanking prop density when `OS.has_feature("web")` is true.
+- **`scripts/world/world_scenery.gd`**: Disabled shadow casting (`SHADOW_CASTING_SETTING_OFF`) on distant valley floor and mountain cone meshes.
+- **`scenes/world/world.gd`**: On Web builds (`OS.has_feature("web")`), disabled `SunLight.shadow_enabled` and reduced `track_spawner.initial_chunk_count` from `6` to `4` to cut WebGL2 draw calls and shadow-pass overhead.
+- **`shaders/stylized_sky.gdshader`**: Reduced `cloud_fbm` from 4 octaves to 2 octaves for lighter per-pixel WebGL2 cost.
+- **`shaders/forest_trail.gdshader`**: Removed the 3rd pebble noise tap per pixel on the trail shader.
 
 ## Next Steps
-1. User visual inspection of Step 10.4 (run dust, landing puff, tree burn fire/ash, wood splinters, and overall audio-visual feel).
-2. On user approval, merge `feature/visual-particles` into `main` and proceed to Phase 11 (Optimization & Multi-Platform Export).
+1. User re-exports the HTML5 build in Godot and verifies 60 FPS smoothness via a local HTTP server (`python3 -m http.server 8000 --directory export/HTML`).
+2. On user approval, merge `feature/optimization-export` into `main` and decide whether to commit or `.gitignore` `export_presets.cfg`.

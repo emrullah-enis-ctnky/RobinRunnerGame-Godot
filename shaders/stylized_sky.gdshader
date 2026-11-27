@@ -35,13 +35,9 @@ float value_noise(vec2 p) {
 }
 
 float cloud_fbm(vec2 p) {
-	float v = 0.0;
-	float amp = 0.52;
-	for (int i = 0; i < 4; i++) {
-		v += amp * value_noise(p);
-		p = p * 2.05 + vec2(13.1, 7.7);
-		amp *= 0.5;
-	}
+	// 2-octave stylized clouds: soft painterly silhouette with half the WebGL2 fragment cost
+	float v = 0.65 * value_noise(p);
+	v += 0.35 * value_noise(p * 2.15 + vec2(13.1, 7.7));
 	return v;
 }
 
