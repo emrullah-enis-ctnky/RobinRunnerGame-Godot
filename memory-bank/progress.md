@@ -1,9 +1,9 @@
 # Progress & Kanban Roadmap: RobinRunner
 
 ## Project Status Overview
-- **Current Phase**: Phase 11: Performance Optimization & Multi-Platform Export Preparation (In Progress)
-- **Active Branch**: `feature/optimization-export` (WebGL2 & 60 FPS draw-call, shadow, pooling, and shader optimization pass)
-- **Next Phase**: Phase 11 completion (Desktop/Web preset validation, touch/swipe input abstraction, release verification)
+- **Current Phase**: Phase 11: Performance Optimization & Multi-Platform Export Preparation (Step 11.3 merged into `main`)
+- **Active Branch**: `main`
+- **Next Phase**: Phase 11 remaining steps (Desktop/Web preset validation, touch/swipe input abstraction, release verification)
 - **Overall Health**: Green (Core, player, camera, world, obstacles, combat, collectibles, UI, atmosphere, audio, and VFX suites implemented)
 
 ---

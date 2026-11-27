@@ -6,6 +6,7 @@
 
 # Godot-specific configuration & credentials
 export.cfg
+export_presets.cfg
 export_credentials.cfg
 override.cfg
 *.tmp
