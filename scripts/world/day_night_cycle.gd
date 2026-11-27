@@ -131,6 +131,7 @@ func _setup_sky_material() -> void:
 		env.sky = Sky.new()
 	_sky_mat = ShaderMaterial.new()
 	_sky_mat.shader = SKY_SHADER
+	_sky_mat.set_shader_parameter("low_quality", OS.has_feature("web"))
 	env.sky.sky_material = _sky_mat
 
 

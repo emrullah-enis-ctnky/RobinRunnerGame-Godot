@@ -52,13 +52,16 @@ func _ready() -> void:
 		_chunk.activated.connect(_on_chunk_activated)
 
 
-## Builds biome scenery once per pooled chunk to eliminate recycle stutter, and disables decor shadows.
+## Builds biome scenery on chunk activation; Web builds cache decor once and disable shadows.
 func _on_chunk_activated() -> void:
 	if _decor_root == null or _chunk == null:
 		return
-	if _built:
-		return
-	_built = true
+	if _is_web:
+		if _built:
+			return
+		_built = true
+	else:
+		_clear()
 
 	var is_stream_bridge: bool = (biome == "straight" and _chunk.global_position.z < -20.0 and _rng.randf() < 0.45)
 	if is_stream_bridge:
@@ -70,16 +73,22 @@ func _on_chunk_activated() -> void:
 	else:
 		_build_meadow_camp_biome()
 
-	_disable_shadows_recursive(_decor_root)
+	if _is_web:
+		_disable_shadows_recursive(_decor_root)
+		var deck: MeshInstance3D = _chunk.get_node_or_null("Visuals/TrackDeck") as MeshInstance3D
+		if deck != null and deck.mesh != null and deck.mesh.get_surface_count() > 0:
+			var deck_mat: ShaderMaterial = deck.mesh.surface_get_material(0) as ShaderMaterial
+			if deck_mat != null:
+				deck_mat.set_shader_parameter("low_quality", true)
 	CurvedWorld.apply_to_tree(_chunk)
 
 
 ## Forest biome: lush mossy banks, dense multi-layer woods, trail-edge bushes, and leaning canopies.
 func _build_forest_biome() -> void:
 	_add_flank_banks(_mat_forest_bank, -0.05, 0.0, CHUNK_LEN)
-	var bush_count: int = 4 if _is_web else 9
+	var bush_count: int = 4 if _is_web else 10
 	var fg_count: int = 4 if _is_web else 8
-	var bg_count: int = 4 if _is_web else 9
+	var bg_count: int = 4 if _is_web else 10
 
 	for side in [-1.0, 1.0]:
 		# Trail-edge undergrowth & grass tufts hugging the path
@@ -165,8 +174,8 @@ func _build_rocky_biome() -> void:
 ## Straight clearing biome: lush meadow banks, archer camp tents, wooden outpost, fences & treeline.
 func _build_meadow_camp_biome() -> void:
 	_add_flank_banks(_mat_meadow_bank, -0.05, 0.0, CHUNK_LEN)
-	var bush_count: int = 3 if _is_web else 7
-	var tree_count: int = 5 if _is_web else 10
+	var bush_count: int = 3 if _is_web else 8
+	var tree_count: int = 5 if _is_web else 11
 
 	var camp_side: float = -1.0 if _rng.randf() < 0.5 else 1.0
 	# Archer camp tents on one side

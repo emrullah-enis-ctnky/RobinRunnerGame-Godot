@@ -16,6 +16,7 @@ uniform float moon_strength : hint_range(0.0, 2.0) = 0.0;
 uniform vec3 cloud_color : source_color = vec3(1.0, 0.98, 0.95);
 uniform float cloud_opacity : hint_range(0.0, 1.0) = 0.65;
 uniform float stars_alpha : hint_range(0.0, 1.0) = 0.0;
+uniform bool low_quality = false;
 
 float hash21(vec2 p) {
 	p = fract(p * vec2(123.34, 456.21));
@@ -35,9 +36,18 @@ float value_noise(vec2 p) {
 }
 
 float cloud_fbm(vec2 p) {
-	// 2-octave stylized clouds: soft painterly silhouette with half the WebGL2 fragment cost
-	float v = 0.65 * value_noise(p);
-	v += 0.35 * value_noise(p * 2.15 + vec2(13.1, 7.7));
+	if (low_quality) {
+		float v = 0.65 * value_noise(p);
+		v += 0.35 * value_noise(p * 2.15 + vec2(13.1, 7.7));
+		return v;
+	}
+	float v = 0.0;
+	float amp = 0.52;
+	for (int i = 0; i < 4; i++) {
+		v += amp * value_noise(p);
+		p = p * 2.05 + vec2(13.1, 7.7);
+		amp *= 0.5;
+	}
 	return v;
 }
 

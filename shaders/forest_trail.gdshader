@@ -8,6 +8,7 @@ uniform vec3 dirt_base : source_color = vec3(0.42, 0.29, 0.18);
 uniform vec3 dirt_light : source_color = vec3(0.54, 0.40, 0.25);
 uniform vec3 dirt_dark : source_color = vec3(0.30, 0.20, 0.12);
 uniform vec3 moss_edge : source_color = vec3(0.20, 0.40, 0.16);
+uniform bool low_quality = false;
 
 varying vec3 v_world_pos;
 
@@ -64,6 +65,13 @@ void fragment() {
 	float edge_dist = abs(wp.x) + (n_broad - 0.5) * 0.55 + (n_fine - 0.5) * 0.25;
 	float edge_moss = smoothstep(2.65, 3.15, edge_dist);
 	col = mix(col, moss_edge, edge_moss * 0.92);
+
+	// Tiny lighter pebbles/gravel flecks (full quality on Desktop, skipped on Web)
+	if (!low_quality) {
+		float n_pebble = noise2d(wp * 6.5);
+		float pebble = smoothstep(0.84, 0.95, n_pebble) * (1.0 - edge_moss);
+		col = mix(col, vec3(0.62, 0.56, 0.48), pebble * 0.45);
+	}
 
 	ALBEDO = col;
 	ROUGHNESS = 0.94;
