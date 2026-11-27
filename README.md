@@ -3,9 +3,12 @@
 [![Engine](https://img.shields.io/badge/Engine-Godot%204.x-478cbf?logo=godotengine&logoColor=white)](https://godotengine.org)
 [![Renderer](https://img.shields.io/badge/Renderer-GL%20Compatibility-green)](https://docs.godotengine.org)
 [![Platform](https://img.shields.io/badge/Platform-Desktop%20%7C%20Web-orange)](https://godotengine.org)
+[![Play Online](https://img.shields.io/badge/Play%20Online-GitHub%20Pages-2ea44f?logo=githubpages&logoColor=white)](https://emrullah-enis-ctnky.github.io/RobinRunnerGame-Godot/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 **RobinRunner** is an action-packed, stylized 3D endless runner developed in **Godot Engine 4**. Sprint as a forest archer down a winding woodland trail through dense woods, rocky canyons, archer camps, and stream-bridge crossings under a dynamic 24-hour sky. Unlike passive runners where you only dodge, RobinRunner blends high-speed 3-lane platforming with active archery combat: gather normal and flame arrows into your quiver, fire on the sprint to burn trees, topple ladder barricades, and land bullseyes on archery targets while chaining star-coin combos for bonus score multipliers.
+
+> **Play in Browser (Web Test Build):** [https://emrullah-enis-ctnky.github.io/RobinRunnerGame-Godot/](https://emrullah-enis-ctnky.github.io/RobinRunnerGame-Godot/)
 
 ---
 
