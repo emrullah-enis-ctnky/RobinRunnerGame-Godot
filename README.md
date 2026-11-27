@@ -14,11 +14,13 @@
 
 ## Screenshots & Gameplay
 
+![RobinRunner Gameplay](docs/media/gameplay.gif)
+
 | Gameplay & HUD | Launch Countdown | Game Over UI |
 | :---: | :---: | :---: |
 | ![Gameplay](docs/media/gameplay.png) | ![Countdown](docs/media/countdown.png) | ![Game Over](docs/media/game-over.png) |
 
-**Gameplay Video:** [Watch Gameplay Clip (`docs/media/gameplay.mp4`)](docs/media/gameplay.mp4)
+**Full Gameplay Video (720p H.264 with Audio):** [Watch / Download `docs/media/gameplay.mp4`](docs/media/gameplay.mp4)
 
 ---
 
