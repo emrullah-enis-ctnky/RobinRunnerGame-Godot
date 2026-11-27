@@ -12,6 +12,16 @@
 
 ---
 
+## Screenshots & Gameplay
+
+| Gameplay & HUD | Launch Countdown | Game Over UI |
+| :---: | :---: | :---: |
+| ![Gameplay](docs/media/gameplay.png) | ![Countdown](docs/media/countdown.png) | ![Game Over](docs/media/game-over.png) |
+
+**Gameplay Video:** [Watch Gameplay Clip (`docs/media/gameplay.mp4`)](docs/media/gameplay.mp4)
+
+---
+
 ## Key Features
 
 - **Responsive 3-Lane Movement**: Snappy lateral lane transitions (Left, Center, Right), responsive jump arcs, mid-air fast-fall, and ducking/sliding under overhead arches.
