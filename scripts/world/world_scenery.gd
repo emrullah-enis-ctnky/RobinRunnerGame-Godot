@@ -53,6 +53,7 @@ func _build_horizon_backdrop() -> void:
 
 	var floor_inst := MeshInstance3D.new()
 	floor_inst.mesh = floor_mesh
+	floor_inst.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	floor_inst.position = Vector3(0.0, -3.2, -85.0)
 	_horizon_root.add_child(floor_inst)
 
@@ -85,6 +86,7 @@ func _build_horizon_backdrop() -> void:
 
 		var mi := MeshInstance3D.new()
 		mi.mesh = cone
+		mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		mi.position = Vector3(p[0], -3.3 + p[3] * 0.5, p[1])
 		mi.rotation.y = _rng.randf_range(0.0, TAU)
 		_horizon_root.add_child(mi)

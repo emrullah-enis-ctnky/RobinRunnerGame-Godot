@@ -43,7 +43,6 @@ void fragment() {
 	vec2 wp = v_world_pos.xz;
 	float n_broad = noise2d(wp * 0.35);
 	float n_fine = noise2d(wp * 2.4);
-	float n_pebble = noise2d(wp * 6.5);
 
 	// Rich organic woodland soil base (seamless across chunk boundaries via world XZ)
 	vec3 col = mix(dirt_dark, dirt_base, n_broad * 0.7 + n_fine * 0.3);
@@ -65,10 +64,6 @@ void fragment() {
 	float edge_dist = abs(wp.x) + (n_broad - 0.5) * 0.55 + (n_fine - 0.5) * 0.25;
 	float edge_moss = smoothstep(2.65, 3.15, edge_dist);
 	col = mix(col, moss_edge, edge_moss * 0.92);
-
-	// Tiny lighter pebbles/gravel flecks
-	float pebble = smoothstep(0.84, 0.95, n_pebble) * (1.0 - edge_moss);
-	col = mix(col, vec3(0.62, 0.56, 0.48), pebble * 0.45);
 
 	ALBEDO = col;
 	ROUGHNESS = 0.94;

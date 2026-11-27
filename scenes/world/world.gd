@@ -8,6 +8,12 @@ extends Node3D
 
 
 func _ready() -> void:
+	if OS.has_feature("web"):
+		var sun: DirectionalLight3D = get_node_or_null("SunLight") as DirectionalLight3D
+		if sun != null:
+			sun.shadow_enabled = false
+		if track_spawner != null:
+			track_spawner.initial_chunk_count = 4
 	if has_node("/root/GameManager"):
 		var gm: Node = get_node("/root/GameManager")
 		gm.reset_game()

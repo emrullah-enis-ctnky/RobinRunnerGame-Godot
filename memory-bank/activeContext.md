@@ -1,15 +1,14 @@
 # Active Context: RobinRunner
 
 ## Current Work Focus
-Phase 10 Step 10.3 (Stylized Particle Systems) is implemented on `feature/visual-particles` (branched from `main`). Awaiting user visual inspection (Step 10.4) before merging into `main`.
+Phase 11 Step 11.3 (Performance Optimization & 60 FPS / WebGL2 Export Pass) has been merged into `main`, and `export_presets.cfg` is now ignored in `.gitignore`.
 
 ## Recent Changes
-- Created `shaders/curved_particle.gdshader` (curved alpha-blended billboard particle shader) and `scripts/vfx/vfx_spawner.gd` (`VFXSpawner`).
-- Attached ground-only `RunDust` puff emitter and landing dust ring (`spawn_landing_dust`) to `PlayerController`.
-- Wired dramatic rising flame + billowing charcoal ash/smoke burst (`spawn_tree_burn`) into `BurnableTree.destroy()`.
-- Wired wood splinter spray (`spawn_wood_splinters`) into `ArcheryTarget.stick_arrow()` and `Destructible.destroy()`.
-- Added `tests/unit/test_vfx_particles.gd` + `.tscn` (2 suites).
+- **`scripts/world/chunk_biome_decorator.gd`**: Built chunk biome scenery once per pooled chunk (`_built` guard) to eliminate main-thread GLB instantiation stutter on chunk recycle; disabled shadow casting on all flanking biome props; halved flanking prop density on Web builds (`OS.has_feature("web")`).
+- **`scripts/world/world_scenery.gd`**: Disabled shadow casting (`SHADOW_CASTING_SETTING_OFF`) on distant valley floor and mountain cone meshes.
+- **`scenes/world/world.gd`**: On Web builds (`OS.has_feature("web")`), disabled `SunLight.shadow_enabled` and reduced `track_spawner.initial_chunk_count` from `6` to `4`.
+- **`shaders/stylized_sky.gdshader`** & **`shaders/forest_trail.gdshader`**: Reduced sky cloud FBM from 4 to 2 octaves and removed the 3rd trail pebble noise tap for smoother WebGL2 frame pacing.
+- **`.gitignore`**: Added `export_presets.cfg` alongside `export.cfg` and `export_credentials.cfg`.
 
 ## Next Steps
-1. User visual inspection of Step 10.4 (run dust, landing puff, tree burn fire/ash, wood splinters, and overall audio-visual feel).
-2. On user approval, merge `feature/visual-particles` into `main` and proceed to Phase 11 (Optimization & Multi-Platform Export).
+1. Continue Phase 11 remaining items as requested (Desktop/Web export presets validation, Step 11.4 touch/swipe input abstraction for future Android export, Step 11.5 final release verification).

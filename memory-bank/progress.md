@@ -1,10 +1,10 @@
 # Progress & Kanban Roadmap: RobinRunner
 
 ## Project Status Overview
-- **Current Phase**: Phase 10: Audio & Visual Polish (Complete — merged into `main`)
-- **Active Branch**: `feature/obstacles` (syncing with `main` for archery target graze-vs-lethal hit refinement)
-- **Next Phase**: Phase 11 (Optimization & Multi-Platform Export) or Phase 6 leftovers (6.5–6.7)
-- **Overall Health**: Green (All six automated suites pass per documented runs: core, player, camera, world 5/5, obstacles 9/9, combat 13/13)
+- **Current Phase**: Phase 11: Performance Optimization & Multi-Platform Export Preparation (Step 11.3 merged into `main`)
+- **Active Branch**: `main`
+- **Next Phase**: Phase 11 remaining steps (Desktop/Web preset validation, touch/swipe input abstraction, release verification)
+- **Overall Health**: Green (Core, player, camera, world, obstacles, combat, collectibles, UI, atmosphere, audio, and VFX suites implemented)
 
 ---
 
@@ -152,7 +152,7 @@
 - **Objective**: Optimize draw calls, configure export presets for Desktop and Web, and prepare mobile foundation.
 - [ ] Step 11.1: Configure Desktop export presets (Linux, Windows, macOS).
 - [ ] Step 11.2: Configure Web export preset and optimize asset compression for rapid HTML5 loading.
-- [ ] Step 11.3: Profile draw calls, frame pacing, and memory utilization to ensure solid 60 FPS.
+- [x] Step 11.3: Profile draw calls, frame pacing, and memory utilization to ensure solid 60 FPS. Eliminated chunk-recycle stutter by building `ChunkBiomeDecorator` props once per pooled chunk instead of destroying/re-instantiating 50+ GLB scenes on every recycle; disabled shadow casting on flanking biome props (`ChunkBiomeDecorator`) and distant valley/mountain meshes (`WorldScenery`); added `OS.has_feature("web")` runtime optimizations (halved biome prop density, `SunLight.shadow_enabled = false`, and `track_spawner.initial_chunk_count = 4`); simplified fragment shaders (`stylized_sky.gdshader` cloud FBM 4 -> 2 octaves, `forest_trail.gdshader` removed 3rd pebble noise tap) for smooth WebGL2 performance.
 - [ ] Step 11.4: Implement touch/swipe input abstraction layer ready for future Android export.
 - [ ] Step 11.5: Final release validation and package verification.
 
